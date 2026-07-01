@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\OrderController;
+use App\Http\Controllers\ProductController;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
@@ -21,6 +22,17 @@ Route::prefix('/orders')->group(function(){
         Route::get('/', 'index')->name('order.index');
         Route::get('/create', 'create')->name('order.create');
         Route::post('/', 'store')->name('order.store');
+    });
+});
+
+Route::prefix('/products')->group(function(){
+    Route::controller(ProductController::class)->group(function(){
+        Route::get('/', 'index')->name('product.index');
+        // Route::get('/create', 'create')->name('product.create');
+        Route::post('/', 'store')->name('product.store');
+        Route::put('/{product}', 'update')->name('product.update');
+        Route::put('/{product}/disable', 'disableProduct')->name('product.disable');
+        Route::delete('/{product}', 'destroy')->name('product.destroy');
     });
 });
 

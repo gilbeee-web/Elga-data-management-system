@@ -9,7 +9,7 @@ class Product extends Model
     //
     protected $fillable = ['name', 'category'];
 
-    public function product_variants(){
+    public function variants(){
         return $this->hasMany(ProductVariant::class);
     }
 

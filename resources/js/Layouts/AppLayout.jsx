@@ -1,0 +1,36 @@
+import { Link } from "@inertiajs/react";
+import NavLink from "@/Components/NavLink";
+import {route}  from "ziggy-js";
+import Navbar from "@/Components/Navbar";
+import Sidebar from "@/Components/Sidebar";
+
+export default function AppLayout({children, title}){
+
+    return (
+
+        <div className="min-h-screen bg-white">
+            
+            <div className="flex h-screen">
+                
+                
+                <Sidebar />
+
+                
+                <div className="flex-1 flex flex-col bg-[#DFDFDF]">
+
+                    
+                    <Navbar title={title} />
+                    
+                    <main className="p-6 overflow-y-auto flex-1">
+                        {children}
+                    </main>
+
+                </div>
+
+            </div>
+
+        </div>
+    );
+
+    
+}

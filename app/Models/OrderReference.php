@@ -9,7 +9,7 @@ class OrderReference extends Model
     //
     protected $fillable = [
         'order_id',
-        'order_reference'
+        'order_number'
     ];
 
     public function order()

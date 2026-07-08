@@ -8,7 +8,7 @@ export default function AppLayout({children, title}){
 
     return (
 
-        <div className="min-h-screen bg-white">
+        <div className="min-h-screen overflow-hidden">
             
             <div className="flex h-screen">
                 
@@ -18,7 +18,6 @@ export default function AppLayout({children, title}){
                 
                 <div className="flex-1 flex flex-col bg-[#DFDFDF]">
 
-                    
                     <Navbar title={title} />
                     
                     <main className="p-6 overflow-y-auto flex-1">

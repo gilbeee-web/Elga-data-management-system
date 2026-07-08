@@ -10,16 +10,33 @@ class ProductService{
 
         return DB::transaction(function() use ($data){
 
+            $imagePath = null;
+
+            if(isset($data['image'])){
+
+                $file = $data['image'];
+
+                $fileName = $data['name'].'_'.time().'.'.$file->extension();
+
+                $imagePath = $file->storeAs(
+                    'products',
+                    $fileName,
+                    'public'
+                );
+
+            }
+
             $product = Product::create([
                 'name' => $data['name'],
-                'category' => $data['category']
+                'category' => $data['category'],
+                'image' => $imagePath
             ]);
 
-
-            foreach ($data['product_variants'] as $variant) {
+            foreach ($data['variants'] as $variant) {
                 $product->variants()->create([
                     'variant_name' => $variant['variant_name'],
                     'price' => $variant['price'],
+                    'product_code' => $variant['product_code'],
                     'sold' => 0
                 ]);
             }
@@ -41,7 +58,9 @@ class ProductService{
             //collect the variant_id that are present
             $variantIds = [];
 
-            foreach($data['product_variants'] as $variant){
+            
+
+            foreach($data['variants'] as $variant){
 
                 if(isset($variant['id'])){
                     $variantIds[] = $variant['id'];
@@ -51,16 +70,22 @@ class ProductService{
                     if($variantToUpdate){
                         $variantToUpdate->update([
                             'variant_name' => $variant['variant_name'],
-                            'price' => $variant['price']
+                            'product_code' => $variant['product_code'],
+                            'price' => $variant['price'],                            
                         ]);
                     }
 
                 }else{
-                    $product->variants()->create([
+                    // dd($variant);
+
+                    $newVariant = $product->variants()->create([
                         'variant_name' => $variant['variant_name'],
+                        'product_code' => $variant['product_code'],
                         'price' => $variant['price'],
                         'sold' => 0
                     ]);
+
+                    $variantIds[] = $newVariant->id; //add the new variant id
                 }
 
             }

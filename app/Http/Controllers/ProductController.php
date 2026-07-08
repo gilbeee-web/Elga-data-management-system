@@ -31,23 +31,73 @@ class ProductController extends Controller
             $query->where('name', 'like', "%{$request->search}%");
         }
 
-        $products = $query->with('variants')->paginate(10);
+        $products = $query
+            ->with('variants')
+            ->withMin('variants', 'price')
+            ->withMax('variants', 'price')
+            ->withSum('variants', 'sold')
+            ->paginate(10);
 
         return Inertia::render('Products/Index', [
             'products' => $products,
         ]);
 
     }
+
+    public function create(){
+        return Inertia::render('Products/CreateProduct');
+    }
+
+
+
+    public function view($id){
+        
+        $product = Product::findOrFail($id);
+
+        if(!$product){
+            return back()->with('error', "Product not found");
+        }
+
+
+        $product->load('variants');
+
+        // $product = Product::with('variants')->where('id', $id);
+
+        return response()->json(['product' => $product]);
+    }
+
+    public function edit($id){
+        
+        $product = Product::findOrFail($id);
+
+        if(!$product){
+            return back()->with('error', "Product not found");
+        }
+
+        $product->load('variants');
+
+        return Inertia::render('Products/EditProduct', [
+            'product' => $product
+        ]);
+    }
+
+
     
     public function store(Request $request){
+
+        // dd($request->all());
 
         $validated_products = $request->validate([
             'name' => 'required|string',
             'category' => 'required|string',
-            'product_variants' => 'required|array',
-            'product_variants.*.variant_name' => 'required|string',
-            'product_variants.*.price' => 'required|numeric|min:0',
+            'image' => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
+            'variants' => 'required|array',
+            'variants.*.variant_name' => 'required|string',
+            'variants.*.product_code' => 'required|string|distinct',
+            'variants.*.price' => 'required|numeric|min:0',
         ]);
+        
+        // dd($validated_products);
 
         
         $this->productService->store($validated_products);
@@ -60,15 +110,22 @@ class ProductController extends Controller
 
     public function update(Request $request, Product $product){
 
-        $validated_products = $request->validate([
+        // dd($request->all());
+
+        $validated_product = $request->validate([
             'name' => 'required|string',
             'category' => 'required|string',
-            'product_variants' => 'required|array',
-            'product_variants.*.variant_name' => 'required|string',
-            'product_variants.*.price' => 'required|numeric|min:0',
+            'image' => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
+            'variants' => 'required|array',
+            'variants.*.id' => 'nullable|integer|exists:product_variants,id',
+            'variants.*.variant_name' => 'required|string',
+            'variants.*.product_code' => 'required|string|distinct',
+            'variants.*.price' => 'required|numeric|min:0',
         ]);
+
+        // dd($validated_product);
         
-        $this->productService->update($product, $validated_products);
+        $this->productService->update($product, $validated_product);
 
         return redirect()->route('product.index')->with('success', $product->name . ' successfully updated!');
     }

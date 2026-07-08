@@ -13,24 +13,25 @@ export default function Navbar({title}){
 
 
     return (
-        <header className="w-full flex justify-between items-center bg-white shadow sticky top-0 z-10 hidden lg:flex">
+        <header className="w-full flex justify-between items-center bg-[#DF9BAA] shadow sticky top-0 z-10 hidden lg:flex">
 
             <h1 className="ml-5 text-white text-lg font-bold">
                 {title}
             </h1>
 
-            <div className="relative mr-5">
+            <div className="relative">
+
 
                 <button 
-                    className="flex items-center gap-x-4 cursor-pointer"
+                    className="flex items-center gap-x-10 bg-white shadow-md rounded-l-full px-10 cursor-pointer"
                     onClick={toggleProfile}
                 >
-                    <div className="flex flex-col items-center">
-                        <p className="font-bold text-lg">Gilbs</p>
-                        <p className="text-gray-500 text-sm">Admin</p>
+                    <div className="flex flex-col items-center py-1">
+                        <p className="font-bold text-lg">Gilbert</p>
+                        <p className="text-gray-500 text-xs font-semibold">Admin</p>
                     </div>
 
-
+                    <img  className="object-contain w-10 rounded-full border-2" />
                 </button>
 
                 {

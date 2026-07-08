@@ -28,7 +28,9 @@ Route::prefix('/orders')->group(function(){
 Route::prefix('/products')->group(function(){
     Route::controller(ProductController::class)->group(function(){
         Route::get('/', 'index')->name('product.index');
-        // Route::get('/create', 'create')->name('product.create');
+        Route::get('/create', 'create')->name('product.create');
+        Route::get('/{id}/view', 'view')->name('product.view');
+        Route::get('/{id}/edit', 'edit')->name('product.edit');
         Route::post('/', 'store')->name('product.store');
         Route::put('/{product}', 'update')->name('product.update');
         Route::put('/{product}/disable', 'disableProduct')->name('product.disable');

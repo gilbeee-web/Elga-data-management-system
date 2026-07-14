@@ -1,7 +1,9 @@
 <?php
 
+use App\Http\Controllers\CustomerController;
 use App\Http\Controllers\OrderController;
 use App\Http\Controllers\ProductController;
+use App\Models\Customer;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
@@ -20,10 +22,15 @@ Route::get('/', function () {
 Route::prefix('/orders')->group(function(){
     Route::controller(OrderController::class)->group(function(){
         Route::get('/', 'index')->name('order.index');
-        Route::get('/create', 'create')->name('order.create');
-        Route::post('/', 'store')->name('order.store');
+        Route::get('/save-customers', 'getSaveCustomers')->name('order.getSaveCustomers');
+        Route::post('/draft', 'saveDraft')->name('order.saveDraft');
+        Route::get('/{order}/edit', 'edit')->name('order.edit');
+        Route::post('/{order}/customer', 'saveCustomer')->name('order.customer.save');
+    
     });
 });
+
+
 
 Route::prefix('/products')->group(function(){
     Route::controller(ProductController::class)->group(function(){

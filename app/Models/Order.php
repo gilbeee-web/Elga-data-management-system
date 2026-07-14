@@ -9,12 +9,11 @@ class Order extends Model
     //
     protected $fillable = [
         'transaction_number',
-        'customer_name',
+        'sender_name',
+        'receiver_name',
+        'contact_number',
+        'address',
         'subtotal',
-        'raw_shipping_fee',
-        'order_container_id',
-        'container_fee',
-        'total_shipping_fee',
         'discount',
         'total_amount',
         'payment_status',
@@ -53,8 +52,8 @@ class Order extends Model
         return $this->belongsTo(OrderContainer::class);
     }
 
-    public function customers(){
-        return $this->hasMany(Customer::class);
+    public function customer(){
+        return $this->belongsTo(Customer::class);
     }
 
 

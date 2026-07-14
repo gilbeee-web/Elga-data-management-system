@@ -10,7 +10,10 @@ class Shipment extends Model
     protected $fillable = [
         'order_id',
         'courier',
-        'shipping_fee',
+        'order_container_id',
+        'raw_shipping_fee',
+        'container_fee',
+        'total_shipping_fee',
         'tracking_number',
         'sf_payment_reference',
         'shipped_at'

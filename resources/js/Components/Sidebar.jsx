@@ -32,15 +32,11 @@ export default function Sidebar(){
                 </NavLink>
 
                 <NavLink
-                    href={route('order.index')}
-                    active={route().current('order.*')}
                 >
                     Reports
                 </NavLink>
 
                 <NavLink
-                    href={route('order.index')}
-                    active={route().current('order.*')}
                 >
                     Settings
                 </NavLink>

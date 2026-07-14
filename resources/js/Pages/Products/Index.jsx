@@ -40,7 +40,7 @@ export default function Dashboard ({products}){
         <Layout title={"Products"}>
             
             
-            <div className="w-full flex justify-between">
+            <div className="w-full flex justify-between items-center">
 
                 <h1 className="font-bold text-2xl border-b-3 inline-block border-red-500">
                     Product List

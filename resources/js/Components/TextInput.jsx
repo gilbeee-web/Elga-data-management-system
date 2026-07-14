@@ -16,7 +16,7 @@ export default function TextInput({
                 id={name}
                 name={name}
                 type={type}
-                value={value}
+                value={value ?? ""}
                 placeholder={placeholder}
                 onChange={onChange}
                 className={`w-50 rounded-md px-2 py-1 bg-[#F5F5F5]

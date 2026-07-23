@@ -1,8 +1,5 @@
 export default function CustomerBook({customers, selectCustomer ,onClose}){
 
-    console.log("customers: ", customers);
-
-
     return <>
     
         <div className="fixed inset-0 bg-[rgb(0,0,0,0.5)] z-99 flex items-center justify-center">

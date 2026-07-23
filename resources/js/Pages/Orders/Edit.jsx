@@ -6,18 +6,16 @@ import CustomerForm from "./Components/CustomerForm";
 import OrderForm from "./Components/OrderForm";
 import { route } from "ziggy-js";
 import CustomerBook from "./Components/CustomerBook";
+import ShippingForm from "./Components/ShippingForm";
 
 
-export default function Edit({order, status, customer}){
+export default function Edit({order, status, customer, orderReferences, shipmentInfo}){
 
     const [selectedCustomer, setSelectedCustomer] = useState(customer);
 
     const tabs = ['customer', 'order', 'shipping', 'payment', 'shipment'];
 
     const [activeTab, setActiveTab] = useState("customer");
-
-    console.log("Current Customer: ", customer);
-    
 
 
     const handleTab = (selectedTab) => {
@@ -81,7 +79,7 @@ export default function Edit({order, status, customer}){
     
     return <>
 
-        <Layout>
+        <Layout title={"Orders"}>
             
             <div className="flex justify-between items-center">
 
@@ -103,7 +101,7 @@ export default function Edit({order, status, customer}){
             </div>
 
 
-            <div className="mt-10 w-[75%] grid grid-cols-5 gap-10 pl-5">
+            <div className="mt-3 w-[75%] grid grid-cols-5 gap-10 pl-5">
 
                 <button 
                     className="text-start cursor-pointer"
@@ -185,7 +183,7 @@ export default function Edit({order, status, customer}){
 
             </div>
 
-            <div className="mt-8 grid grid-cols-[75%_25%] gap-4">
+            <div className="mt-5 grid grid-cols-[75%_25%] gap-4">
                 {
                     activeTab === "customer" && (
                         <CustomerForm 
@@ -209,7 +207,22 @@ export default function Edit({order, status, customer}){
 
                 {
                     activeTab === "order" && (
-                        <OrderForm />
+                        <OrderForm 
+                            changeTab={handleTab}
+                            order={order} 
+                            orderReferences={orderReferences}
+                            
+                        />
+                    )
+                }
+
+                {
+                    activeTab === "shipping" && (
+                        <ShippingForm 
+                            changeTab={handleTab}
+                            shippingInfo={shipmentInfo}
+                            order={order}
+                        /> 
                     )
                 }
                 

@@ -44,6 +44,19 @@ class ProductController extends Controller
 
     }
 
+    public function getAllProducts(){
+
+        $products = Product::with('variants')
+            ->withMin('variants', 'price')
+            ->withMax('variants', 'price')
+            ->withSum('variants', 'sold')
+            ->where('is_active', true)
+            ->get();
+
+
+        return response()->json($products);
+    }
+
     public function create(){
         return Inertia::render('Products/CreateProduct');
     }

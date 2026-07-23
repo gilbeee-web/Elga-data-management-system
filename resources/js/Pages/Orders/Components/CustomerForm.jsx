@@ -71,7 +71,7 @@ export default function CustomerForm({order, changeTab, customer, getSaveCustome
     return <>
 
         <form onSubmit={saveCustomer}>
-            <div className="rounded-md bg-white p-5 h-120">
+            <div className="relative rounded-md bg-white p-5 h-125">
                 
                 <div className="flex justify-between items-center">
                     <div className="flex gap-x-10 items-center">
@@ -169,7 +169,7 @@ export default function CustomerForm({order, changeTab, customer, getSaveCustome
 
                 </div>
 
-                <div className="mt-10 flex justify-end">
+                <div className="absolute bottom-5 right-3 flex justify-end">
                     <button type="submit" className="px-8 py-2 bg-green-500 text-white rounded-md hover:bg-green-400 cursor-pointer">
                         Next
                     </button>

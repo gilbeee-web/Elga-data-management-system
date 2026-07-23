@@ -12,7 +12,7 @@ class StoreOrderRequest extends FormRequest
      */
     public function authorize(): bool
     {
-        return false;
+        return true;
     }
 
     /**
@@ -23,42 +23,27 @@ class StoreOrderRequest extends FormRequest
     public function rules(): array
     {
         return [
+            'orderReferences' => ['required', 'array', 'min:1'],
+            'orderReferences.*.order_number' => ['required', 'string', 'max:255'],
+            'orderReferences.*.items' => ['required', 'array', 'min:1'],
 
-            'customer_name' => [
-                'required',
-                'string',
-                'max:255'
-            ],
-
-            //need to have at least 1 order
-            'order_items' => [
-                'required',
-                'array',
-                'min:1'
-            ],
-
-            'order_items.*.item_name' => [
-                'required',
-                'string'
-            ],
-
-            'order_items.*.qty' => [
-                'required',
-                'integer',
-                'min:1'
-            ],
-
-            'order_items.*.price' => [
-                'required',
-                'numeric',
-                'min:0'
-            ],
-
-            'order_items.*.discount' => [
-                'nullable',
-                'numeric',
-                'min:0'
-            ]
+            'orderReferences.*.items.*.id' => ['required', 'integer', 'exists:products,id'],
+            'orderReferences.*.items.*.selected_variant_id' => ['required', 'integer', 'exists:product_variants,id'],
+            'orderReferences.*.items.*.qty' => ['required', 'integer', 'min:1'],
+            'orderReferences.*.items.*.discount' => ['nullable', 'numeric', 'min:0'],
+            'orderReferences.*.items.*.variant_price' => ['required', 'numeric', 'min:0'],
         ];
     }
+
+    public function messages(): array
+    {
+        return [
+            'orderReferences.required' => 'At least one order reference is required.',
+            'orderReferences.*.order_number.required' => 'Each order reference must have an order number.',
+            'orderReferences.*.items.required' => 'Each order reference must have at least one item.',
+            'orderReferences.*.items.*.selected_variant_id.exists' => 'The selected product variant does not exist.',
+            'orderReferences.*.items.*.qty.min' => 'Quantity must be at least 1.',
+        ];
+    }
+
 }

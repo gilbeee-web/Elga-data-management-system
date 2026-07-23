@@ -14,7 +14,8 @@ class OrderItem extends Model
         'price',
         'discount',
         'final_price',
-        'subtotal'
+        'subtotal',
+        'order_reference_id'
     ];
 
     public function order()
@@ -22,7 +23,14 @@ class OrderItem extends Model
         return $this->belongsTo(Order::class);
     }
 
-    public function product_variants(){
-        return $this->hasMany(ProductVariant::class);
+    
+    public function product_variant()
+    {
+        return $this->belongsTo(ProductVariant::class);
     }
+
+    public function order_reference(){
+        return $this->belongsTo(OrderReference::class);
+    }
+
 }

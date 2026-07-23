@@ -7,10 +7,6 @@ import { createRoot } from 'react-dom/client'
 createInertiaApp({
     resolve: name => {
         const pages = import.meta.glob('./Pages/**/*.jsx')
-
-        console.log(pages)
-        console.log(name)
-
         return pages[`./Pages/${name}.jsx`]()
     },
     setup({ el, App, props }) {

@@ -16,4 +16,9 @@ class OrderReference extends Model
     {
         return $this->belongsTo(Order::class);
     }
+
+    public function order_items(){
+        return $this->hasMany(OrderItem::class);
+    }
+
 }

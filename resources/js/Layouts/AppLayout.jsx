@@ -20,7 +20,7 @@ export default function AppLayout({children, title}){
 
                     <Navbar title={title} />
                     
-                    <main className="p-6 overflow-y-auto flex-1">
+                    <main className="py-3 px-6 overflow-y-auto flex-1">
                         {children}
                     </main>
 

@@ -26,6 +26,8 @@ Route::prefix('/orders')->group(function(){
         Route::post('/draft', 'saveDraft')->name('order.saveDraft');
         Route::get('/{order}/edit', 'edit')->name('order.edit');
         Route::post('/{order}/customer', 'saveCustomer')->name('order.customer.save');
+        Route::post('/{order}/save-order', 'saveOrderItem')->name('order.saveOrderItem');
+        Route::post('/{order}/save-shipping-info', 'saveShippingInfo')->name('order.saveShippingInfo');
     
     });
 });
@@ -38,6 +40,7 @@ Route::prefix('/products')->group(function(){
         Route::get('/create', 'create')->name('product.create');
         Route::get('/{id}/view', 'view')->name('product.view');
         Route::get('/{id}/edit', 'edit')->name('product.edit');
+        Route::get('/get-products', 'getAllProducts')->name('product.getAllProducts');
         Route::post('/', 'store')->name('product.store');
         Route::put('/{product}', 'update')->name('product.update');
         Route::put('/{product}/disable', 'disableProduct')->name('product.disable');

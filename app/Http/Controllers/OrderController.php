@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Http\Requests\Orders\StoreOrderRequest;
 use App\Models\Customer;
 use App\Models\Order;
+use App\Models\Shipment;
 use App\Services\OrderService;
 use Exception;
 use Illuminate\Http\Request;
@@ -45,10 +46,57 @@ class OrderController extends Controller
             'contact_number',
             'address',
         ]);
-        
+
+        $order->load([
+            'references',
+            'items.product_variant.product',
+        ]);
+
+        $orderReferences = [];
+
+        foreach($order->references as $ref){
+
+            $items = [];
+
+            foreach($order->items as $item){
+
+                //skip if the order item if doesnt belong to the current reference
+                if ($item->order_reference_id !== $ref->id) {
+                    continue;
+                }
+
+                $variant = $item->product_variant;
+                $product = $variant->product;
+
+                $items[] = [
+                    'id' => $product->id,
+                    'name' => $product->name,
+                    'category' => $product->category,
+                    'image' => $product->image,
+                    'variants' => $product->variants,
+                    'selected_variant_id' => $variant->id,
+                    'variant_price' => $item->price,
+                    'qty' => $item->qty,
+                    'discount' => $item->discount,
+                ];
+
+
+            }
+
+            $orderReferences[] = [
+                'order_number' => $ref->order_number,
+                'items' => $items
+            ];
+
+        }
+
+        $shipmentInfo = Shipment::where('order_id', $order->id)->first();
+
         return Inertia::render('Orders/Edit', [
             'order' => $order, 
-            'customer' => $customer
+            'customer' => $customer,
+            'orderReferences' => $orderReferences,
+            'shipmentInfo' => $shipmentInfo
         ]);
     }
 
@@ -106,24 +154,44 @@ class OrderController extends Controller
 
 
 
-    public function storeOrderItem(StoreOrderRequest $request){
+    public function saveOrderItem(Order $order, StoreOrderRequest $request){
 
-       try{
+        try{
 
-        $this->orderService->saveOrderItem($request->validated());
+            $this->orderService->saveOrderItem($order,$request->validated());
 
-        return redirect()->back()->with(['success' => 'order created']);
+            return redirect()->back()->with(['success' => 'order created']);
 
-       }catch(Exception $e){
+        }catch(Exception $e){
+            dd($e);
+            return redirect()->back()->with(['error' => 'Something went wrong: ' . $e]);
 
-        return redirect()->back()->with(['error' => 'Something went wrong: ' . $e]);
-
-       }
+        }
 
     }
 
 
+    public function saveShippingInfo(Order $order, Request $request){
 
+        // dd($request->all());
+
+        $validated = $request->validate([
+            'order_id' => 'nullable|integer|exists:orders,id',
+            'container_type' => 'string|required',
+            'container_size' => 'string|required',
+            'raw_shipping_fee' => 'integer|required',
+            'container_fee' => 'integer|required',
+            'tracking_number' => 'string|required'
+        ]);
+
+        try{
+            $this->orderService->saveShippingInfo($order,$validated);
+        }catch(Exception $e){
+            dd($e);
+            return redirect()->back()->with(['error' => 'Something went wrong: ' . $e]);
+        }
+
+    }
 
 
 

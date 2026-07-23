@@ -6,6 +6,7 @@ use App\Models\Customer;
 use App\Models\Order;
 use App\Models\OrderContainer;
 use App\Models\OrderItem;
+use App\Models\OrderReference;
 use App\Models\OrderStatusHistory;
 use App\Models\Payment;
 use App\Models\Shipment;
@@ -52,7 +53,7 @@ class OrderService{
 
         $discount = $item['discount'] ?? 0;
 
-        $finalPrice = $item['price'] - $discount;
+        $finalPrice = $item['variant_price'] - $discount;
 
         $subtotal = $finalPrice * $item['qty'];
 
@@ -71,31 +72,49 @@ class OrderService{
         $order->statusHistories()->create([
             'old_status' => $oldStatus,
             'new_status' => $newStatus,
-            'changed_by' => Auth::id(),
+            // 'changed_by' => Auth::id(),
+            'changed_by' => 1,
         ]);
     }
 
 
-    public function saveOrderItem(array $data){
+    public function saveOrderItem(Order $order, array $data){
 
-        return DB::transaction(function() use ($data){
+        return DB::transaction(function() use ($data, $order){
 
             $subtotal = 0;
+            $totalDiscount = 0;
 
-            foreach ($data['order_items'] as $item) {
 
-                $computed = $this->computeItem($item);
+            //create or update orderReference data
+            foreach($data['orderReferences'] as $ref){
 
-                $subtotal += $computed['subtotal'];
-
-                $order = OrderItem::create([
-                    'item_name' => $item['item_name'],
-                    'qty' => $item['qty'],
-                    'price' => $item['price'],
-                    'discount' => $item['discount'] ?? 0,
-                    'final_price' => $computed['final_price'],
-                    'subtotal' => $computed['subtotal'],
+                $orderReference = OrderReference::firstOrCreate([
+                    'order_id' => $order->id,
+                    'order_number' => $ref['order_number'],
                 ]);
+
+                foreach($ref['items'] as $item){
+
+                    $computed = $this->computeItem($item);
+                    $subtotal += $computed['subtotal'];
+                    $totalDiscount += $item['discount'] ?? 0;
+
+                    OrderItem::updateOrCreate(
+                        [
+                            'order_reference_id' => $orderReference->id,
+                            'product_variant_id' => $item['selected_variant_id'],
+                        ],
+                        [
+                            'order_id' => $order->id,
+                            'qty' => $item['qty'],
+                            'price' => $item['variant_price'],
+                            'discount' => $item['discount'] ?? 0,
+                            'final_price' => $computed['final_price'],
+                            'subtotal' => $computed['subtotal'],
+                        ]
+                    );
+                }
             }
 
             if($order->order_status === 'draft'){
@@ -104,10 +123,35 @@ class OrderService{
                 ]);
             }
 
+            //subtotal is already computed with multiplied by qty in computeItem Function
+            $totalAmount = $subtotal - $totalDiscount;
+            
+            // get the sum or total amount paid by the customer to get the right computation for remaining balance
+            $totalPaid = Payment::where('order_id', $order->id)
+                ->where('payment_type', 'item_payment')
+                ->sum('payment_amount');
+
+            //calculate the remaining balance and avoid negative number by default to 0
+            $remainingBalance = max(0, $totalAmount - $totalPaid);
+
+            $paymentStatus = "unpaid";
+
+            if($remainingBalance <= 0 ){
+                $paymentStatus = "paid";
+            }else{
+                if($totalPaid > 0){
+                    $paymentStatus = "partial";
+                }
+            }
+
+            // $paymentStatus = $remainingBalance <= 0 ? 'paid' : ($totalPaid > 0 ? 'partial' : 'unpaid');
+
             $order->update([
                 'subtotal' => $subtotal,
-                'remaining_balance' => $subtotal,
-                
+                'discount' => $totalDiscount,
+                'total_amount' => $totalAmount,
+                'remaining_balance' => $remainingBalance,
+                'payment_status' => $paymentStatus
             ]);
 
             $this->storeStatusHistory(
@@ -116,11 +160,97 @@ class OrderService{
                 'awaiting_shipping_fee'
             );
 
-            return $order;
+            
+            return $order->load('references', 'items');
 
         });
 
     }
+
+    public function saveShippingInfo(Order $order, array $data)
+    {
+        return DB::transaction(function () use ($data, $order) {
+
+            $totalShippingFee = $data['raw_shipping_fee'] + $data['container_fee'];
+
+            //get the previous sf
+            $previousShippingFee = Shipment::where('order_id', $order->id)
+                ->value('total_shipping_fee') ?? 0;
+
+            $shipment = Shipment::updateOrCreate(
+                ['order_id' => $order->id],
+                [
+                    'courier' => 'jnt',
+                    'container_type' => $data['container_type'],
+                    'container_size' => $data['container_size'],
+                    'raw_shipping_fee' => $data['raw_shipping_fee'],
+                    'container_fee' => $data['container_fee'],
+                    'total_shipping_fee' => $totalShippingFee,
+                    'tracking_number' => $data['tracking_number'],
+                ]
+            );
+
+            $updatedShippingFee = $totalShippingFee - $previousShippingFee;
+
+            
+
+            $newRemainingBalance = max(0,$order->remaining_balance + $updatedShippingFee);
+
+            $order->update([
+                'order_status' => 'awaiting_payment',
+                'remaining_balance' => $newRemainingBalance
+            ]);
+
+            return $shipment;
+        });
+    }
+
+    // public function saveShippingInfo(Order $order, array $data){
+        
+    //     return DB::transaction(function() use ($data, $order){
+
+    //         $totalShippingFee = $data['raw_shipping_fee'] + $data['container_fee'];
+    //         $order_id = $order->id;
+
+    //         $shipment = Shipment::where('order_id', $order_id)->first();
+        
+    //         if(!$shipment){
+
+    //             $shipment = Shipment::create([
+    //                 'order_id' => $order_id,
+    //                 'courier' => "jnt",
+    //                 'container_type' => $data['container_type'],
+    //                 'container_size' => $data['container_size'],
+    //                 'raw_shipping_fee' => $data['raw_shipping_fee'],
+    //                 'container_fee' => $data['container_fee'],
+    //                 'total_shipping_fee' => $totalShippingFee,
+    //                 'tracking_number' => $data['tracking_number']
+    //             ]);
+
+    //         }else{
+
+    //             $shipment->update([
+    //                 'container_type' => $data['container_type'],
+    //                 'container_size' => $data['container_size'],
+    //                 'raw_shipping_fee' => $data['raw_shipping_fee'],
+    //                 'container_fee' => $data['container_fee'],
+    //                 'total_shipping_fee' => $totalShippingFee,
+    //                 'tracking_number' => $data['tracking_number']
+    //             ]);
+
+    //         }
+
+            
+    //         $order = Order::findOrFail($order_id );
+
+    //         $order->update([
+    //             'order_status' => 'awaiting_payment'
+    //         ]);
+
+    //         return $shipment;
+    //     });
+    
+    // }
 
     public function addPayment(array $data, int $order_id, int $user_id){
 
@@ -199,32 +329,7 @@ class OrderService{
     }
 
 
-    public function storeShippingInfo(array $data, int $order_id){
-        
-        return DB::transaction(function() use ($data, $order_id){
-
-            $container = OrderContainer::findOrFail($data['container_id']);
-
-            $totalShippingFee = $data['raw_shipping_fee'] + $container->charge;
-
-            $shipment = Shipment::create([
-                'order_id' => $order_id,
-                'courier' => "jnt",
-                'container_id' => $data['container_id'],
-                'total_shipping_fee' => $totalShippingFee,
-                'tracking_number' => $data['tracking_number']
-            ]);
-
-            $order = Order::findOrFail($order_id);
-
-            $order->update([
-                'order_status' => 'awaiting_payment'
-            ]);
-
-            return $shipment;
-        });
     
-    }
 
     public function saveShipment(array $data, int $order_id){
 

@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import TextInput from "../../../Components/TextInput";
 import Layout from "../../../Layouts/AppLayout";
 import { router, useForm } from "@inertiajs/react";
+import { formatCurrency } from "../../../Utils/formatCurrency";
 
 export default function ProductForm({mode, product}){
 
@@ -29,6 +30,11 @@ export default function ProductForm({mode, product}){
 
         setPreviewImage(URL.createObjectURL(file));
     };
+
+
+    const [editingPrice, setEditingPrice] = useState(null);
+
+
 
     const addVariant = () => {
         setData("variants", [
@@ -65,6 +71,14 @@ export default function ProductForm({mode, product}){
         e.preventDefault();
         console.log("Submitting...");
 
+        console.log("Variants length: ", data.variants.length);
+        console.log("Variants: ", data.variants);
+
+        if(data.variants[0].variant_name === "" || data.variants[0].price === null || data.variants[0].product_code === "" ){
+            alert("Please add at least one product variant");
+            return;
+        }
+
 
         if (product && mode === "edit") {
             
@@ -100,7 +114,6 @@ export default function ProductForm({mode, product}){
             }
         }
 
-        console.log("Product.variants: ", product.variants);
         console.log("data.variants: ", data.variants);
 
     }, [mode,product]);
@@ -120,7 +133,7 @@ export default function ProductForm({mode, product}){
             <div className="mt-3 bg-white rounded-md p-5 w-[70%]">
 
                 <div className="mb-5">
-                    <h1 className="text-lg font-bold border-b-3 inline-block border-red-500">Prdouct Information</h1>
+                    <h1 className="text-lg font-bold border-b-3 inline-block border-red-500">Product Information</h1>
                 </div>
 
                 <div className="flex gap-x-20 items-center">
@@ -149,6 +162,7 @@ export default function ProductForm({mode, product}){
                             <option value="clothes">Clothes</option>
                             <option value="footwear">Footwear</option>
                             <option value="perfume">Perfume</option>
+                            <option value="other">Others</option>
                         </select>
 
                         {errors.category && (
@@ -215,11 +229,11 @@ export default function ProductForm({mode, product}){
 
                 <div className="mb-5">
                     <h1 className="text-lg font-bold border-b-3 inline-block border-red-500">
-                        Prdouct Variants
+                        Product Variants
                     </h1>
                 </div>
                 
-                <div className="grid grid-cols-[1fr_1fr_1fr_auto] font-semibold">
+                {/* <div className="grid grid-cols-[1fr_1fr_1fr_auto] font-semibold">
 
                     <div>Variant <span className="text-red-500">*</span></div>
 
@@ -229,15 +243,25 @@ export default function ProductForm({mode, product}){
 
                     <div></div>
 
-                </div>
+                </div> */}
 
                 
 
                 {data.variants.map((item, index) => (
                     <div
                         key={index}
-                        className="grid grid-cols-[1fr_1fr_1fr_auto] gap-4 mb-4 items-end"
+                        className="grid grid-cols-[1fr_1fr_1fr_auto] mb-4 items-end"
                     >
+                        
+                        {index === 0 && (
+                            <>
+                                <label>Variant <span className="text-red-500">*</span></label>
+                                <label>Product Code <span className="text-red-500">*</span></label>
+                                <label>Price <span className="text-red-500">*</span></label>
+                                <label></label>
+                            </>
+                        )}
+                        
                         <TextInput
                             name="variant_name"
                             value={item.variant_name}
@@ -253,36 +277,37 @@ export default function ProductForm({mode, product}){
                                 updateVariant(index, "product_code", e.target.value)
                             }
                         />
+
+                        <div className="flex gap-x-10 items-center">
+                            <input
+                                type="text"
+                                className="w-30 border bg-[#F5F5F5] rounded-md px-3 py-1"
+                                value={
+                                    editingPrice === index
+                                        ? item.price
+                                        : formatCurrency(item.price)
+                                }
+                                onFocus={() => setEditingPrice(index)}
+                                onBlur={() => setEditingPrice(null)}
+                                onChange={(e) =>
+                                    updateVariant(index, "price", Number(e.target.value))
+                                }
+                            />
+
+                            {
+                                data.variants.length > 1 && (
+                                    <button onClick={() => removeVariant(index)}>
+                                        <img 
+                                            src={'/images/icons/remove-btn.svg'} 
+                                            alt="Remove Btn" 
+                                            className="cursor-pointer object-contain h-5 w-5"
+                                        />
+                                    </button>
+                                )
+                            }
+                        </div>
                         
-
-                        <input 
-                            type="number" 
-                            className="w-30 border bg-[#F5F5F5] rounded-md px-2 py-1"
-                            name="price"
-                            value={item.price}
-                            onChange={(e) =>
-                                updateVariant(index, "price", e.target.value)
-                            }
-                        />
-
-                        {/* <TextInput
-                            name="price"
-                            type="number"
-                            value={item.price}
-                            className="w-10"
-                            onChange={(e) =>
-                                updateVariant(index, "price", e.target.value)
-                            }
-                        /> */}
-
-                        <button
-                            type="button"
-                            onClick={() => removeVariant(index)}
-                            disabled={data.variants.length === 1}
-                            className="px-3 py-2 bg-red-500 text-white rounded cursor-pointer hover:bg-red-400 disabled:bg-gray-300"
-                        >
-                            ✕
-                        </button>
+                        
                     </div>
                 ))}
 

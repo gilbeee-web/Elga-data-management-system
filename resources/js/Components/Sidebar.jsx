@@ -3,7 +3,7 @@ import NavLink from "./NavLink";
 export default function Sidebar(){
     
     return(
-        <aside className="w-64 shadow-md bg-white min-h-screen z-99">
+        <aside className="w-64 shadow-md bg-white min-h-screen z-99 relative">
 
             <div className="px-3 py-3 font-bold text-lg shadow-sm flex gap-x-3 items-center bg-[#C3252B] bg-[#DF9BAA]">
                 <p>Logo</p>
@@ -42,6 +42,16 @@ export default function Sidebar(){
                 </NavLink>
                 
             </nav>
+
+            <div className="w-full absolute bottom-10 bg-red-500 hover:bg-red-400 flex justify-center items-center text-white p-3 cursor-pointer">
+
+                <div className="flex items-center gap-x-3 text-lg font-semibold">
+                    <img src="/images/icons/logout-icon.svg" alt="Logout icon" className="object-containt w-7 h-7"/>
+                    Logout
+                </div>
+                
+            </div>
+
         </aside>
     );
 

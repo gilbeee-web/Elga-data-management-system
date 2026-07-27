@@ -5,11 +5,14 @@ namespace App\Http\Controllers;
 use App\Http\Requests\Orders\StoreOrderRequest;
 use App\Models\Customer;
 use App\Models\Order;
+use App\Models\Payment;
 use App\Models\Shipment;
 use App\Services\OrderService;
 use Exception;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
+use Illuminate\Validation\ValidationException;
+
 
 class OrderController extends Controller
 {
@@ -75,6 +78,7 @@ class OrderController extends Controller
                     'image' => $product->image,
                     'variants' => $product->variants,
                     'selected_variant_id' => $variant->id,
+                    'variant_name' => $variant->variant_name,
                     'variant_price' => $item->price,
                     'qty' => $item->qty,
                     'discount' => $item->discount,
@@ -92,11 +96,25 @@ class OrderController extends Controller
 
         $shipmentInfo = Shipment::where('order_id', $order->id)->first();
 
+        $totalPaid = Payment::where('order_id', $order->id)->sum('payment_amount');
+    
+        $payments = Payment::where('order_id', $order->id)->get();
+
         return Inertia::render('Orders/Edit', [
             'order' => $order, 
             'customer' => $customer,
             'orderReferences' => $orderReferences,
-            'shipmentInfo' => $shipmentInfo
+            'shipmentInfo' => $shipmentInfo,
+            'payments' => $payments,
+            'orderSummary' => [
+                'receiver_name' => $order->receiver_name,
+                'subtotal' => $order->subtotal,
+                'shipping_fee' => $order->shipment?->total_shipping_fee,
+                'discount' => $order->discount,
+                'total_paid' => $totalPaid,
+                'total_amount' => $order->total_amount,
+                'remaining_balance' => $order->remaining_balance
+            ]
         ]);
     }
 
@@ -156,6 +174,8 @@ class OrderController extends Controller
 
     public function saveOrderItem(Order $order, StoreOrderRequest $request){
 
+        // dd($request->all());
+
         try{
 
             $this->orderService->saveOrderItem($order,$request->validated());
@@ -179,8 +199,8 @@ class OrderController extends Controller
             'order_id' => 'nullable|integer|exists:orders,id',
             'container_type' => 'string|required',
             'container_size' => 'string|required',
-            'raw_shipping_fee' => 'integer|required',
-            'container_fee' => 'integer|required',
+            'raw_shipping_fee' => 'numeric|required',
+            'container_fee' => 'numeric|required',
             'tracking_number' => 'string|required'
         ]);
 
@@ -191,6 +211,64 @@ class OrderController extends Controller
             return redirect()->back()->with(['error' => 'Something went wrong: ' . $e]);
         }
 
+        return redirect()->back()->with(['success' => "Shipping info saved successfully!"]);
+
+    }
+
+
+    public function savePayment(Order $order, Request $request){
+
+
+        // dd($request->all());
+
+        $validated = $request->validate([
+            'payment_type' => 'string|required',
+            'payment_method' => 'string|required',
+            'payment_amount' => 'numeric|required',
+            'mop_name' => 'string|required',
+            'reference_number' => 'string|required',
+            'proof_image' => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
+            'remarks' => 'nullable|string'
+        ]);
+
+        try{
+            $this->orderService->savePayment($order, $validated);
+        }catch(Exception $e){
+            return redirect()->back()->with(['error', 'Error in adding payment.']);
+        }
+
+
+        return redirect()->back()->with(['success', 'Payment added successfully!']);
+    }
+
+
+    public function destroyPayment(Order $order, $payment_id){
+
+        try{
+            $this->orderService->deletePayment($order,$payment_id);
+        }catch(Exception $e){
+            dd("Something went wrong: ", $e);
+            return redirect()->back()->with(['error', 'Error in destroying payment.']);
+        }
+        
+        
+        return redirect()->back()->with('success', "Successfully removed the payment.");
+    }
+
+
+    public function shippedOrder(Order $order, Request $request){
+
+        $validated = $request->validate([
+            'sf_payment_reference' => 'string|nullable'
+        ]);
+
+        try{
+            $this->orderService->saveShipment($order,$validated);
+        }catch(Exception $e){
+            dd("Something went wrong: ", $e);
+            return redirect()->back()->with(['error', 'Error in mark as shipped the order.']);
+        }
+        
     }
 
 

@@ -7,9 +7,15 @@ import OrderForm from "./Components/OrderForm";
 import { route } from "ziggy-js";
 import CustomerBook from "./Components/CustomerBook";
 import ShippingForm from "./Components/ShippingForm";
+import { formatCurrency } from "../../Utils/formatCurrency";
+import Swal from "sweetalert2";
+import Payment from "./Components/Payment";
+import ShipmentForm from "./Components/ShipmentForm";
 
 
-export default function Edit({order, status, customer, orderReferences, shipmentInfo}){
+export default function Edit({order, status, customer, orderReferences, shipmentInfo, payments, orderSummary}){
+
+    // console.log("Order summary: ", orderSummary);
 
     const [selectedCustomer, setSelectedCustomer] = useState(customer);
 
@@ -73,6 +79,68 @@ export default function Edit({order, status, customer, orderReferences, shipment
         }
 
     }, [customer]);
+
+    useEffect(()=> {
+
+        console.log("Order Summary: ", orderSummary);
+
+    }, [orderSummary]);
+
+    const generateOrderSummary = (order) => {
+        
+        const unpaid_message = 
+        `To ship your order please settle:
+
+Subtotal: ${formatCurrency(order.subtotal)}
+Shipping Fee: ${formatCurrency(order.shipping_fee)}
+Discount: ${formatCurrency(order.discount)}
+Total: ${formatCurrency(order.total_payment)}
+        
+Please settle the payment as soon as possible, thank you!
+        `;
+
+        if (order.total_paid <= 0) {
+            return unpaid_message;
+        }
+
+        if (order.remaining_balance > 0) {
+            return `To ship your order please settle:
+
+Subtotal: ${formatCurrency(order.subtotal)}
+Shipping Fee: ${formatCurrency(order.shipping_fee)}
+Discount: ${formatCurrency(order.discount)}
+Total Payment: ${formatCurrency(order.total_payment)}
+
+Total Paid: ${formatCurrency(order.total_paid)}
+Remaining Balance: ${formatCurrency(order.remaining_balance)}
+
+Thank you!`;
+        }
+
+        return `Payment has been received.
+
+            Total Paid: ${formatCurrency(order.total_paid)}
+
+            Thank you for your purchase!`;
+    };
+
+
+    const copyOrderSummary = async () => {
+
+        const message = generateOrderSummary(orderSummary);
+
+        await navigator.clipboard.writeText(message);
+
+        Swal.fire({
+            toast: true,
+            position: "top-end",
+            icon: "success",
+            title: "Copied to clipboard!",
+            showConfirmButton: false,
+            timer: 2000,
+            timerProgressBar: true,
+        });
+    };
 
 
 
@@ -222,36 +290,60 @@ export default function Edit({order, status, customer, orderReferences, shipment
                             changeTab={handleTab}
                             shippingInfo={shipmentInfo}
                             order={order}
+                            customer={selectedCustomer}
+                        /> 
+                    )
+                }
+
+                {
+                    activeTab === "payment" && (
+                        <Payment 
+                            changeTab={handleTab}
+                            order={order}
+                            orderSummary={orderSummary}
+                            payments={payments}
+                        />
+                    )
+                }
+
+                {
+                    activeTab === "shipment" && (
+                        <ShipmentForm 
+                            changeTab={handleTab}
+                            order={order}
+                            shippingInfo={shipmentInfo}
+                            customer={selectedCustomer}
+                            orderReferences={orderReferences}
                         /> 
                     )
                 }
                 
 
-                <div className="rounded-md bg-white p-5">
+                <div className="rounded-md bg-white p-5 relative">
                     
-                    <h1 className="text-xl font-bold text-center border-b-2 border-gray-400 pb-1">Order Summary</h1>
+                    <h1 className="mt-5 text-xl font-bold text-center border-b-2 border-gray-400 pb-1">Order Summary</h1>
                     
                     <div className="mt-5 border-b-2 border-gray-400 pb-5">
 
                         <div className="flex flex-col gap-y-1">
                             <h1 className="text-sm font-semibold">Customer name:</h1>
-                            <div className="border px-5 py-1 rounded-md text-center bg-[#F5F5F5]">
-                                <span>Gilbert Sta. Maria</span>
+                            <div className="border px-3 py-1 rounded-md text-center bg-[#F5F5F5] capitalize">
+                                <span>{orderSummary.receiver_name}</span>
                             </div>
                         </div>
 
                         <div className="mt-3 flex justify-between items-center">
                             <div className="flex flex-col gap-y-1">
                                 <h1 className="text-sm font-semibold">Subtotal:</h1>
-                                <div className="border px-10 py-1 min-w-30 rounded-md text-center bg-[#F5F5F5]">
-                                    <span>1233</span>
+                                <div className="border px-3 py-1 min-w-25 max-w-30 rounded-md text-center bg-[#F5F5F5]">
+                                    <span>{formatCurrency(orderSummary.subtotal)}</span>
                                 </div>
                             </div>
 
                             <div className="flex flex-col gap-y-1">
                                 <h1 className="text-sm font-semibold">Discount:</h1>
-                                <div className="border px-10 py-1 min-w-30 rounded-md text-center bg-[#F5F5F5]">
-                                    <span>1233</span>
+                                <div className="border px-3 py-1 min-w-25 max-w-30 rounded-md text-center bg-[#F5F5F5]">
+                                    <span>{formatCurrency(orderSummary.discount)}</span>
                                 </div>
                             </div>
                         </div>
@@ -259,8 +351,8 @@ export default function Edit({order, status, customer, orderReferences, shipment
                         <div className="mt-3 w-full flex justify-center">
                             <div className="flex flex-col gap-y-1">
                                 <h1 className="text-sm font-semibold">Shipping fee:</h1>
-                                <div className="border px-10 py-1 min-w-30 rounded-md text-center bg-[#F5F5F5]">
-                                    <span>1233</span>
+                                <div className="border px-3 py-1 min-w-25 max-w-30 rounded-md text-center bg-[#F5F5F5]">
+                                    <span>{formatCurrency(orderSummary.shipping_fee)}</span>
                                 </div>
                             </div>
                         </div>
@@ -273,15 +365,15 @@ export default function Edit({order, status, customer, orderReferences, shipment
                         <div className="mt-3 flex justify-between items-center">
                             <div className="flex flex-col gap-y-1">
                                 <h1 className="text-sm font-semibold">Grand Total:</h1>
-                                <div className="border px-10 py-1 min-w-30 rounded-md text-center bg-[#F5F5F5]">
-                                    <span>1233</span>
+                                <div className="border px-3 py-1 min-w-25 max-w-30 rounded-md text-center bg-[#F5F5F5]">
+                                    <span>{formatCurrency(orderSummary.total_amount)}</span>
                                 </div>
                             </div>
 
                             <div className="flex flex-col gap-y-1">
                                 <h1 className="text-sm font-semibold">Paid:</h1>
-                                <div className="border px-10 py-1 min-w-30 rounded-md text-center bg-[#F5F5F5]">
-                                    <span>12</span>
+                                <div className="border px-3 py-1 min-w-25 max-w-30 rounded-md text-center bg-[#F5F5F5]">
+                                    <span>{formatCurrency(orderSummary.total_paid ?? 0)}</span>
                                 </div>
                             </div>
                         </div>
@@ -289,12 +381,22 @@ export default function Edit({order, status, customer, orderReferences, shipment
                         <div className="w-full flex justify-center">
                             <div className="flex flex-col gap-y-1">
                                 <h1 className="text-sm font-semibold">Remaining balance:</h1>
-                                <div className="border px-10 py-1 min-w-30 rounded-md text-center bg-[#F5F5F5]">
-                                    <span>1233.00</span>
+                                <div className="border px-3 py-1 min-w-25 max-w-30 rounded-md text-center bg-[#F5F5F5]">
+                                    <span>{formatCurrency(orderSummary.remaining_balance)}</span>
                                 </div>
                             </div>
                         </div>
 
+                    </div>
+
+
+                    <div className="absolute top-3 left-3">
+                        <button 
+                            className="border px-2 py-1 rounded-md hover:bg-gray-200 cursor-pointer"
+                            onClick={copyOrderSummary}
+                        >
+                            <img src="/images/icons/copy-icon.svg" alt="Copy icon" className="object-contain w-5 h-5"/>
+                        </button>
                     </div>
                     
 

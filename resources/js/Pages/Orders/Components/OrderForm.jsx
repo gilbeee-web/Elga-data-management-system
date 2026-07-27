@@ -197,7 +197,8 @@ export default function OrderForm({order, changeTab, orderReferences: initialOrd
     });
 
 
-    const getSubtotal = (item) => {
+    //item total with discount 
+    const getItemTotal = (item) => {
 
         const variant = item.variants.find((v) => v.id === item.selected_variant_id); // find the variant
 
@@ -212,34 +213,55 @@ export default function OrderForm({order, changeTab, orderReferences: initialOrd
         return subtotal < 0 ? 0 : subtotal; 
     };
 
+    const getItemAmount = (item) => {
+
+        const variant = item.variants.find((v) => v.id === item.selected_variant_id); // find the variant
+
+        const price = variant ? variant.price : 0;
+
+        const totalAmount = price * item.qty;
+
+        
+        return totalAmount < 0 ? 0 : totalAmount; 
+    };
+
+
+
+
     const getOrderTotals = (order) => {
         let totalQty = 0;
         let totalDiscount = 0;
         let totalSubtotal = 0;
+        let finalTotal = 0;
 
         order.items.forEach((item) => {
             totalQty += item.qty;
+            totalSubtotal += item.variant_price * item.qty;
             totalDiscount += item.discount * item.qty;
-            totalSubtotal += getSubtotal(item);
+            finalTotal += getItemTotal(item);
         });
 
-        return { totalQty, totalDiscount, totalSubtotal };
+        return { totalQty, totalSubtotal, totalDiscount, finalTotal };
     };
 
 
     const getGrandTotals = () => {
-        let totalQty = 0;
-        let totalDiscount = 0;
-        let totalSubtotal = 0;
+        let grand_totalQty = 0;
+        let grand_totalDiscount = 0;
+        let grand_totalSubtotal = 0;
+        let grand_finalTotal = 0;
 
         data.orderReferences.forEach((order) => {
+
             const orderTotals = getOrderTotals(order);
-            totalQty += orderTotals.totalQty;
-            totalDiscount += orderTotals.totalDiscount;
-            totalSubtotal += orderTotals.totalSubtotal;
+
+            grand_totalQty += orderTotals.totalQty;
+            grand_totalDiscount += orderTotals.totalDiscount;
+            grand_totalSubtotal += orderTotals.totalSubtotal;
+            grand_finalTotal += orderTotals.finalTotal;
         });
 
-        return { totalQty, totalDiscount, totalSubtotal };
+        return { grand_totalQty, grand_totalSubtotal, grand_totalDiscount, grand_finalTotal };
     };
 
     const grandTotals = getGrandTotals();
@@ -294,13 +316,13 @@ export default function OrderForm({order, changeTab, orderReferences: initialOrd
                     </div>
 
 
-                    <div className="mt-5 max-w-[90%] px-5 pt-2">
+                    <div className="mt-5 px-5 pt-2">
 
                         {/* Order Card */}
                         {
                             data.orderReferences.map((order, orderIndex) => {
 
-                                const { totalQty, totalDiscount, totalSubtotal } = getOrderTotals(order);
+                                const { totalQty, totalSubtotal, totalDiscount, finalTotal } = getOrderTotals(order);
 
                                 return(
                                     <div className="mb-5" key={orderIndex}>
@@ -322,7 +344,8 @@ export default function OrderForm({order, changeTab, orderReferences: initialOrd
                                                 <div className="flex gap-x-5 items-center">
                                                     <h1 className="font-semibold">Qty: {totalQty}</h1>
                                                     <h1 className="font-semibold">Discount: {formatCurrency(totalDiscount)}</h1>
-                                                    <h1 className="font-semibold">{formatCurrency(totalSubtotal)}</h1>
+                                                    <h1 className="font-semibold">Subtotal: {formatCurrency(totalSubtotal)}</h1>
+                                                    <h1 className="font-semibold">Total: {formatCurrency(finalTotal)}</h1>
 
                                                     {
                                                         data.orderReferences.length > 1 && (
@@ -364,7 +387,7 @@ export default function OrderForm({order, changeTab, orderReferences: initialOrd
                                                     >
                                                         {
                                                             order.items.map((item, itemIndex) => (
-                                                                <div key={itemIndex} className="grid grid-cols-[25%_75%] gap-x-10 border-b border-gray-400 pb-3 px-3">
+                                                                <div key={itemIndex} className="grid grid-cols-[25%_75%] gap-x-3 items-center border-b border-gray-400 pb-3 px-3">
                                                                     
                                                                     <div className="flex gap-x-3">
 
@@ -379,7 +402,7 @@ export default function OrderForm({order, changeTab, orderReferences: initialOrd
                                                                         </div>
 
                                                                         <div className="flex flex-col">
-                                                                            <h1 className="text-sm font-bold max-w-25">
+                                                                            <h1 className="text-sm font-bold max-w-30 capitalize">
                                                                                 {item.name}
                                                                             </h1>
 
@@ -403,41 +426,55 @@ export default function OrderForm({order, changeTab, orderReferences: initialOrd
                                                                     </div>
 
 
-                                                                    <div className="flex gap-x-5 items-center">
+                                                                    <div className="flex gap-x-7 items-center">
+
+                                                                        <div className="flex flex-col">
+                                                                            <label htmlFor="" className="font-bold text-sm">Price:</label>
+                                                                            <div className="py-1 min-w-23 max-w-30 border border-gray-400 rounded-xl bg-[#F5F5F5] text-center">
+                                                                                <span>{formatCurrency(item.variant_price)}</span>
+                                                                            </div>
+                                                                        </div>
                                                                         
-                                                                        <div className="flex gap-x-2 items-center">
+                                                                        <div className="flex flex-col">
                                                                             <label htmlFor="" className="font-bold text-sm">Qty:</label>
                                                                             <input 
                                                                                 type="number" 
-                                                                                min={0}
+                                                                                min={1}
                                                                                 value={item.qty}
                                                                                 onChange={(e) =>
                                                                                     handleItemChange(orderIndex, itemIndex, "qty", Number(e.target.value))
                                                                                 }
-                                                                                className="px-3 py-1 border border-gray-400 max-w-20 rounded-xl text-center bg-[#F5F5F5]"
+                                                                                className="py-1 border border-gray-400 max-w-20 rounded-xl text-center bg-white"
                                                                             />
                                                                         </div>
 
-                                                                        <div className="flex gap-x-2 items-center">
-                                                                            <label htmlFor="" className="font-bold text-sm">Discount:</label>
-                                                                            <input 
-                                                                                type="number" 
-                                                                                min={0}
-                                                                                onChange={(e) =>
-                                                                                    handleItemChange(orderIndex, itemIndex, "discount", Number(e.target.value))
-                                                                                }
-                                                                                className="px-3 py-1 border border-gray-400 max-w-20 rounded-xl text-center bg-[#F5F5F5]"
-                                                                            />
-                                                                        </div>
-
-                                                                        <div className="flex gap-x-2 items-center">
-                                                                            <label htmlFor="" className="font-bold text-sm">Subtotal:</label>
+                                                                        <div className="flex flex-col">
+                                                                            <label htmlFor="" className="font-bold text-sm">Amount:</label>
                                                                             <div className="py-1 min-w-23 max-w-30 border border-gray-400 rounded-xl bg-[#F5F5F5] text-center">
-                                                                                <span>{formatCurrency(getSubtotal(item))}</span>
+                                                                                <span>{formatCurrency(getItemAmount(item))}</span>
                                                                             </div>
                                                                         </div>
 
-                                                                        <div className="">
+                                                                        <div className="flex flex-col">
+                                                                            <label htmlFor="" className="font-bold text-sm">Discount:</label>
+                                                                            <input 
+                                                                                type="text" 
+                                                                                value={Number(item.discount ?? 0)}
+                                                                                onChange={(e) =>
+                                                                                    handleItemChange(orderIndex, itemIndex, "discount", Number(e.target.value))
+                                                                                }
+                                                                                className="py-1 border border-gray-400 max-w-20 rounded-xl text-center bg-white"
+                                                                            />
+                                                                        </div>
+
+                                                                        <div className="flex flex-col">
+                                                                            <label htmlFor="" className="font-bold text-sm">Total:</label>
+                                                                            <div className="py-1 min-w-23 max-w-30 border border-gray-400 rounded-xl bg-[#F5F5F5] text-center">
+                                                                                <span>{formatCurrency(getItemTotal(item))}</span>
+                                                                            </div>
+                                                                        </div>
+
+                                                                        <div className="mt-5">
                                                                             <button onClick={() => handleRemoveItem(orderIndex, itemIndex)}>
                                                                                 <img 
                                                                                     src={'/images/icons/remove-btn.svg'} 
@@ -520,9 +557,10 @@ export default function OrderForm({order, changeTab, orderReferences: initialOrd
                 <div className="h-full flex justify-between items-center px-5">
 
                     <div className="flex gap-x-5 items-center">
-                        <h1>Grand Total: {formatCurrency(grandTotals.totalSubtotal)}</h1>
-                        <h1>Total Discount: {formatCurrency(grandTotals.totalDiscount)}</h1>
-                        <h1>Total Qty: {grandTotals.totalQty}</h1>
+                        <h1>Subtotal: {formatCurrency(grandTotals.grand_totalSubtotal)}</h1>
+                        <h1>Grand Total: {formatCurrency(grandTotals.grand_finalTotal)}</h1>
+                        <h1>Total Discount: {formatCurrency(grandTotals.grand_totalDiscount)}</h1>
+                        <h1>Total Qty: {grandTotals.grand_totalQty}</h1>
                     </div>
 
                     <div className="">

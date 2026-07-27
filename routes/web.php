@@ -28,7 +28,8 @@ Route::prefix('/orders')->group(function(){
         Route::post('/{order}/customer', 'saveCustomer')->name('order.customer.save');
         Route::post('/{order}/save-order', 'saveOrderItem')->name('order.saveOrderItem');
         Route::post('/{order}/save-shipping-info', 'saveShippingInfo')->name('order.saveShippingInfo');
-    
+        Route::post('/{order}/save-payment', 'savePayment')->name('order.savePayment');
+        Route::delete('/{order}/{payment_id}', 'destroyPayment')->name('order.destroyPayment');
     });
 });
 

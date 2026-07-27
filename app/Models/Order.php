@@ -47,10 +47,6 @@ class Order extends Model
         return $this->hasMany(OrderReference::class);
     }
 
-    public function container()
-    {
-        return $this->belongsTo(OrderContainer::class);
-    }
 
     public function customer(){
         return $this->belongsTo(Customer::class);

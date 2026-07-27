@@ -154,14 +154,17 @@ export default function Index ({orders}){
                             <th className="p-3">CUSTOMER NAME</th>
                             <th className="p-3">ORDER NUMBER</th>
                             <th className="p-3">STATUS</th>
-                            <th className="p-3">ACTION</th>
                         </tr>
                     </thead>
                     <tbody>
                         {orders.length > 0 ?
                             (
                                 orders.map((order) => (
-                                    <tr className="border-b border-gray-300 hover:bg-gray-100" key={order.id}>
+                                    <tr 
+                                        className="border-b border-gray-300 hover:bg-gray-100 cursor-pointer" 
+                                        onClick={() => router.visit(route('order.edit', order.id))}
+                                        key={order.id}
+                                    >
                                         <td className="p-3">{order.transaction_number}</td>
                                         <td className="p-3">{order.sender_name}</td>
                                         <td className="p-3">{order.reference ?? 'N/A'}</td>
@@ -172,20 +175,20 @@ export default function Index ({orders}){
                                                 {order.order_status}
                                             </span>
                                         </td>
-                                        <td className="p-3">
+                                        {/* <td className="p-3">
                                             <button 
                                                 className="text-green-400 hover:underline cursor-pointer"
                                                 onClick={() => router.visit(route('order.edit', order.id))}
                                             >
                                                 View
                                             </button>
-                                        </td>
+                                        </td> */}
                                     </tr>
                                 ))
                             ) :
                             (
                                 <tr className="text-center">
-                                    <td colSpan={5} className="text-xl font-bold p-4">No orders yet.</td>
+                                    <td colSpan={4} className="text-xl font-bold p-4">No orders yet.</td>
                                 </tr>
                             )
                         }

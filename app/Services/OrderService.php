@@ -17,6 +17,7 @@ use Illuminate\Validation\ValidationException;
 
 class OrderService{
 
+    
     public function saveCustomer(Order $order, array $data){
         
         return DB::transaction(function() use ($data, $order){
@@ -49,6 +50,8 @@ class OrderService{
     
     }
 
+
+    //compute the subtotal of the item
     protected function computeItem(array $item){
 
         $discount = $item['discount'] ?? 0;
@@ -63,17 +66,65 @@ class OrderService{
         ];
     }
 
+    protected function computeOrderSubtotal(array $item){
+
+        $order_subtotal = $item['variant_price'] * $item['qty'];
+
+        return $order_subtotal;
+    }
+
+    protected function recalculateOrderTotals(Order $order): Order
+    {
+        // Sum of item subtotals AFTER discount, freshly computed from
+        // OrderItem rows (not carried over from a previous call).
+        $itemsTotal = OrderItem::where('order_id', $order->id)->sum('subtotal');
+ 
+        $shippingFee = Shipment::where('order_id', $order->id)
+            ->value('total_shipping_fee') ?? 0;
+ 
+        $grandTotal = $itemsTotal + $shippingFee;
+ 
+        $totalPaid = Payment::where('order_id', $order->id)->sum('payment_amount');
+ 
+        $remainingBalance = max(0, $grandTotal - $totalPaid);
+ 
+        $paymentStatus = 'unpaid';
+        if ($remainingBalance <= 0 && $grandTotal > 0) {
+            $paymentStatus = 'paid';
+        } elseif ($totalPaid > 0) {
+            $paymentStatus = 'partial';
+        }
+ 
+        $order->update([
+            'total_amount' => $grandTotal,
+            'remaining_balance' => $remainingBalance,
+            'payment_status' => $paymentStatus,
+        ]);
+ 
+        return $order->fresh();
+    }
+
+    
+
     protected function storeStatusHistory(
         Order $order,
         ?string $oldStatus,
-        string $newStatus
+        ?string $newStatus,
+        ?string $remarks = null
     ){
+
+        if($oldStatus === $newStatus){
+            return;
+        }
+
+
 
         $order->statusHistories()->create([
             'old_status' => $oldStatus,
             'new_status' => $newStatus,
             // 'changed_by' => Auth::id(),
             'changed_by' => 1,
+            'remarks' => $remarks,
         ]);
     }
 
@@ -82,8 +133,16 @@ class OrderService{
 
         return DB::transaction(function() use ($data, $order){
 
-            $subtotal = 0;
+            // total of the item without discount (display only)
+            $orderSubtotal = 0; 
+
+            //total discount applied in all items (discount * qty)
             $totalDiscount = 0;
+
+
+            //collects the IDs that involved in the update or creating process
+            $touchedOrderItemIds = [];
+            $touchedOrderReferenceId = [];
 
 
             //create or update orderReference data
@@ -94,13 +153,21 @@ class OrderService{
                     'order_number' => $ref['order_number'],
                 ]);
 
+                //track the order reference id in the payload
+                $touchedOrderReferenceId[] = $orderReference->id;
+
                 foreach($ref['items'] as $item){
+                    
+                    //get the computed value with discount
+                    $computed = $this->computeItem($item); 
 
-                    $computed = $this->computeItem($item);
-                    $subtotal += $computed['subtotal'];
-                    $totalDiscount += $item['discount'] ?? 0;
+                    // compute the item by item price * qty
+                    $orderSubtotal += $this->computeOrderSubtotal($item); 
 
-                    OrderItem::updateOrCreate(
+                    // each item computed by discount
+                    $totalDiscount += ($item['discount'] ?? 0) * $item['qty'];
+                    
+                    $orderItem = OrderItem::updateOrCreate(
                         [
                             'order_reference_id' => $orderReference->id,
                             'product_variant_id' => $item['selected_variant_id'],
@@ -111,57 +178,46 @@ class OrderService{
                             'price' => $item['variant_price'],
                             'discount' => $item['discount'] ?? 0,
                             'final_price' => $computed['final_price'],
-                            'subtotal' => $computed['subtotal'],
+                            'subtotal' => $computed['subtotal'], // subtotal of the item with discount
                         ]
                     );
+
+                    $touchedOrderItemIds[] = $orderItem->id;
                 }
             }
 
-            if($order->order_status === 'draft'){
-                $order->update([
-                    'order_status' => 'awaiting_shipping_fee'
-                ]);
-            }
 
-            //subtotal is already computed with multiplied by qty in computeItem Function
-            $totalAmount = $subtotal - $totalDiscount;
+
+            // delete all the order item that is not in the payload that have the same order id
+            OrderItem::where('order_id', $order->id)
+                ->whereNotIn('id', $touchedOrderItemIds)
+                ->delete(); 
             
-            // get the sum or total amount paid by the customer to get the right computation for remaining balance
-            $totalPaid = Payment::where('order_id', $order->id)
-                ->where('payment_type', 'item_payment')
-                ->sum('payment_amount');
+            // delete all the order references that is no longer in the payload
+            OrderReference::where('order_id', $order->id)
+                ->whereNotIn('id', $touchedOrderReferenceId)
+                ->delete();
 
-            //calculate the remaining balance and avoid negative number by default to 0
-            $remainingBalance = max(0, $totalAmount - $totalPaid);
 
-            $paymentStatus = "unpaid";
-
-            if($remainingBalance <= 0 ){
-                $paymentStatus = "paid";
-            }else{
-                if($totalPaid > 0){
-                    $paymentStatus = "partial";
-                }
+            //only change the status of the order if it actually changes
+            $oldStatus = $order->order_status;
+            if ($oldStatus === 'draft') {
+                $order->update(['order_status' => 'awaiting_shipping_fee']);
+                $this->storeStatusHistory($order, $oldStatus, 'awaiting_shipping_fee');
             }
 
-            // $paymentStatus = $remainingBalance <= 0 ? 'paid' : ($totalPaid > 0 ? 'partial' : 'unpaid');
 
+            //save the data that is for display
             $order->update([
-                'subtotal' => $subtotal,
+                'subtotal' => $orderSubtotal,
                 'discount' => $totalDiscount,
-                'total_amount' => $totalAmount,
-                'remaining_balance' => $remainingBalance,
-                'payment_status' => $paymentStatus
             ]);
-
-            $this->storeStatusHistory(
-                $order,
-                null,
-                'awaiting_shipping_fee'
-            );
-
             
-            return $order->load('references', 'items');
+
+            // always calculate the total value based on the fresh or updated data 
+            $this->recalculateOrderTotals($order);
+
+            return $order->fresh()->load('references', 'items');
 
         });
 
@@ -171,13 +227,10 @@ class OrderService{
     {
         return DB::transaction(function () use ($data, $order) {
 
+            // total sf with container fee
             $totalShippingFee = $data['raw_shipping_fee'] + $data['container_fee'];
 
-            //get the previous sf
-            $previousShippingFee = Shipment::where('order_id', $order->id)
-                ->value('total_shipping_fee') ?? 0;
-
-            $shipment = Shipment::updateOrCreate(
+            Shipment::updateOrCreate(
                 ['order_id' => $order->id],
                 [
                     'courier' => 'jnt',
@@ -190,76 +243,49 @@ class OrderService{
                 ]
             );
 
-            $updatedShippingFee = $totalShippingFee - $previousShippingFee;
+            $oldStatus = $order->order_status;
+            $newStatus = $oldStatus === 'awaiting_shipping_fee'
+                ? 'awaiting_payment'
+                : $oldStatus;
 
-            
+            //only update the order status if it not equal to previous status
+            if ($newStatus !== $oldStatus) {
+                $order->update(['order_status' => $newStatus]);
+                $this->storeStatusHistory($order, $oldStatus, $newStatus);
+            }
 
-            $newRemainingBalance = max(0,$order->remaining_balance + $updatedShippingFee);
+            // recompute the total based on the fresh or updated data
+            $this->recalculateOrderTotals($order);
 
-            $order->update([
-                'order_status' => 'awaiting_payment',
-                'remaining_balance' => $newRemainingBalance
-            ]);
-
-            return $shipment;
+            return $order->fresh()->load('shipment');
         });
     }
 
-    // public function saveShippingInfo(Order $order, array $data){
-        
-    //     return DB::transaction(function() use ($data, $order){
 
-    //         $totalShippingFee = $data['raw_shipping_fee'] + $data['container_fee'];
-    //         $order_id = $order->id;
+    public function savePayment(Order $order, array $data, ?int $paymentId = null){
 
-    //         $shipment = Shipment::where('order_id', $order_id)->first();
-        
-    //         if(!$shipment){
+        return DB::transaction(function() use ($data, $order, $paymentId){
 
-    //             $shipment = Shipment::create([
-    //                 'order_id' => $order_id,
-    //                 'courier' => "jnt",
-    //                 'container_type' => $data['container_type'],
-    //                 'container_size' => $data['container_size'],
-    //                 'raw_shipping_fee' => $data['raw_shipping_fee'],
-    //                 'container_fee' => $data['container_fee'],
-    //                 'total_shipping_fee' => $totalShippingFee,
-    //                 'tracking_number' => $data['tracking_number']
-    //             ]);
+            // dd($order->toArray());
 
-    //         }else{
-
-    //             $shipment->update([
-    //                 'container_type' => $data['container_type'],
-    //                 'container_size' => $data['container_size'],
-    //                 'raw_shipping_fee' => $data['raw_shipping_fee'],
-    //                 'container_fee' => $data['container_fee'],
-    //                 'total_shipping_fee' => $totalShippingFee,
-    //                 'tracking_number' => $data['tracking_number']
-    //             ]);
-
-    //         }
-
+            $existingAmount = 0;
             
-    //         $order = Order::findOrFail($order_id );
+            //if editing get the existing payment amount
+            if($paymentId){
+                $existingAmount = Payment::where('id', $paymentId)
+                    ->where('order_id', $order->id)
+                    ->value('payment_amount') ?? 0;
+            }
 
-    //         $order->update([
-    //             'order_status' => 'awaiting_payment'
-    //         ]);
+            // if existing amount is not 0 it "give back" to original balance that replaced the previous payment
+            // add again the existing amount that subtract in the previous payment (edit mode)
+            $availableBalance = $order->remaining_balance + $existingAmount;
 
-    //         return $shipment;
-    //     });
-    
-    // }
 
-    public function addPayment(array $data, int $order_id, int $user_id){
-
-        return DB::transaction(function() use ($data, $order_id, $user_id){
-
-            $order = Order::findOrFail($order_id);
+            // dd($order->remaining_balance);
 
             //avoid overpayment
-            if ($data['payment_amount'] > $order->remaining_balance) {
+            if ($data['payment_amount'] > $availableBalance) {
                 throw ValidationException::withMessages([
                     'payment_amount' => 'Payment exceeds the remaining balance.'
                 ]);
@@ -280,47 +306,40 @@ class OrderService{
                 );
             }
 
-            $payment = Payment::create([
-                'order_id' => $order_id,
+            $payload = [
+                'order_id' => $order->id,
                 'payment_amount' => $data['payment_amount'],
-                'payment_method' => $data['payment_method'],
                 'payment_type' => $data['payment_type'],
+                'payment_method' => $data['payment_method'],
                 'mop_name' => $data['mop_name'],
                 'reference_number' => $data['reference_number'],
-                'encoded_by' => $user_id,
-                'proof_image' => $proof_imagePath,
-                'remarks' => $data['remarks'],
-                'paid_at' => now()
-            ]);
+                'encoded_by' => 1,
+                'remarks' => $data['remarks'] ?? null,
+                'paid_at' => now(),
+            ];
 
-            // Calculate total customer payments only
-            $totalPaid = Payment::where('order_id', $order_id)
-                ->where('payment_type', 'item_payment')
-                ->sum('payment_amount');
-            
-            
-            $remaining_balance = $order->total_amount - $totalPaid;
+            // Only overwrite proof_image if a new one was uploaded
+            if ($proof_imagePath) {
+                $payload['proof_image'] = $proof_imagePath;
+            }
+
+            $payment = Payment::updateOrCreate(
+                [
+                    'id' => $paymentId,
+                    'order_id' => $order->id
+                ],
+                $payload
+            );
 
             $oldStatus = $order->order_status;
 
-            $orderStatus = $remaining_balance == 0 ? 'processing': 'payment';
-            $paymentStatus = $remaining_balance <= 0 ? 'paid' : 'partial';
-            
+            $updatedOrder = $this->recalculateOrderTotals($order);
 
-            $order->update([
-                'remaining_balance' => $remaining_balance,
-                'payment_status' => $paymentStatus,
-                'order_status' => $orderStatus
-            ]);
-
-             if ($oldStatus !== $orderStatus) {
-                OrderStatusHistory::create([
-                    'order_id' => $order_id,
-                    'old_status' => $oldStatus,
-                    'new_status' => $orderStatus,
-                    'changed_by' => $user_id,
-                    'remarks' => 'Order fully paid.',
-                ]);
+            $newStatus = $updatedOrder->remaining_balance == 0 ? 'processing' : 'payment_confirmed';
+ 
+            if ($newStatus !== $oldStatus) {
+                $order->update(['order_status' => $newStatus]);
+                $this->storeStatusHistory($order, $oldStatus, $newStatus, 'Order fully paid.');
             }
 
             return $payment;
@@ -328,27 +347,58 @@ class OrderService{
 
     }
 
+    public function deletePayment(Order $order, int $paymentId)
+    {
+        return DB::transaction(function () use ($order, $paymentId) {
+ 
+            $payment = Payment::where('id', $paymentId)
+                ->where('order_id', $order->id)
+                ->firstOrFail();
+ 
+            $payment->delete();
+ 
+            $oldStatus = $order->order_status;
+ 
+            $updatedOrder = $this->recalculateOrderTotals($order);
+ 
+            // not allowed to update the status to draft or awaiting sf or payment because the payment is just removed but the status is now in payment terms
+            $newStatus = $oldStatus;
+            if (in_array($oldStatus, ['processing', 'payment_confirmed'])) {
+                $newStatus = $updatedOrder->remaining_balance == 0
+                    ? 'processing'
+                    : 'payment_confirmed';
+            }
+
+            //only update the order status if it actually changes
+            if ($newStatus !== $oldStatus) {
+                $order->update(['order_status' => $newStatus]);
+                $this->storeStatusHistory($order, $oldStatus, $newStatus, 'Payment deleted.');
+            }
+ 
+            return $updatedOrder;
+        });
+    }
+
 
     
 
-    public function saveShipment(array $data, int $order_id){
+    public function saveShipment(Order $order, array $data){
 
-        return DB::transaction(function() use ($data, $order_id){
+        return DB::transaction(function() use ($data, $order){
 
-            $shipment = Shipment::where('order_id', $order_id)->get();
+            $shipment = Shipment::where('order_id', $order->id)->firstOrFail();
 
             $shipment->update([
                 'sf_payment_reference' => $data['sf_payment_reference'],
-                'shipped_at' => now()
+                'shipped_at' => now(),
             ]);
 
-            $order = Order::findOrFail($order_id);
+            $oldStatus = $order->order_status;
+            $order->update([
+                'order_status' => "shipped"
+            ]);
 
-            if($order){
-                $order->update([
-                    'order_status' => "shipped"
-                ]);
-            }
+            $this->storeStatusHistory($order,$oldStatus,'shipped');
 
             return $shipment;
         });
@@ -357,33 +407,5 @@ class OrderService{
 
 
     
-
-
-
-    
-
-
-    
-
-
-    
-
-    // protected function storeOrderItem(Order $order, array $item){
-
-    //     $computed = $this->computeItem($item);
-
-    //     //store order items using eloquent 
-    //     $order->items()->create([
-    //         'item_name' => $item['item_name'] ?? null,
-    //         'qty' => $item['qty'] ?? 1,
-    //         'price' => $item['price'] ?? 0,
-    //         'discount' => $item['discount'] ?? 0,
-    //         'final_price' => $computed['final_price'],
-    //         'subtotal' => $computed['subtotal']
-    //     ]);
-
-    // }
-
-   
 
 }

@@ -7,10 +7,11 @@ export default function TextInput({
     placeholder = "",
     className = "",
     error = "",
+    required = false
 }){
     return(
-        <div className="flex flex-col">
-            <label htmlFor={name}>{label}</label>
+        <div className="flex flex-col gap-y-1">
+            <label htmlFor={name} className="font-semibold">{label}{ required && (<span className="text-red-500">*</span>)}</label>
 
             <input
                 id={name}

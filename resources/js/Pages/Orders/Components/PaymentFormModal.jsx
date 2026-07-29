@@ -4,13 +4,12 @@ import { useEffect, useState } from "react";
 import { route } from "ziggy-js";
 import { formatCurrency } from "../../../Utils/formatCurrency";
 
-export default function PaymentFormModal({order, onClose, payment}){
+export default function PaymentFormModal({order, onClose, payment, onSubmitPayment}){
 
     console.log("Order data(payment form): ", order);
     console.log("Payment data (payment form): ", payment);
 
     const {data, setData, post, processing, errors} = useForm({
-        payment_type: "",
         payment_method: "",
         payment_amount: null,
         mop_name: "",
@@ -34,19 +33,18 @@ export default function PaymentFormModal({order, onClose, payment}){
     };
 
     const savePayment = (e) => {
-
         e.preventDefault();
 
         post(route('order.savePayment', order.id), {
-            onSuccess: () => {
-                
-                onClose();
+            onSuccess: (page) => {
+                const isFullyPaid = Number(page.props.order.remaining_balance) === 0;
 
-                console.log("Successful payment");
+                console.log("isFullyPaid submitted: ", isFullyPaid);
+
+                onSubmitPayment(isFullyPaid);
             },
-
             onError: (errors) => {
-                console.log("Errors: ", errors)
+                console.log("Errors: ", errors);
             }
         });
     }
@@ -57,7 +55,6 @@ export default function PaymentFormModal({order, onClose, payment}){
         if(payment){
 
             setData({
-                payment_type: payment.payment_type,
                 payment_method: payment.payment_method,
                 payment_amount: payment.payment_amount,
                 mop_name: payment.mop_name,
@@ -103,6 +100,26 @@ export default function PaymentFormModal({order, onClose, payment}){
                     <div className="flex gap-x-5 items-center">
 
                         <div className="flex flex-col gap-y-1">
+                            <label htmlFor="" className="font-semibold">Payment Amount: <span className="text-red-500">*</span></label>
+
+                            <input
+                                type="text"
+                                className="w-50 border bg-[#F5F5F5] rounded-md px-3 py-1"
+                                value={
+                                    isEditing
+                                        ? data.payment_amount
+                                        : data.payment_amount
+                                            ? formatCurrency(Number(data.payment_amount))
+                                            : ""
+                                }
+                                onFocus={() => setIsEditing(true)}
+                                onBlur={() => setIsEditing(false)}
+                                onChange={(e) => setData("payment_amount", e.target.value)}
+                            />
+
+                        </div>
+
+                        {/* <div className="flex flex-col gap-y-1">
                             <label htmlFor="payment_type" className="font-semibold">Payment Type:<span className="text-red-500">*</span></label>
                             <select 
                                 name="payment_type"
@@ -121,13 +138,13 @@ export default function PaymentFormModal({order, onClose, payment}){
                                     {errors.payment_type}
                                 </p>
                             )}
-                        </div>
+                        </div> */}
 
                         <div className="flex flex-col gap-y-1">
                             <label htmlFor="payment_method" className="font-semibold">Payment Method:<span className="text-red-500">*</span></label>
                             <select 
                                 name="payment_method"
-                                className="border bg-white p-2 rounded-md max-w-50"
+                                className="border bg-white px-2 py-1 rounded-md max-w-50"
                                 value={data.payment_method}
                                 onChange={(e) => setData("payment_method",e.target.value)}
                             >
@@ -146,9 +163,12 @@ export default function PaymentFormModal({order, onClose, payment}){
                         </div>
 
 
+                        
+
+
                     </div>
 
-                    <div className="flex gap-x-5 items-center">
+                    {/* <div className="flex gap-x-5 items-center">
 
                         <div className="flex flex-col gap-y-1">
                             <label htmlFor="" className="font-semibold">Payment Amount: <span className="text-red-500">*</span></label>
@@ -171,25 +191,7 @@ export default function PaymentFormModal({order, onClose, payment}){
                         </div>
 
                         
-                        
-                        {/* <TextInput
-                            label="Payment Amount:"
-                            type={isEditing ? "number" : "text"}
-                            placeholder="Enter amount"
-                            value={
-                                isEditing
-                                    ? data.payment_amount
-                                    : data.payment_amount
-                                        ? formatCurrency(Number(data.payment_amount))
-                                        : ""
-                            }
-                            onFocus={() => setIsEditing(true)}
-                            onBlur={() => setIsEditing(false)}
-                            onChange={(e) => setData("payment_amount", e.target.value)}
-                        /> */}
-
-
-                        
+                    
 
                         <TextInput 
                             label={"MOP Name:"}
@@ -198,7 +200,16 @@ export default function PaymentFormModal({order, onClose, payment}){
                             value={data.mop_name}
                             onChange={(e) => setData("mop_name",e.target.value)}
                         />
-                    </div>
+                    </div> */}
+
+                    <TextInput 
+                        label={"MOP Name:"}
+                        type="text"
+                        className="min-w-80"
+                        placeholder="eg. Railey C"
+                        value={data.mop_name}
+                        onChange={(e) => setData("mop_name",e.target.value)}
+                    />
                     
 
                     

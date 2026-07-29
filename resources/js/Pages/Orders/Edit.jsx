@@ -15,7 +15,13 @@ import ShipmentForm from "./Components/ShipmentForm";
 
 export default function Edit({order, status, customer, orderReferences, shipmentInfo, payments, orderSummary}){
 
-    // console.log("Order summary: ", orderSummary);
+    // console.log("Customers: ", customer);
+
+    // console.log("Order References: ", orderReferences);
+
+    // console.log("Shipping info: ", shipmentInfo);
+    console.log("Remaining balance: ", order.remaining_balance);
+
 
     const [selectedCustomer, setSelectedCustomer] = useState(customer);
 
@@ -142,9 +148,17 @@ Thank you!`;
         });
     };
 
+    const hasCustomerData = Object.values(customer).some(
+        value => value !== null && value !== ""
+    );
 
-
+    const orderStatusDisplay = {
+        awaiting_payment: "Awaiting Payment",
+        payment_confirmed: "Partial Payment",
+        awaiting_shipping_fee: "Awaiting Shipping Fee"
+    };
     
+
     return <>
 
         <Layout title={"Orders"}>
@@ -163,16 +177,16 @@ Thank you!`;
                 <div className="flex gap-x-3 items-center">
                     <h1 className="text-lg font-bold">Status:</h1>
                     <span className="bg-gray-400 px-5 py-2 rounded-md text-white capitalize font-semibold">
-                        {order.order_status}
+                       {orderStatusDisplay[order.order_status] ?? order.order_status}
                     </span>
                 </div>
             </div>
 
 
-            <div className="mt-3 w-[75%] grid grid-cols-5 gap-10 pl-5">
+            <div className="mt-3 w-[75%] grid grid-cols-5 gap-3 pl-5">
 
                 <button 
-                    className="text-start cursor-pointer"
+                    className="text-start cursor-pointer relative"
                     onClick={() => handleTab(tabs[0])}
                 >
                     <span
@@ -184,10 +198,19 @@ Thank you!`;
                     >
                         Customer
                     </span>
+
+                    
+                    <span className="absolute top-0">
+                        <img 
+                            src={hasCustomerData ? "/images/icons/completed.svg" : "/images/icons/incomplete.svg"}
+                            alt="" 
+                            className="object-contain w-5 h-5"
+                        />
+                    </span>
                 </button>
 
                 <button 
-                    className="text-start cursor-pointer"
+                    className="text-start cursor-pointer relative"
                     onClick={() => handleTab(tabs[1])}
                 >
                     <span
@@ -197,13 +220,21 @@ Thank you!`;
                             : "text-gray-400"
                         }`}
                     >
-                        Order
+                        Order Items
+                    </span>
+
+                    <span className="absolute top-0">
+                        <img 
+                            src={orderReferences.length > 0 ? "/images/icons/completed.svg" : "/images/icons/incomplete.svg"}
+                            alt="" 
+                            className="object-contain w-5 h-5"
+                        />
                     </span>
                     
                 </button>
 
                 <button 
-                    className="text-start cursor-pointer"
+                    className="text-start cursor-pointer relative"
                     onClick={() => handleTab(tabs[2])}
                 >
                     <span
@@ -215,11 +246,19 @@ Thank you!`;
                     >
                         Shipping
                     </span>
+
+                    <span className="absolute top-0">
+                        <img 
+                            src={shipmentInfo ? "/images/icons/completed.svg" : "/images/icons/incomplete.svg"}
+                            alt="" 
+                            className="object-contain w-5 h-5"
+                        />
+                    </span>
                     
                 </button>
 
                 <button 
-                    className="text-start cursor-pointer"
+                    className="text-start cursor-pointer relative"
                     onClick={() => handleTab(tabs[3])}
                 >
                     <span
@@ -231,21 +270,29 @@ Thank you!`;
                     >
                         Payment
                     </span>
+
+                    <span className="absolute top-0">
+                        <img 
+                            src={order.remaining_balance <= 0 ? "/images/icons/completed.svg" : "/images/icons/incomplete.svg"}
+                            alt="" 
+                            className="object-contain w-5 h-5"
+                        />
+                    </span>
                     
                 </button>
 
                 <button 
-                    className="text-start cursor-pointer"
+                    className="w-full text-start cursor-pointer"
                     onClick={() => handleTab(tabs[4])}
                 >
                     <span
-                        className={`text-2xl font-bold ${
+                        className={`w-full text-2xl font-bold ${
                             activeTab === tabs[4] 
                             ? "border-b-3 border-green-600"
                             : "text-gray-400"
                         }`}
                     >
-                        Shipment
+                        Review & Ship
                     </span>
                 </button>
 
@@ -314,6 +361,8 @@ Thank you!`;
                             shippingInfo={shipmentInfo}
                             customer={selectedCustomer}
                             orderReferences={orderReferences}
+                            orderSummary={orderSummary}
+                            payments={payments}
                         /> 
                     )
                 }

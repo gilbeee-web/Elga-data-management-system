@@ -6,6 +6,8 @@ import { useState } from "react";
 export default function Index ({orders}){
 
 
+    console.log("Orders: ", orders);
+
     const tabs = ['all', 'draft', 'shipping', 'payment', 'processing', 'shipped'];
 
     const [activeTab, setActiveTab] = useState(tabs[0]);
@@ -157,9 +159,9 @@ export default function Index ({orders}){
                         </tr>
                     </thead>
                     <tbody>
-                        {orders.length > 0 ?
+                        {orders.data.length > 0 ?
                             (
-                                orders.map((order) => (
+                                orders.data.map((order) => (
                                     <tr 
                                         className="border-b border-gray-300 hover:bg-gray-100 cursor-pointer" 
                                         onClick={() => router.visit(route('order.edit', order.id))}
@@ -194,6 +196,36 @@ export default function Index ({orders}){
                         }
                     </tbody>
                 </table>
+
+                {orders.data.length > 0 && (
+                    <div className="flex justify-between items-center mt-4 text-sm text-gray-600">
+                        <span>
+                            Showing {orders.from ?? 0}–{orders.to ?? 0} of {orders.total} orders
+                        </span>
+                        <div className="flex gap-1">
+                            {orders.links.map((link, i) => (
+                                <button
+                                    key={i}
+                                    disabled={!link.url}
+                                    onClick={() =>
+                                        link.url &&
+                                        router.get(
+                                            link.url,
+                                            {},
+                                            { preserveState: true, preserveScroll: true, only: ['orders'] }
+                                        )
+                                    }
+                                    className={`px-3 py-1 rounded ${
+                                        link.active
+                                            ? 'bg-blue-500 text-white'
+                                            : 'bg-gray-100 hover:bg-gray-200'
+                                    } ${!link.url ? 'opacity-40 cursor-not-allowed' : 'cursor-pointer'}`}
+                                    dangerouslySetInnerHTML={{ __html: link.label }}
+                                />
+                            ))}
+                        </div>
+                    </div>
+                )}
 
             </div>
 

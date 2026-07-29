@@ -250,6 +250,18 @@ export default function Payment({order, orderSummary, payments, changeTab}){
                     }}
                     order={order}
                     payment={selectedPayment}
+                    onSubmitPayment={(isFullyPaid) => {
+
+                        console.log("Submitted payment successfully");
+
+                        if (isFullyPaid) {
+                            console.log("isFully paid");
+                            changeTab("shipment");
+                        }
+
+                        setSelectedPayment(null);
+                        setOpenPaymentForm(false);
+                    }}
                 />
             )
             

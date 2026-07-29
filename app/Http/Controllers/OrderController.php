@@ -26,19 +26,57 @@ class OrderController extends Controller
     }
 
 
-    public function index(Request $request){
+    public function index(Request $request)
+    {
+        $query = Order::with('references');
 
-        $query = Order::query();
-
-        if($request->filter_status){
+        if ($request->filled('filter_status') && $request->filter_status !== 'all') {
             $query->where('order_status', $request->filter_status);
         }
 
-        $orders = $query->with('references')->get();
+        if ($request->filled('search')) {
+            $search = $request->search;
+
+            $query->where(function ($q) use ($search) {
+                $q->where('receiver_name', 'like', '%' . $search . '%')
+                    ->orWhere('sender_name', 'like', '%' . $search . '%')
+                    ->orWhere('transaction_number', 'like', '%' . $search . '%')
+                    ->orWhereHas('references', function ($q2) use ($search) {
+                        $q2->where('order_number', 'like', '%' . $search . '%');
+                    });
+            });
+        }
+
+        $orders = $query->latest()->paginate(10)->withQueryString();
+
+        return Inertia::render('Orders/Index', [
+            'orders' => $orders,
+            'filters' => $request->only(['filter_status', 'search']),
+        ]);
+    }   
+
+    // public function filterOrder(Request $request){
+    //     $orders = Order::where('order_status', $request->filter_status)->get();
+
+    //     return response()->json($orders);
+    // }
+
+    // public function searchOrder(Request $request){
+
+    //     $orders = Order::join('order_references', 'orders.id', '=', 'order_references.order_id')
+    //         ->join('shipments', 'orders.id', '=', 'shipments.order_id')
+    //         ->select('orders.*', 'order_references.order_number', 'shipments.*')
+    //         ->where('orders.receiver_name', 'like', '%', $request->search, '%')
+    //         ->orWhere('orders.sender_name', 'like', '%', $request->search, '%')
+    //         ->orWhere('orders.transaction_number', '%', $request->search, '%')
+    //         ->orWhere('order_references.order_number', '%', $request->search, '%')
+    //         ->get();
+
+    //     return response()->json($orders);
+
+    // }
 
 
-        return Inertia::render('Orders/Index', ['orders' => $orders]);
-    }
 
     public function edit(Order $order){
         
@@ -101,7 +139,7 @@ class OrderController extends Controller
         $payments = Payment::where('order_id', $order->id)->get();
 
         return Inertia::render('Orders/Edit', [
-            'order' => $order, 
+            'order' => $order->fresh(), 
             'customer' => $customer,
             'orderReferences' => $orderReferences,
             'shipmentInfo' => $shipmentInfo,
@@ -222,7 +260,6 @@ class OrderController extends Controller
         // dd($request->all());
 
         $validated = $request->validate([
-            'payment_type' => 'string|required',
             'payment_method' => 'string|required',
             'payment_amount' => 'numeric|required',
             'mop_name' => 'string|required',
@@ -234,18 +271,18 @@ class OrderController extends Controller
         try{
             $this->orderService->savePayment($order, $validated);
         }catch(Exception $e){
-            return redirect()->back()->with(['error', 'Error in adding payment.']);
+            return redirect()->back()->with('error', 'Error in adding payment.');
         }
 
 
-        return redirect()->back()->with(['success', 'Payment added successfully!']);
+        return redirect()->back()->with('success', 'Payment added successfully!');
     }
 
 
     public function destroyPayment(Order $order, $payment_id){
 
         try{
-            $this->orderService->deletePayment($order,$payment_id);
+            $this->orderService->destroyPayment($order,$payment_id);
         }catch(Exception $e){
             dd("Something went wrong: ", $e);
             return redirect()->back()->with(['error', 'Error in destroying payment.']);
@@ -258,6 +295,8 @@ class OrderController extends Controller
 
     public function shippedOrder(Order $order, Request $request){
 
+        // dd($request->all());
+
         $validated = $request->validate([
             'sf_payment_reference' => 'string|nullable'
         ]);
@@ -268,6 +307,8 @@ class OrderController extends Controller
             dd("Something went wrong: ", $e);
             return redirect()->back()->with(['error', 'Error in mark as shipped the order.']);
         }
+
+        return redirect()->route('order.index');
         
     }
 

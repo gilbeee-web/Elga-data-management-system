@@ -306,10 +306,20 @@ class OrderService{
                 );
             }
 
+            $isFullPayment = bccomp((string) $data['payment_amount'], (string) $availableBalance, 2) === 0;
+            $hasPriorPayments = Payment::where('order_id', $order->id)
+                ->when($paymentId, fn ($q) => $q->where('id', '!=', $paymentId))
+                ->exists();
+
+            $paymentType = !$isFullPayment
+                ? 'down_payment'
+                : ($hasPriorPayments ? 'balance' : 'full');
+
+
             $payload = [
                 'order_id' => $order->id,
                 'payment_amount' => $data['payment_amount'],
-                'payment_type' => $data['payment_type'],
+                'payment_type' => $paymentType,
                 'payment_method' => $data['payment_method'],
                 'mop_name' => $data['mop_name'],
                 'reference_number' => $data['reference_number'],
@@ -347,7 +357,7 @@ class OrderService{
 
     }
 
-    public function deletePayment(Order $order, int $paymentId)
+    public function destroyPayment(Order $order, int $paymentId)
     {
         return DB::transaction(function () use ($order, $paymentId) {
  
@@ -385,6 +395,8 @@ class OrderService{
     public function saveShipment(Order $order, array $data){
 
         return DB::transaction(function() use ($data, $order){
+
+            // dd($data);
 
             $shipment = Shipment::where('order_id', $order->id)->firstOrFail();
 

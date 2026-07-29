@@ -1,12 +1,137 @@
+import { router, useForm } from "@inertiajs/react";
+import TextInput from "../../../Components/TextInput";
 import { formatCurrency } from "../../../Utils/formatCurrency";
+import Swal from "sweetalert2";
 
-export default function ShipmentForm({order, customer, orderReferences, shippingInfo, changeTab}){
+export default function ShipmentForm({order, customer, orderReferences, shippingInfo, orderSummary, payments, changeTab}){
 
-    console.log("Order references: ", orderReferences);
     
-    const saveShipment = () => {
+   
 
+    const {data, setData, processing, errors, post} = useForm({
+        sf_payment_reference: ""
+    });
+
+
+    const hasCustomerData = Object.values(customer).some(
+        value => value !== null && value !== ""
+    );
+
+
+    const showShipmentValidationError = (message) => {
+        Swal.fire({
+            icon: "warning",
+            title: "Cannot Ship Order",
+            text: message,
+        });
+    };
+
+    
+    const saveShipment = async (e) => {
+
+        e.preventDefault();
+        
+        const result = await Swal.fire({
+            title: "Shipped Order?",
+            text: "This can't be undone from here.",
+            icon: "warning",
+            showCancelButton: true,
+            confirmButtonColor: "#dc2626",
+            cancelButtonColor: "#6b7280",
+            confirmButtonText: "Confirm",
+            cancelButtonText: "Cancel",
+            reverseButtons: true
+        });
+
+        if(!result.isConfirmed){
+            return;
+        }
+
+        let isCompleted = false;
+        let message = "";
+
+        if (result.isConfirmed) {
+
+            if (!hasCustomerData) {
+                return showShipmentValidationError("Please check the customer data if completed.");
+            }
+
+            if (orderReferences.length <= 0) {
+                return showShipmentValidationError("Please input some order items.");
+            }
+
+            if (!shippingInfo) {
+                return showShipmentValidationError("Please fill up the shipping form first.");
+            }
+
+            if (order.remaining_balance > 0) {
+                return showShipmentValidationError("Please settle the remaining balance first.");
+            }
+
+            console.log("Save Shipment");
+
+            post(
+                route("order.shippedOrder", order.id),
+                {
+                    onSuccess: () => {
+                        Swal.fire({
+                            toast: true,
+                            position: "top-end",
+                            icon: "success",
+                            title: "Successfully shipped order!",
+                            showConfirmButton: false,
+                            timer: 2000,
+                            timerProgressBar: true,
+                        });
+                    },
+                    onError: () => {
+                        Swal.fire({
+                            icon: "error",
+                            title: "Ship failed",
+                            text: "Unable to ship the order.",
+                        });
+                    },
+                }
+            );
+        }
     }
+
+    //item total with discount 
+    const getItemTotal = (item) => {
+
+        const variant = item.variants.find((v) => v.id === item.selected_variant_id); // find the variant
+
+        const price = variant ? variant.price : 0;
+
+        //formula for subtotal
+        const finalPrice = price - item.discount; 
+
+        const subtotal = finalPrice * item.qty;
+
+        // if subtotal is less than 0 return 0 to avoid negative number or subtotal
+        return subtotal < 0 ? 0 : subtotal; 
+    };
+
+
+    const getOrderTotals = (order) => {
+        let totalQty = 0;
+        let totalDiscount = 0;
+        let totalSubtotal = 0;
+        let finalTotal = 0;
+
+        order.items.forEach((item) => {
+            totalQty += item.qty;
+            totalSubtotal += item.variant_price * item.qty;
+            totalDiscount += item.discount * item.qty;
+            finalTotal += getItemTotal(item);
+        });
+
+        return { totalQty, totalSubtotal, totalDiscount, finalTotal };
+    };
+
+
+
+   
 
     return <>
 
@@ -19,127 +144,213 @@ export default function ShipmentForm({order, customer, orderReferences, shipping
                 <h1 className="text-xl font-bold">Review Transaction</h1>
 
 
-                <div className="mt-5 w-[80%] border-2 border-gray-300 shadow-sm rounded-lg px-5 py-5">
+                <div className="mt-5 w-full border-2 border-gray-300 shadow-sm rounded-lg p-3">
 
-                    <h1 className="font-bold text-lg">Customer Information</h1>
+                    <div className="flex justify-between">
 
-                    <div className="mt-5 flex gap-x-20">
-
-                        <div className="flex flex-col gap-y-5">
-
-                            <div className="flex flex-col gap-y-1">
-                                <h1 className="text-sm font-semibold text-gray-500">Customer Name:</h1>
-                                <div className="border px-3 py-1 min-w-50 max-w-70 rounded-md text-center bg-[#F5F5F5]">
-                                    <span className="font-semibold">{customer.sender_name}</span>
-                                </div>
-                            </div>
-
-                            <div className="flex flex-col gap-y-1">
-                                <h1 className="text-sm font-semibold text-gray-500">Contact Number:</h1>
-                                <div className="border px-3 py-1 min-w-50 max-w-70 rounded-md text-center bg-[#F5F5F5]">
-                                    <span className="font-semibold">{customer.contact_number}</span>
-                                </div>
-                            </div>
-
-                            
-                            
+                        <div className="flex items-center gap-2">
+                            <img src="/images/icons/person-outline.svg" alt="Order icon" className="object-contain w-6 h-6" />
+                            <h1 className="font-semibold text-base">Customer</h1>
                         </div>
-
-
-                        <div className="flex flex-col gap-y-5">
-
-                            <div className="flex flex-col gap-y-1">
-                                <h1 className="text-sm font-semibold text-gray-500">Receiver's Name:</h1>
-                                <div className="border px-3 py-1 min-w-50 max-w-60 rounded-md text-center bg-[#F5F5F5]">
-                                    <span className="font-semibold">{customer.receiver_name}</span>
-                                </div>
-                            </div>
-
-                            <div className="flex flex-col gap-y-1">
-                                <h1 className="text-sm font-semibold text-gray-500">Address:</h1>
-                                <div className="border px-3 py-1 min-w-50 max-w-80 rounded-md text-center bg-[#F5F5F5]">
-                                    <span className="font-semibold text-sm">{customer.address}</span>
-                                </div>
-                            </div>
-                            
+                    
+                        <div>
+                            <button 
+                                className="cursor-pointer"
+                                onClick={() => changeTab("customer")}
+                            >
+                                <img src="/images/icons/edit-icon.svg" alt="Edit icon" className="object-contain w-4 h-4 hover:invert"/>
+                            </button>
                         </div>
-
                     </div>
-
-                </div>
-
-
-                <div className="mt-10 w-[80%] border-2 border-gray-300 shadow-sm rounded-lg px-5 py-5">
-
-                    <h1 className="font-bold text-lg">Order Items</h1>
-
-                    {
-                        orderReferences.map((order) => (
-                            <div 
-                                key={order.id}
-                                className="mt-5 rounded-lg border min-h-60 flex flex-col gap-y-3 w-[80%]"
-                            > 
-
-                                <div className="rounded-t-lg border-b-2 border-gray-300 px-3 py-2">
-                                    <h1 className="text-lg font-bold">#{order.order_number}</h1>
-                                </div>
-
-                                <div 
-                                    className="flex flex-col gap-y-2 px-3 pb-3 "
-                                >
-                                    {
-                                        order.items.map((item, itemIndex) => (
-                                            <div 
-                                                key={itemIndex} 
-                                                className="flex justify-between"
-                                            >
-                                                <div className="flex gap-x-3">
-                                                    <div 
-                                                        className="border border-gray-200 rounded-md flex-shrink-0 h-15 w-15 overflow-hidden"
-                                                    >
-                                                        <img 
-                                                            src={`/storage/${item.image}`}
-                                                            alt={item.name} 
-                                                            className="h-full w-full object-cover object-center"
-                                                        />
-                                                    </div>
-
-                                                    <div className="flex flex-col">
-                                                        <h1 className="uppercase font-bold">{item.name}</h1>
-                                                        <h1 className="uppercase text-sm text-gray-400">
-                                                            {item.variant_name}
-                                                        </h1>
-                                                    </div>
-                                                </div>
-
-
-                                                <div className="flex flex-col items-end">
-                                                    <h1 className="font-bold">{formatCurrency(item.variant_price)}</h1>
-                                                    <h1 className="text-sm text-sm text-gray-400">x{item.qty}</h1>
-                                                </div>
-                                                
-                                                
-
-                                            </div>
-                                    ))}
-                                
-
-
-                                </div>
-
-
-
-
-
-                            </div>
-                        ))
-                    }
                     
 
+
+                    <div className="mt-2">
+                        <ul className="flex gap-x-3 items-center">
+                            <li className="font-semibold text-gray-500">{customer.receiver_name}</li>
+                            <li className="font-semibold text-gray-500"><span className="text-black">|</span> {customer.contact_number}</li>
+                            <li className="font-semibold text-gray-500"><span className="text-black">|</span> {customer.address}</li>
+                        </ul>
+                    </div>
+                    
                 </div>
 
 
+                <div className="mt-5 w-full border border-gray-200 shadow-sm rounded-lg p-4">
+                    <div className="flex justify-between items-center mb-3">
+                        <div className="flex items-center gap-2">
+                            <img src="/images/icons/package.svg" alt="Order icon" className="object-contain w-6 h-6" />
+                            <h1 className="font-semibold text-base">Order</h1>
+                        </div>
 
+                        <button 
+                            className="cursor-pointer"
+                            onClick={() => changeTab("order")}
+                        >
+                            <img src="/images/icons/edit-icon.svg" alt="Edit icon" className="object-contain w-4 h-4 hover:opacity-70" />
+                        </button>
+                    </div>
+
+                    <table className="w-full text-sm">
+                        <thead>
+                            <tr className="border-b border-gray-200">
+                                <th className="text-xs font-semibold text-gray-400 text-left py-2">Order no.</th>
+                                <th className="text-xs font-semibold text-gray-400 text-right py-2">Items</th>
+                                <th className="text-xs font-semibold text-gray-400 text-right py-2">Discount</th>
+                                <th className="text-xs font-semibold text-gray-400 text-right py-2">Total</th>
+                            </tr>
+                        </thead>
+
+                        <tbody>
+                            {orderReferences.map((order, orderIndex) => {
+                                const { totalQty, totalDiscount, finalTotal } = getOrderTotals(order);
+
+                                return (
+                                    <tr key={orderIndex} className="border-b border-gray-100">
+                                        <td className="py-2 text-gray-900">{order.order_number}</td>
+                                        <td className="py-2 text-right text-gray-600">{totalQty}</td>
+                                        <td className="py-2 text-right text-gray-600">{formatCurrency(totalDiscount)}</td>
+                                        <td className="py-2 text-right text-gray-900">{formatCurrency(finalTotal)}</td>
+                                    </tr>
+                                );
+                            })}
+                        </tbody>
+                    </table>
+
+                    <div className="mt-3 pt-3 border-t border-gray-300 space-y-1">
+                        <div className="flex justify-between text-sm text-gray-600">
+                            <span>Subtotal</span>
+                            <span>{formatCurrency(orderSummary.subtotal)}</span>
+                        </div>
+
+                        <div className="flex justify-between text-sm text-gray-600">
+                            <span>Total discount</span>
+                            <span>-{formatCurrency(orderSummary.discount)}</span>
+                        </div>
+
+                        <div className="flex justify-between text-sm font-semibold pt-1">
+                            <span>Order total</span>
+                            <span>{formatCurrency(orderSummary.total_amount)}</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div className="mt-5 w-full border-2 border-gray-300 shadow-sm rounded-lg p-3">
+
+                    <div className="flex justify-between">
+
+                        <div className="flex items-center gap-2">
+                            <img src="/images/icons/truck-icon.svg" alt="Order icon" className="object-contain w-6 h-6" />
+                            <h1 className="font-semibold text-base">Shipping</h1>
+                        </div>
+                    
+                        <div>
+                            <button 
+                                className="cursor-pointer"
+                                onClick={() => changeTab("shipping")}
+                            >
+                                <img src="/images/icons/edit-icon.svg" alt="Edit icon" className="object-contain w-4 h-4 hover:invert"/>
+                            </button>
+                        </div>
+                    </div>
+                    
+
+
+                    <div className="mt-2">
+                        <ul className="flex gap-x-3 items-center">
+                            <li className="font-semibold text-gray-500 capitalize">{shippingInfo.container_size} {shippingInfo.container_type}</li>
+                            <li className="font-semibold text-gray-500"><span className="text-black">|</span> Fee {formatCurrency(shippingInfo.total_shipping_fee)}</li>
+                            <li className="font-semibold text-gray-500"><span className="text-black">|</span> {shippingInfo.tracking_number}</li>
+                        </ul>
+                    </div>
+
+                    <div className="mt-3">
+                        <TextInput 
+                            label={"SF Payment Reference:"}
+                            placeholder="eg. GoTyme reference"
+                            value={data.sf_payment_reference}
+                            onChange={(e) => setData("sf_payment_reference", e.target.value)}
+                            error={errors.sf_payment_reference}
+                        />
+                    </div>
+                    
+                </div>
+
+
+                <div className="mt-5 w-full border-2 border-gray-200 shadow-sm rounded-lg p-4">
+                    <div className="flex justify-between items-center mb-3">
+                        <div className="flex items-center gap-2">
+                            <img src="/images/icons/payment-icon.svg" alt="Payment icon" className="object-contain w-6 h-6" />
+                            <h1 className="font-semibold text-base">Payment</h1>
+                        </div>
+
+                        <button 
+                            className="cursor-pointer"
+                            onClick={() => changeTab("payment")}
+                        >
+                            <img src="/images/icons/edit-icon.svg" alt="Edit icon" className="object-contain w-4 h-4 hover:opacity-70" />
+                        </button>
+                    </div>
+
+                    <table className="w-full text-sm">
+                        <thead>
+                            <tr className="border-b border-gray-200">
+                                <th className="text-xs font-semibold text-gray-400 text-left py-2">Method</th>
+                                <th className="text-xs font-semibold text-gray-400 text-left py-2">Reference</th>
+                                <th className="text-xs font-semibold text-gray-400 text-right py-2">Amount</th>
+                            </tr>
+                        </thead>
+
+                        <tbody>
+                            {payments.length > 0 && payments.map((payment, paymentIndex) => (
+                                <tr key={paymentIndex} className="border-b border-gray-100">
+                                    <td className="py-2 text-gray-900 capitalize">{payment.payment_method} {payment.mop_name}</td>
+                                    <td className="py-2 text-gray-600">{payment.reference_number || '—'}</td>
+                                    <td className="py-2 text-right text-gray-900">{formatCurrency(payment.payment_amount)}</td>
+                                </tr>
+                            ))}
+                        </tbody>
+                    </table>
+
+                    <div className="mt-3 pt-3 border-t border-gray-300 space-y-1">
+                        <div className="flex justify-between text-sm text-gray-600">
+                            <span>Order total</span>
+                            <span>{formatCurrency(orderSummary.total_amount)}</span>
+                        </div>
+
+                        <div className="flex justify-between text-sm text-gray-600">
+                            <span>Total paid</span>
+                            <span>{formatCurrency(orderSummary.total_paid)}</span>
+                        </div>
+
+                        <div className="flex justify-between items-center text-sm font-semibold pt-1">
+                            <span>Balance</span>
+                            {orderSummary.remaining_balance === 0 && (
+                                <span className="text-xs font-normal text-green-700 bg-green-100 px-2.5 py-0.5 rounded">
+                                    Fully paid
+                                </span>
+                            )}
+                            {orderSummary.remaining_balance > 0 && (
+                                <span className="text-amber-700">{formatCurrency(orderSummary.remaining_balance)} due</span>
+                            )}
+                            {orderSummary.remaining_balance < 0 && (
+                                <span className="text-blue-700">{formatCurrency(Math.abs(orderSummary.remaining_balance))} overpaid</span>
+                            )}
+                        </div>
+                    </div>
+                </div>
+
+                <div className="mt-5 flex justify-end">
+                    <button 
+                        className="flex gap-x-2 bg-green-400 p-2 rounded-md items-center cursor-pointer text-white font-bold"
+                        type="submit"
+                    >
+                        <img src="/images/icons/truck-icon.svg" alt="Order icon" className="object-contain w-8 h-8"/>
+                        Shipped
+                    </button>
+                </div>
+
+                
             </div>
         </form>
 

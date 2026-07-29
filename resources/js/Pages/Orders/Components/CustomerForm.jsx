@@ -99,10 +99,12 @@ export default function CustomerForm({order, changeTab, customer, getSaveCustome
                     </button>
                 </div>
 
-                <div className="flex gap-x-3 items-center mt-12">
-                    <label htmlFor="sender_name" className="text-md font-semibold">
-                      <span className="text-red-500 text-sm">*</span> Customer name: 
-                    </label>
+                <div className="flex gap-x-3 items-start mt-12">
+                    <div className="h-10 flex items-center">
+                        <label htmlFor="receiver_name" className="text-md font-semibold">
+                            <span className="text-red-500 text-sm">*</span> Customer Name: 
+                        </label>
+                    </div>
 
                     <TextInput 
                         name={"sender_name"}
@@ -115,10 +117,14 @@ export default function CustomerForm({order, changeTab, customer, getSaveCustome
 
                 </div>
                 
-                <div className="mt-8 flex gap-x-3 items-center">
-                    <label htmlFor="receiver_name" className="text-md font-semibold">
-                      <span className="text-red-500 text-sm">*</span>  Receiver's name: 
-                    </label>
+                <div className="mt-5 flex gap-x-3 items-start">
+
+                    <div className="h-10 flex items-center">
+                        <label htmlFor="receiver_name" className="text-md font-semibold">
+                            <span className="text-red-500 text-sm">*</span>  Receiver's name: 
+                        </label>
+                    </div>
+                    
 
                     <TextInput 
                         name={"receiver_name"}
@@ -131,10 +137,12 @@ export default function CustomerForm({order, changeTab, customer, getSaveCustome
 
                 </div>  
 
-                <div className="mt-8 flex gap-x-3 items-center">
-                    <label htmlFor="contact_number" className="text-md font-semibold">
-                       <span className="text-red-500 text-sm">*</span> Contact number: 
-                    </label>
+                <div className="mt-5 flex gap-x-3 items-start">
+                    <div className="h-10 flex items-center">
+                        <label htmlFor="receiver_name" className="text-md font-semibold">
+                            <span className="text-red-500 text-sm">*</span> Contact Number: 
+                        </label>
+                    </div>
 
                     <TextInput 
                         name={"contact_number"}
@@ -147,25 +155,30 @@ export default function CustomerForm({order, changeTab, customer, getSaveCustome
 
                 </div>
 
-                <div className="mt-8 flex gap-x-3 items-center">
-                    <label htmlFor="address" className="text-md font-semibold">
-                       <span className="text-red-500 text-sm">*</span> Address: 
-                    </label>
+                <div className="mt-5 flex gap-x-3 items-start">
 
-                    <input 
-                        type="text" 
-                        placeholder="Enter address..."
-                        name="address" 
-                        value={data.address}
-                        className="border rounded-md text-sm w-170 p-2 bg-[#F5F5F5]"
-                        onChange={(e) => handleFieldChange("address", e.target.value)}
-                    />
+                    <div className="h-10 flex items-center">
+                        <label htmlFor="address" className="text-md font-semibold">
+                            <span className="text-red-500 text-sm">*</span> Address:
+                        </label>
+                    </div>
 
-                    {errors.address && (
-                        <p className="text-red-500 text-sm mt-1">
-                            {errors.address}
-                        </p>
-                    )}
+                    <div className="flex flex-col">
+                        <input
+                            type="text"
+                            placeholder="Enter address..."
+                            name="address"
+                            value={data.address}
+                            className="border rounded-md text-sm w-170 p-2 bg-[#F5F5F5]"
+                            onChange={(e) => handleFieldChange("address", e.target.value)}
+                        />
+
+                        {errors.address && (
+                            <p className="text-red-500 text-sm mt-1">
+                                {errors.address}
+                            </p>
+                        )}
+                    </div>
 
                 </div>
 

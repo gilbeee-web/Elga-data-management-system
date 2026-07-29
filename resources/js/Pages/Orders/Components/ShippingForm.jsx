@@ -15,6 +15,7 @@ export default function ShippingForm({shippingInfo, order, changeTab, customer})
     const [totalShippingFee, setTotalShippingFee] = useState(null);
     
     
+    
     const saveShippingInfo = (e) => {
         
         e.preventDefault();
@@ -64,6 +65,8 @@ export default function ShippingForm({shippingInfo, order, changeTab, customer})
         console.log("Shipping info Data:", data);
     }, [data]);
 
+    const [isEditingFee, setIsEditingFee] = useState(false);
+
 
 
 
@@ -88,6 +91,7 @@ export default function ShippingForm({shippingInfo, order, changeTab, customer})
                                 value={data.container_type}
                                 onChange={(e) => setData("container_type", e.target.value)}
                             >
+                                <option value="" hidden selected>Select type</option>
                                 <option value="pouch">Pouch</option>
                                 <option value="box">Box</option>
                             </select>
@@ -100,6 +104,7 @@ export default function ShippingForm({shippingInfo, order, changeTab, customer})
                                 value={data.container_size}
                                 onChange={(e) => setData("container_size", e.target.value)}
                             >
+                                <option value="" hidden selected>Select size</option>
                                 <option value="extra-small">Extra Small</option>
                                 <option value="small">Small</option>
                                 <option value="medium">Medium</option>
@@ -111,21 +116,39 @@ export default function ShippingForm({shippingInfo, order, changeTab, customer})
                         <div className="flex gap-x-3 items-center">
                             <label htmlFor="" className="text-lg font-semibold">Shipping fee:</label>
                             <input 
-                                type="number" 
+                                type="text" 
                                 className="min-w-40 border rounded-md px-2 py-1 bg-[#F5F5F5]"
-                                value={data.raw_shipping_fee}
+                                
+                                value={
+                                    isEditingFee
+                                        ? data.raw_shipping_fee
+                                        : data.raw_shipping_fee
+                                            ? formatCurrency(Number(data.raw_shipping_fee))
+                                            : ""
+                                }
                                 onChange={(e) => setData("raw_shipping_fee", Number(e.target.value))}
+                                onFocus={() => setIsEditingFee(true)}
+                                onBlur={() => setIsEditingFee(false)}
                             />
                         </div>
 
                         <div className="flex gap-x-3 items-center">
                             <label htmlFor="" className="text-lg font-semibold">Package fee:</label>
                             <input 
-                                type="number" 
+                                type="text" 
                                 className="min-w-40 border rounded-md px-2 py-1 bg-[#F5F5F5]"
-                                value={data.container_fee}
+                                value={
+                                    isEditingFee
+                                        ? data.container_fee
+                                        : data.container_fee
+                                            ? formatCurrency(Number(data.container_fee))
+                                            : ""
+                                }
+                                
                                 onChange={(e) => setData("container_fee", Number(e.target.value))}
-                            />
+                                onFocus={() => setIsEditingFee(true)}
+                                onBlur={() => setIsEditingFee(false)}
+                            />    
                         </div>
 
                         <div className="flex items-center">

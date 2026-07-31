@@ -327,40 +327,61 @@ export default function OrderForm({order, changeTab, orderReferences: initialOrd
                                 return(
                                     <div className="mb-5" key={orderIndex}>
 
-                                        <div className="bg-white shadow-md border rounded-lg min-h-60 flex flex-col gap-y-3">
+                                        <div className="bg-white shadow-sm border border-gray-300 rounded-lg min-h-60 flex flex-col gap-y-3">
 
-                                            <div className="flex justify-between items-center bg-[#D9D9D9] rounded-t-lg border-b px-3">
+                                            <div className="flex justify-between items-center">
 
                                                 <div className="flex gap-x-3 items-center p-2">
                                                     <label htmlFor="" className="text-sm font-semibold">Order Number: </label>
                                                     <input 
                                                         type="text" 
+                                                        placeholder="Enter order number"
                                                         value={order.order_number}
                                                         onChange={(e) => handleOrderNumberChange(orderIndex, e.target.value)}
-                                                        className="border rounded-md bg-white py-1 px-2"
+                                                        className="border border-gray-400 rounded-md bg-white py-1 px-2"
                                                     />
                                                 </div>
 
-                                                <div className="flex gap-x-5 items-center">
-                                                    <h1 className="font-semibold">Qty: {totalQty}</h1>
-                                                    <h1 className="font-semibold">Discount: {formatCurrency(totalDiscount)}</h1>
-                                                    <h1 className="font-semibold">Subtotal: {formatCurrency(totalSubtotal)}</h1>
-                                                    <h1 className="font-semibold">Total: {formatCurrency(finalTotal)}</h1>
-
+                                                <div>
                                                     {
                                                         data.orderReferences.length > 1 && (
                                                             <button 
                                                                 onClick={() => handleRemoveOrder(orderIndex)}
                                                                 type="button"
-                                                                className="cursor-pointer"
+                                                                className="cursor-pointer p-3"
                                                             >
-                                                            <img src={"/images/icons/delete-icon.svg"} alt="Delete Icon" className="object-contain w-8 h-8"/>
+                                                            <img src={"/images/icons/delete-icon.svg"} alt="Delete Icon" className="object-contain w-8 h-8 border rounded-md hover:bg-gray-100"/>
                                                             </button>
                                                         )
                                                     }
-
                                                 </div>
 
+
+                                            </div>
+
+                                            <div className="w-full grid grid-cols-4 bg-[#F7F7F4] p-5 items-center justify-center">
+                                                
+                                                <div className="w-full flex flex-col justify-center">
+                                                    <label className="text-sm text-gray-500 font-semibold">Qty:</label>
+                                                    <h1 className="font-bold text-lg">{totalQty}</h1>
+                                                </div>
+
+                                                <div className="w-full flex flex-col justify-center">
+                                                    <label className="text-sm text-gray-500 font-semibold">Discount:</label>
+                                                    <h1 className="font-bold text-lg">{formatCurrency(totalDiscount)}</h1>
+                                                </div>
+
+                                                <div className="w-full flex flex-col justify-center">
+                                                    <label className="text-sm text-gray-500 font-semibold">Subtotal:</label>
+                                                    <h1 className="font-bold text-lg">{formatCurrency(totalSubtotal)}</h1>
+                                                </div>
+
+
+
+                                                <div className="w-full flex flex-col justify-center">
+                                                    <label className="text-sm text-gray-500 font-semibold">Total:</label>
+                                                    <h1 className="font-bold text-xl text-red-500">{formatCurrency(finalTotal)}</h1>
+                                                </div>
                                             </div>
                                             
                                             {
@@ -382,136 +403,110 @@ export default function OrderForm({order, changeTab, orderReferences: initialOrd
                                                     </div>
                                                 ): 
                                                 (
-                                                    <div 
-                                                        className="flex flex-col gap-y-2 px-3 pb-3 "
-                                                    >
-                                                        {
-                                                            order.items.map((item, itemIndex) => (
-                                                                <div key={itemIndex} className="grid grid-cols-[25%_75%] gap-x-3 items-center border-b border-gray-400 pb-3 px-3">
-                                                                    
-                                                                    <div className="flex gap-x-3">
+                                                    <div className="flex flex-col px-4 pb-4">
+                                                        {order.items.map((item, itemIndex) => (
+                                                            <div
+                                                                key={itemIndex}
+                                                                className="grid grid-cols-[minmax(0,1fr)_auto] gap-x-3 items-center border-b border-gray-100 py-3 last:border-b-0"
+                                                            >
+                                                                {/* Product */}
+                                                                <div className="flex gap-x-3 items-center min-w-0">
+                                                                    <div className="border border-gray-200 rounded-md flex-shrink-0 h-12 w-12 overflow-hidden bg-[#F7F7F4]">
+                                                                        <img
+                                                                            src={`/storage/${item.image}`}
+                                                                            alt={item.name}
+                                                                            className="h-full w-full object-cover object-center"
+                                                                        />
+                                                                    </div>
 
-                                                                        <div 
-                                                                            className="border border-gray-200 rounded-md flex-shrink-0 h-12 w-12 overflow-hidden"
+                                                                    <div className="flex flex-col min-w-0">
+                                                                        <h1 className="text-sm font-medium uppercase truncate">
+                                                                            {item.name}
+                                                                        </h1>
+
+                                                                        <select
+                                                                            value={item.selected_variant_id ?? ""}
+                                                                            onChange={(e) =>
+                                                                                handleItemChange(orderIndex, itemIndex, "selected_variant_id", Number(e.target.value))
+                                                                            }
+                                                                            className="text-xs text-gray-500 cursor-pointer bg-transparent focus:outline-none"
                                                                         >
-                                                                            <img 
-                                                                                src={`/storage/${item.image}`}
-                                                                                alt={item.name} 
-                                                                                className="h-full w-full object-cover object-center"
-                                                                            />
-                                                                        </div>
-
-                                                                        <div className="flex flex-col">
-                                                                            <h1 className="text-sm font-bold max-w-30 capitalize">
-                                                                                {item.name}
-                                                                            </h1>
-
-                                                                            <select 
-                                                                                value={item.selected_variant_id ?? ""}
-                                                                                onChange={(e) =>
-                                                                                    handleItemChange(orderIndex, itemIndex, "selected_variant_id", Number(e.target.value))
-                                                                                } 
-                                                                                className="text-sm font-semibold text-gray-400 cursor-pointer"
-                                                                            >
-                                                                                {
-                                                                                    item.variants.map((variant) => (
-                                                                                        <option value={variant.id} key={variant.id}>
-                                                                                            {variant.variant_name}
-                                                                                        </option>
-                                                                                    ))
-                                                                                }
-                                                                            </select>
-                                                                        </div>
-
+                                                                            {item.variants.map((variant) => (
+                                                                                <option value={variant.id} key={variant.id}>
+                                                                                    {variant.variant_name}
+                                                                                </option>
+                                                                            ))}
+                                                                        </select>
                                                                     </div>
-
-
-                                                                    <div className="flex gap-x-7 items-center">
-
-                                                                        <div className="flex flex-col">
-                                                                            <label htmlFor="" className="font-bold text-sm">Price:</label>
-                                                                            <div className="py-1 min-w-23 max-w-30 border border-gray-400 rounded-xl bg-[#F5F5F5] text-center">
-                                                                                <span>{formatCurrency(item.variant_price)}</span>
-                                                                            </div>
-                                                                        </div>
-                                                                        
-                                                                        <div className="flex flex-col">
-                                                                            <label htmlFor="" className="font-bold text-sm">Qty:</label>
-                                                                            <input 
-                                                                                type="number" 
-                                                                                min={1}
-                                                                                value={item.qty}
-                                                                                onChange={(e) =>
-                                                                                    handleItemChange(orderIndex, itemIndex, "qty", Number(e.target.value))
-                                                                                }
-                                                                                className="py-1 border border-gray-400 max-w-20 rounded-xl text-center bg-white"
-                                                                            />
-                                                                        </div>
-
-                                                                        <div className="flex flex-col">
-                                                                            <label htmlFor="" className="font-bold text-sm">Amount:</label>
-                                                                            <div className="py-1 min-w-23 max-w-30 border border-gray-400 rounded-xl bg-[#F5F5F5] text-center">
-                                                                                <span>{formatCurrency(getItemAmount(item))}</span>
-                                                                            </div>
-                                                                        </div>
-
-                                                                        <div className="flex flex-col">
-                                                                            <label htmlFor="" className="font-bold text-sm">Discount:</label>
-                                                                            <input 
-                                                                                type="text" 
-                                                                                value={Number(item.discount ?? 0)}
-                                                                                onChange={(e) =>
-                                                                                    handleItemChange(orderIndex, itemIndex, "discount", Number(e.target.value))
-                                                                                }
-                                                                                className="py-1 border border-gray-400 max-w-20 rounded-xl text-center bg-white"
-                                                                            />
-                                                                        </div>
-
-                                                                        <div className="flex flex-col">
-                                                                            <label htmlFor="" className="font-bold text-sm">Total:</label>
-                                                                            <div className="py-1 min-w-23 max-w-30 border border-gray-400 rounded-xl bg-[#F5F5F5] text-center">
-                                                                                <span>{formatCurrency(getItemTotal(item))}</span>
-                                                                            </div>
-                                                                        </div>
-
-                                                                        <div className="mt-5">
-                                                                            <button onClick={() => handleRemoveItem(orderIndex, itemIndex)}>
-                                                                                <img 
-                                                                                    src={'/images/icons/remove-btn.svg'} 
-                                                                                    alt="Remove Btn" 
-                                                                                    className="cursor-pointer object-contain h-5 w-5"
-                                                                                />
-                                                                            </button>
-                                                                        </div>
-
-                                                                    </div>
-
-
-                                                                    
-                                                            
-
-                                                            
                                                                 </div>
-                                                            ))
-                                                        }
 
+                                                                {/* Price / Qty / Discount / Total / Remove */}
+                                                                <div className="flex gap-x-4 items-end">
 
-                                                        <div className="flex items-center gap-4 mt-4">
-                                                            <div className="flex-1 border-t border-gray-300"></div>
+                                                                    {/* Read-only: muted fill, no border */}
+                                                                    <div className="flex flex-col items-center">
+                                                                        <label className="text-xs text-gray-400 mb-1">Price</label>
+                                                                        <div className="py-1.5 px-2 min-w-20 rounded-md bg-[#F5F5F5] text-center text-sm text-gray-600">
+                                                                            {formatCurrency(item.variant_price)}
+                                                                        </div>
+                                                                    </div>
 
-                                                            <button 
+                                                                    {/* Editable: white bg, visible border */}
+                                                                    <div className="flex flex-col items-center">
+                                                                        <label className="text-xs text-gray-400 mb-1">Qty</label>
+                                                                        <input
+                                                                            type="number"
+                                                                            min={1}
+                                                                            value={item.qty}
+                                                                            onChange={(e) =>
+                                                                                handleItemChange(orderIndex, itemIndex, "qty", Number(e.target.value))
+                                                                            }
+                                                                            className="py-1.5 border border-gray-300 w-16 rounded-md text-center text-sm bg-white focus:outline-none focus:ring-2 focus:ring-blue-200 focus:border-blue-400"
+                                                                        />
+                                                                    </div>
+
+                                                                    {/* Editable */}
+                                                                    <div className="flex flex-col items-center">
+                                                                        <label className="text-xs text-gray-400 mb-1">Discount</label>
+                                                                        <input
+                                                                            type="text"
+                                                                            value={Number(item.discount ?? 0)}
+                                                                            onChange={(e) =>
+                                                                                handleItemChange(orderIndex, itemIndex, "discount", Number(e.target.value))
+                                                                            }
+                                                                            className="py-1.5 border border-gray-300 w-16 rounded-md text-center text-sm bg-white focus:outline-none focus:ring-2 focus:ring-blue-200 focus:border-blue-400"
+                                                                        />
+                                                                    </div>
+
+                                                                    {/* Read-only, bold since it's a result */}
+                                                                    <div className="flex flex-col items-center">
+                                                                        <label className="text-xs text-gray-400 mb-1">Total</label>
+                                                                        <div className="py-1.5 px-2 min-w-20 rounded-md bg-[#F5F5F5] text-center text-sm font-medium text-gray-900">
+                                                                            {formatCurrency(getItemTotal(item))}
+                                                                        </div>
+                                                                    </div>
+
+                                                                    <button
+                                                                        onClick={() => handleRemoveItem(orderIndex, itemIndex)}
+                                                                        type="button"
+                                                                        aria-label="Remove item"
+                                                                        className="w-7 h-7 cursor-pointer flex items-center justify-center rounded-md border border-gray-300 text-red-600 hover:bg-red-50 flex-shrink-0"
+                                                                    >
+                                                                        X
+                                                                    </button>
+                                                                </div>
+                                                            </div>
+                                                        ))}
+
+                                                        <div className="flex justify-center mt-4">
+                                                            <button
                                                                 type="button"
-                                                                className="bg-green-500 hover:bg-green-600 text-white px-3 py-1 rounded-md"
+                                                                className="text-sm text-gray-500 border border-gray-300 hover:bg-gray-50 px-4 py-1.5 rounded-md flex items-center gap-1 cursor-pointer"
                                                                 onClick={() => handleOpenProductList(orderIndex)}
                                                             >
-                                                                + Add Item
+                                                                + Add item
                                                             </button>
-
-                                                            <div className="flex-1 border-t border-gray-300"></div>
                                                         </div>
-
-
-                                                        
                                                     </div>
                                                 )
                                             }
@@ -535,7 +530,7 @@ export default function OrderForm({order, changeTab, orderReferences: initialOrd
 
                                     <button 
                                         type="button"
-                                        className="border px-4 py-2 rounded-md cursor-pointer"
+                                        className="border px-4 py-2 rounded-md cursor-pointer hover:bg-gray-100"
                                         onClick={handleAddOrder}
                                     >
                                         + Add Order Number
@@ -552,7 +547,46 @@ export default function OrderForm({order, changeTab, orderReferences: initialOrd
                 
             </div>
 
-            <div className="bg-white shadow-lg border border-gray-400 rounded-md min-h-20 w-full">
+            <div className="sticky bottom-0 bg-white border-t border-gray-200 rounded-t-xl shadow-[0_-4px_12px_rgba(0,0,0,0.06)] px-6 py-4 flex items-center justify-between">
+ 
+                <div className="flex items-center gap-7">
+
+                   
+            
+                    <div className="flex flex-col">
+                        <span className="text-xs text-gray-400">Qty</span>
+                        <span className="text-sm font-medium text-gray-900">{grandTotals.grand_totalQty}</span>
+                    </div>
+            
+                    <div className="flex flex-col">
+                        <span className="text-xs text-gray-400">Subtotal</span>
+                        <span className="text-sm font-medium text-gray-900">{formatCurrency(grandTotals.grand_totalSubtotal)}</span>
+                    </div>
+            
+                    <div className="flex flex-col">
+                        <span className="text-xs text-gray-400">Discount</span>
+                        <span className="text-sm font-medium text-gray-900">{formatCurrency(grandTotals.grand_totalDiscount)}</span>
+                    </div>
+            
+                    <div className="w-px h-9 bg-gray-200" />
+            
+                    <div className="flex flex-col">
+                        <span className="text-xs text-red-500">Grand Total</span>
+                        <span className="text-2xl font-semibold text-red-700">{formatCurrency(grandTotals.grand_finalTotal)}</span>
+                    </div>
+            
+                </div>
+            
+                <button
+                    type="submit"
+                    className="h-[42px] px-7 bg-green-500 hover:bg-green-600 text-white text-sm font-medium rounded-md"
+                >
+                    Save
+                </button>
+            
+            </div>
+
+            {/* <div className="bg-white shadow-lg border border-gray-400 rounded-md min-h-20 w-full">
                     
                 <div className="h-full flex justify-between items-center px-5">
 
@@ -582,7 +616,7 @@ export default function OrderForm({order, changeTab, orderReferences: initialOrd
 
                 
 
-            </div>
+            </div> */}
         </form>
 
         {/* modal to search and add product to order number */}

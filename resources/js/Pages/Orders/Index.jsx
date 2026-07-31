@@ -2,6 +2,8 @@ import Layout from "@/Layouts/AppLayout"
 import { route } from "ziggy-js"
 import { Link, router } from "@inertiajs/react"
 import { useState } from "react";
+import { formatDateTime } from "../../Utils/formatDateTime";
+import { formatCurrency } from "../../Utils/formatCurrency";
 
 export default function Index ({orders}){
 
@@ -12,22 +14,49 @@ export default function Index ({orders}){
 
     const [activeTab, setActiveTab] = useState(tabs[0]);
 
+    const [currentSearch, setCurrentSearch] = useState(null);
+
     const handleTab = (selectedTab) => {
 
-        setActiveTab(selectedTab);
+        let filterStatus = selectedTab;
 
+        if(selectedTab === 'payment'){
+            filterStatus = "awaiting_payment";
+        }else if(selectedTab === "shipping"){
+            filterStatus = "awaiting_shipping_fee";
+        }
+
+        router.get(route('order.index'), {filter_status: filterStatus, search: currentSearch}, {
+            preserveState: true,
+            preserveScroll: true,
+            only:['orders'],
+        });
+
+        setActiveTab(selectedTab);
     }
 
-    const statusClasses = {
-        draft: "bg-gray-100",
-        shipping_fee: "bg-blue-100",
-        payment: "bg-red-100",
-        processing: "bg-yellow-100",
-        shipped: "bg-green-100"
+    const handleSearch = (value) => {
+        router.get(route('order.index'), { filter_status: currentFilter, search: value }, {
+            preserveState: true,
+            preserveScroll: true,
+            only: ['orders'],
+        });
     };
 
+    const statusClasses = {
+        draft: "bg-gray-500",
+        awaiting_shipping_fee: "bg-blue-500",
+        awaiting_payment: "bg-red-500",
+        payment_confirmed: "bg-blue-500",
+        processing: "bg-yellow-500",
+        shipped: "bg-green-500",
+    };
 
-    console.log("Order List: ", orders);
+    const orderStatusDisplay = {
+        awaiting_payment: "Unpaid",
+        payment_confirmed: "Partial Payment",
+        awaiting_shipping_fee: "Awaiting Shipping Fee"
+    };
 
 
 
@@ -152,10 +181,15 @@ export default function Index ({orders}){
                 <table className="w-full text-sm text-left border-collapse bg-white shadow-md rounded-lg">
                     <thead className="text-gray-600 uppercase text-xs border-b border-gray-300">
                         <tr className="bg-gray-300">
-                            <th className="p-3">TRANSACTION NUMBER</th>
+                            <th className="p-3">TRANSACTION NUMBER / ORDER NUM</th>
                             <th className="p-3">CUSTOMER NAME</th>
-                            <th className="p-3">ORDER NUMBER</th>
+                            <th className="p-3">
+                                {activeTab === "payment" ? "REMAINING BALANCE" : "TOTAL AMOUNT"}
+                            </th>
                             <th className="p-3">STATUS</th>
+                            <th className="p-3">
+                                {activeTab === "shipped" ? "DATE SHIPPED" : "DATE CREATED"}
+                            </th>
                         </tr>
                     </thead>
                     <tbody>
@@ -167,24 +201,37 @@ export default function Index ({orders}){
                                         onClick={() => router.visit(route('order.edit', order.id))}
                                         key={order.id}
                                     >
-                                        <td className="p-3">{order.transaction_number}</td>
-                                        <td className="p-3">{order.sender_name}</td>
-                                        <td className="p-3">{order.reference ?? 'N/A'}</td>
                                         <td className="p-3">
+                                            <h1 className="font-semibold">{order.transaction_number}</h1>
+                                            
+                                            {
+                                                order.references.map((ref, index) => (
+                                                  <span className="text-sm">
+                                                    {ref.order_number} 
+                                                    {index < order.references.length - 1 && " - "}
+                                                  </span>  
+                                            ))}
+                                            
+                                        </td>
+                                        <td className="p-3">{order.sender_name}</td>
+                                        <td className="p-3">
+                                            {
+                                                activeTab === "payment" 
+                                                ? formatCurrency(order.remaining_balance ?? "0.00")  
+                                                : formatCurrency(order.total_amount ?? "0.00")
+                                            }
+                                        </td>
+
+                                        <td className="p-3">
+                                            
                                             <span className={`py-1 px-3 rounded-full text-white font-semibold capitalize ${
-                                                statusClasses[order.order_satus] || "bg-gray-500"
+                                                statusClasses[order.order_status] || "bg-gray-500"
                                             }`}>
-                                                {order.order_status}
+                                                {orderStatusDisplay[order.order_status] ?? order.order_status}
                                             </span>
                                         </td>
-                                        {/* <td className="p-3">
-                                            <button 
-                                                className="text-green-400 hover:underline cursor-pointer"
-                                                onClick={() => router.visit(route('order.edit', order.id))}
-                                            >
-                                                View
-                                            </button>
-                                        </td> */}
+
+                                        <td className="p-3">{formatDateTime(order.created_at)}</td>
                                     </tr>
                                 ))
                             ) :

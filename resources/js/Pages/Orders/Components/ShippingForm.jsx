@@ -210,7 +210,7 @@ export default function ShippingForm({shippingInfo, order, changeTab, customer})
 
             </div>
 
-            <div className="rounded-md bg-white min-h-20 p-5">
+            <div className="min-h-20 sticky bottom-0 px-6 py-4border-t border-gray-200 rounded-t-xl shadow-[0_-4px_12px_rgba(0,0,0,0.06)] bg-white">
                 
                 <div className="h-full flex justify-between items-center">
                     <div className="flex gap-x-3 items-center">

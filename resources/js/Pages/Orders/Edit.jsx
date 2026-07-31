@@ -153,9 +153,18 @@ Thank you!`;
     );
 
     const orderStatusDisplay = {
-        awaiting_payment: "Awaiting Payment",
+        awaiting_payment: "Unpaid",
         payment_confirmed: "Partial Payment",
         awaiting_shipping_fee: "Awaiting Shipping Fee"
+    };
+
+    const statusClasses = {
+        draft: "bg-gray-500",
+        awaiting_shipping_fee: "bg-blue-500",
+        awaiting_payment: "bg-red-500",
+        payment_confirmed: "bg-blue-500",
+        processing: "bg-yellow-500",
+        shipped: "bg-green-500",
     };
     
 
@@ -176,7 +185,12 @@ Thank you!`;
 
                 <div className="flex gap-x-3 items-center">
                     <h1 className="text-lg font-bold">Status:</h1>
-                    <span className="bg-gray-400 px-5 py-2 rounded-md text-white capitalize font-semibold">
+
+                    <span 
+                        className={`px-5 py-2 rounded-md text-white capitalize font-semibold
+                            ${statusClasses[order.order_status] || "bg-gray-500"}`
+                        }
+                    >
                        {orderStatusDisplay[order.order_status] ?? order.order_status}
                     </span>
                 </div>

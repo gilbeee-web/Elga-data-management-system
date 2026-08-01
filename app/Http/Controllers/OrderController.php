@@ -276,11 +276,19 @@ class OrderController extends Controller
             'remarks' => 'nullable|string'
         ]);
 
-        try{
+        try {
             $this->orderService->savePayment($order, $validated);
-        }catch(Exception $e){
+        } catch (ValidationException $e) {
+            throw $e; // let Laravel/Inertia handle it as a validation error
+        } catch (Exception $e) {
             return redirect()->back()->with('error', 'Error in adding payment.');
         }
+
+        // try{
+        //     $this->orderService->savePayment($order, $validated);
+        // }catch(Exception $e){
+        //     return redirect()->back()->with('error', 'Error in adding payment.');
+        // }
 
 
         return redirect()->back()->with('success', 'Payment added successfully!');

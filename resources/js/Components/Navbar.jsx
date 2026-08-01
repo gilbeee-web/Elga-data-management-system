@@ -31,7 +31,7 @@ export default function Navbar({title}){
                         <p className="text-gray-500 text-xs font-semibold">Admin</p>
                     </div>
 
-                    <img  className="object-contain w-10 rounded-full border-2" />
+                    <img src="/images/logo/default-profile.jpg"  className="object-contain w-10 rounded-full border" />
                 </button>
 
                 {

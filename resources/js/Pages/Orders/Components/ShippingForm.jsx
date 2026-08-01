@@ -1,6 +1,7 @@
 import { useForm } from "@inertiajs/react";
 import { formatCurrency } from "../../../Utils/formatCurrency";
 import { useEffect, useState } from "react";
+import Swal from "sweetalert2";
 
 export default function ShippingForm({shippingInfo, order, changeTab, customer}){
 
@@ -23,12 +24,27 @@ export default function ShippingForm({shippingInfo, order, changeTab, customer})
         post(route("order.saveShippingInfo", order), {
 
             onSuccess: () => {
+                Swal.fire({
+                    toast: true,
+                    position: "top-end",
+                    icon: "success",
+                    title: "Shipping info saved!",
+                    showConfirmButton: false,
+                    timer: 2000,
+                    timerProgressBar: true,
+                });
+
                 changeTab("payment");
             },
-
             onError: (errors) => {
+                Swal.fire({
+                    icon: "error",
+                    title: "Save shipping info failed",
+                    text: "Unable to save the shipping info.",
+                });
+
                 console.log("Errors: ", errors)
-            }
+            },
         });
 
     }
@@ -66,6 +82,28 @@ export default function ShippingForm({shippingInfo, order, changeTab, customer})
     }, [data]);
 
     const [isEditingFee, setIsEditingFee] = useState(false);
+
+    
+
+
+    const copyCustomerInfo = async () => {
+
+        const message = `NAME: ${customer.receiver_name}
+CONTACT NUMBER: ${customer.contact_number}
+COMPLETE ADDRESS: ${customer.address}`;
+
+        await navigator.clipboard.writeText(message);
+
+        Swal.fire({
+            toast: true,
+            position: "top-end",
+            icon: "success",
+            title: "Copied to clipboard!",
+            showConfirmButton: false,
+            timer: 2000,
+            timerProgressBar: true,
+        });
+    };
 
 
 
@@ -169,7 +207,9 @@ export default function ShippingForm({shippingInfo, order, changeTab, customer})
                         
                         <div className="flex gap-x-3 items-center">
                             <button 
+                                type="button"
                                 className="border px-2 py-1 rounded-md hover:bg-gray-200 cursor-pointer"
+                                onClick={copyCustomerInfo}
                             >
                                 <img src="/images/icons/copy-icon.svg" alt="Copy icon" className="object-contain w-4 h-4"/>
                             </button>
@@ -224,7 +264,7 @@ export default function ShippingForm({shippingInfo, order, changeTab, customer})
                         className="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-md cursor-pointer"
                         type="submit"
                     >
-                        Submit
+                        Save
                     </button>
                 </div>
 

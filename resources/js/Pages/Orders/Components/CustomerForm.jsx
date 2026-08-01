@@ -1,6 +1,7 @@
 import { useForm } from "@inertiajs/react";
 import TextInput from "../../../Components/TextInput";
 import { useEffect } from "react";
+import Swal from "sweetalert2";
 
 export default function CustomerForm({order, changeTab, customer, getSaveCustomers}){
 
@@ -29,14 +30,29 @@ export default function CustomerForm({order, changeTab, customer, getSaveCustome
         console.log("Submitting...");
         
         post(route("order.customer.save", order.id), {
-            
+
             onSuccess: () => {
+                Swal.fire({
+                    toast: true,
+                    position: "top-end",
+                    icon: "success",
+                    title: "Customer saved!",
+                    showConfirmButton: false,
+                    timer: 2000,
+                    timerProgressBar: true,
+                });
+
                 changeTab("order");
             },
-
             onError: (errors) => {
+                Swal.fire({
+                    icon: "error",
+                    title: "Save customer failed",
+                    text: "Unable to save the customer.",
+                });
+
                 console.log("Errors: ", errors)
-            }
+            },
         });
     
 
@@ -184,7 +200,7 @@ export default function CustomerForm({order, changeTab, customer, getSaveCustome
 
                 <div className="absolute bottom-5 right-3 flex justify-end">
                     <button type="submit" className="px-8 py-2 bg-green-500 text-white rounded-md hover:bg-green-400 cursor-pointer">
-                        Next
+                       Save
                     </button>
                 </div>
             </div>

@@ -282,10 +282,13 @@ class OrderService{
             $availableBalance = $order->remaining_balance + $existingAmount;
 
 
-            // dd($order->remaining_balance);
+            // dd($availableBalance);
 
             //avoid overpayment
             if ($data['payment_amount'] > $availableBalance) {
+
+                // dd("Pasok");
+
                 throw ValidationException::withMessages([
                     'payment_amount' => 'Payment exceeds the remaining balance.'
                 ]);

@@ -4,6 +4,7 @@ import ProductListModal from "./ProductListModal";
 import { route } from "ziggy-js";
 import { router, useForm } from "@inertiajs/react";
 import { formatCurrency } from "../../../Utils/formatCurrency";
+import Swal from "sweetalert2";
 
 export default function OrderForm({order, changeTab, orderReferences: initialOrderReferences}){
 
@@ -29,7 +30,12 @@ export default function OrderForm({order, changeTab, orderReferences: initialOrd
         const order = data.orderReferences[index];
 
         if (!order.order_number.trim()) {
-            alert("Please enter an order number first.");
+            Swal.fire({
+                icon: "error",
+                title: "Unable to add order item",
+                text: "Please enter the order number first.",
+            });
+            // alert("Please enter an order number first.");
             return;
         }
 
@@ -274,14 +280,29 @@ export default function OrderForm({order, changeTab, orderReferences: initialOrd
         console.log("Submitting...");
         
         post(route("order.saveOrderItem", order.id), {
-            
+
             onSuccess: () => {
+                Swal.fire({
+                    toast: true,
+                    position: "top-end",
+                    icon: "success",
+                    title: "Order items saved!",
+                    showConfirmButton: false,
+                    timer: 2000,
+                    timerProgressBar: true,
+                });
+
                 changeTab("shipping");
             },
-
             onError: (errors) => {
+                Swal.fire({
+                    icon: "error",
+                    title: "Save order items failed",
+                    text: Object.values(errors)[0],
+                });
+
                 console.log("Errors: ", errors)
-            }
+            },
         });
     }
 
@@ -358,31 +379,35 @@ export default function OrderForm({order, changeTab, orderReferences: initialOrd
 
 
                                             </div>
-
-                                            <div className="w-full grid grid-cols-4 bg-[#F7F7F4] p-5 items-center justify-center">
+                                            {
+                                                totalQty > 0 && (
+                                                    <div className="w-full grid grid-cols-4 bg-[#F7F7F4] p-5 items-center justify-center">
                                                 
-                                                <div className="w-full flex flex-col justify-center">
-                                                    <label className="text-sm text-gray-500 font-semibold">Qty:</label>
-                                                    <h1 className="font-bold text-lg">{totalQty}</h1>
-                                                </div>
+                                                        <div className="w-full flex flex-col justify-center">
+                                                            <label className="text-sm text-gray-500 font-semibold">Qty:</label>
+                                                            <h1 className="font-bold text-lg">{totalQty}</h1>
+                                                        </div>
 
-                                                <div className="w-full flex flex-col justify-center">
-                                                    <label className="text-sm text-gray-500 font-semibold">Discount:</label>
-                                                    <h1 className="font-bold text-lg">{formatCurrency(totalDiscount)}</h1>
-                                                </div>
+                                                        <div className="w-full flex flex-col justify-center">
+                                                            <label className="text-sm text-gray-500 font-semibold">Discount:</label>
+                                                            <h1 className="font-bold text-lg">{formatCurrency(totalDiscount)}</h1>
+                                                        </div>
 
-                                                <div className="w-full flex flex-col justify-center">
-                                                    <label className="text-sm text-gray-500 font-semibold">Subtotal:</label>
-                                                    <h1 className="font-bold text-lg">{formatCurrency(totalSubtotal)}</h1>
-                                                </div>
+                                                        <div className="w-full flex flex-col justify-center">
+                                                            <label className="text-sm text-gray-500 font-semibold">Subtotal:</label>
+                                                            <h1 className="font-bold text-lg">{formatCurrency(totalSubtotal)}</h1>
+                                                        </div>
 
 
 
-                                                <div className="w-full flex flex-col justify-center">
-                                                    <label className="text-sm text-gray-500 font-semibold">Total:</label>
-                                                    <h1 className="font-bold text-xl text-red-500">{formatCurrency(finalTotal)}</h1>
-                                                </div>
-                                            </div>
+                                                        <div className="w-full flex flex-col justify-center">
+                                                            <label className="text-sm text-gray-500 font-semibold">Total:</label>
+                                                            <h1 className="font-bold text-xl text-red-500">{formatCurrency(finalTotal)}</h1>
+                                                        </div>
+                                                    </div>
+                                                )
+                                            }
+                                            
                                             
                                             {
                                                 order.items.length === 0 ? (
@@ -579,7 +604,7 @@ export default function OrderForm({order, changeTab, orderReferences: initialOrd
             
                 <button
                     type="submit"
-                    className="h-[42px] px-7 bg-green-500 hover:bg-green-600 text-white text-sm font-medium rounded-md"
+                    className="h-[42px] px-7 bg-green-500 hover:bg-green-600 text-white text-sm font-medium rounded-md cursor-pointer"
                 >
                     Save
                 </button>

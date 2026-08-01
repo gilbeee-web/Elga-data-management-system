@@ -7,7 +7,7 @@ export default function TextInput({
     placeholder = "",
     className = "",
     error = "",
-    required = false
+    required = false,
 }){
     return(
         <div className="flex flex-col gap-y-1">

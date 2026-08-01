@@ -1,3 +1,4 @@
+import { formatCurrency } from "../../../Utils/formatCurrency";
 
 export default function ProductModal({product, onClose, editProduct, deleteProduct}){
 
@@ -59,7 +60,7 @@ export default function ProductModal({product, onClose, editProduct, deleteProdu
 
                 <table className="mt-5 w-full text-sm text-left shadow-md rounded-lg">
 
-                    <thead className="text-gray-600 text-md border-b border-gray-300">
+                    <thead className="text-gray-400 text-md border-b border-gray-300">
                         <tr className="bg-gray-100">
                             <th className="p-3">Variants</th>
                             <th className="p-3">Variant code</th>
@@ -75,7 +76,7 @@ export default function ProductModal({product, onClose, editProduct, deleteProdu
                                 <tr key={variant.id} className="border-b border-gray-300">
                                     <td className="p-3 uppercase text-gray-600 font-semibold">{variant.variant_name}</td>
                                     <td className="p-3 uppercase text-gray-600 font-semibold">{variant.product_code}</td>
-                                    <td className="p-3 uppercase text-gray-600 font-semibold">{variant.price}</td>
+                                    <td className="p-3 uppercase text-gray-600 font-semibold">{formatCurrency(variant.price)}</td>
                                     <td className="p-3 uppercase text-gray-600 font-semibold">{variant.sold}</td>
                                 </tr>
                             ))

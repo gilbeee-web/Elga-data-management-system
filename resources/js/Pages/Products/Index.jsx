@@ -36,6 +36,10 @@ export default function Dashboard ({products}){
         router.visit(route('product.edit', id));
     }
 
+    const tabs = ['all', 'clothes', 'bags', 'footwear', 'perfume', 'skincare'];
+
+    const [activeTab, setActiveTab] = useState(tabs[0]);
+
     return <>
         <Layout title={"Products"}>
             
@@ -47,7 +51,7 @@ export default function Dashboard ({products}){
                 </h1>
 
                 <button 
-                    className="rounded-md text-md bg-green-500 px-3 text-white cursor-pointer hover:bg-green-400"
+                    className="rounded-md text-md bg-blue-500 px-3 py-2 text-white cursor-pointer hover:bg-blue-400"
                     onClick={() => router.visit(route("product.create"))}
                 >
                     + Add product
@@ -55,27 +59,108 @@ export default function Dashboard ({products}){
 
             </div>
 
-            <div className="w-full flex justify-between mt-8">
+            
+            {/* Navigation */}
+            <div className="mt-10 flex gap-x-15 items-center">
 
-                <div>
-                    <select 
-                        name="category_filter" 
-                        className="border bg-white px-5 py-2 rounded-md"
+                <button 
+                    className="text-start cursor-pointer"
+                    onClick={() => handleTab(tabs[0])}
+                >
+                    <span
+                        className={`text-2xl font-bold ${
+                            activeTab === tabs[0] 
+                            ? "border-b-3 border-green-600"
+                            : "text-gray-400"
+                        }`}
                     >
-                        <option value="" disabled hidden>Select Category</option>
-                        <option value="bag">Bag</option>
-                        <option value="clothes">Clothes</option>
-                        <option value="footwear">Footwear</option>
-                        <option value="perfume">Perfume</option>
-                    </select>
-                </div>
+                        All
+                    </span>
+                </button>
 
+                <button 
+                    className="text-start cursor-pointer"
+                    onClick={() => handleTab(tabs[1])}
+                >
+                    <span
+                        className={`text-2xl font-bold ${
+                            activeTab === tabs[1] 
+                            ? "border-b-3 border-green-600"
+                            : "text-gray-400"
+                        }`}
+                    >
+                        Clothes
+                    </span>
+                    
+                </button>
 
-               <div className="relative w-full max-w-md">
+                <button 
+                    className="text-start cursor-pointer"
+                    onClick={() => handleTab(tabs[2])}
+                >
+                    <span
+                        className={`text-2xl font-bold ${
+                            activeTab === tabs[2] 
+                            ? "border-b-3 border-green-600"
+                            : "text-gray-400"
+                        }`}
+                    >
+                        Bags
+                    </span>
+                    
+                </button>
+
+                <button 
+                    className="text-start cursor-pointer"
+                    onClick={() => handleTab(tabs[3])}
+                >
+                    <span
+                        className={`text-2xl font-bold ${
+                            activeTab === tabs[3] 
+                            ? "border-b-3 border-green-600"
+                            : "text-gray-400"
+                        }`}
+                    >
+                        Footwear
+                    </span>
+                    
+                </button>
+
+                <button 
+                    className="text-start cursor-pointer"
+                    onClick={() => handleTab(tabs[4])}
+                >
+                    <span
+                        className={`text-2xl font-bold ${
+                            activeTab === tabs[4] 
+                            ? "border-b-3 border-green-600"
+                            : "text-gray-400"
+                        }`}
+                    >
+                        Perfumes
+                    </span>
+                </button>
+
+                <button 
+                    className="text-start cursor-pointer"
+                    onClick={() => handleTab(tabs[5])}
+                >
+                    <span
+                        className={`text-2xl font-bold ${
+                            activeTab === tabs[5] 
+                            ? "border-b-3 border-green-600"
+                            : "text-gray-400"
+                        }`}
+                    >
+                        Skincare
+                    </span>
+                </button>
+
+                <div className="ml-20 relative w-full max-w-xs">
                     <input
                         type="text"
                         placeholder="Search product..."
-                        className="w-full rounded-md py-2 pl-3 pr-14 bg-white"
+                        className="w-full rounded-md py-2 pl-3 bg-white"
                     />
 
                     <button className="absolute top-0 right-0 h-full px-4 bg-[#DF9BAA] rounded-r-md flex items-center justify-center">
@@ -89,7 +174,27 @@ export default function Dashboard ({products}){
 
             </div>
 
-            <div className="grid grid-cols-3 gap-x-20 mt-5">
+            {/* <div className="w-full mt-5 flex justify-end">
+
+               <div className="relative w-full max-w-xs">
+                    <input
+                        type="text"
+                        placeholder="Search product..."
+                        className="w-full rounded-md py-2 pl-3 bg-white"
+                    />
+
+                    <button className="absolute top-0 right-0 h-full px-4 bg-[#DF9BAA] rounded-r-md flex items-center justify-center">
+                        <img
+                            src="/images/icons/search-icon.png"
+                            alt="Search"
+                            className="w-5 h-5"
+                        />
+                    </button>
+                </div>
+
+            </div> */}
+
+            <div className="grid grid-cols-4 gap-x-10 mt-10">
 
                 {products.data.length > 0 ? (
                     products.data.map((product) => (
@@ -115,7 +220,7 @@ export default function Dashboard ({products}){
                                
                                 <div className="px-3 py-2">
                                     <h1 className="font-semibold text-xl">{ product.name }</h1>
-                                    <p className="text-md text-gray-500 capitalize">{product.category}</p>
+                                    <p className="text-sm text-gray-500 capitalize font-semibold">{product.category}</p>
                                 </div>
 
                                 <div className="px-3 py-2">

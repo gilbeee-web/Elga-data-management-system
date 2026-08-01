@@ -342,10 +342,10 @@ export default function ShipmentForm({order, customer, orderReferences, shipping
 
                 <div className="mt-5 flex justify-end">
                     <button 
-                        className="flex gap-x-2 bg-green-400 p-2 rounded-md items-center cursor-pointer text-white font-bold"
+                        className="flex gap-x-2 bg-green-500 hover:bg-green-400 p-2 rounded-md items-center cursor-pointer text-white font-bold"
                         type="submit"
                     >
-                        <img src="/images/icons/truck-icon.svg" alt="Order icon" className="object-contain w-8 h-8"/>
+                        <img src="/images/icons/shipped-icon.svg" alt="Order icon" className="object-contain w-8 h-8"/>
                         Shipped
                     </button>
                 </div>

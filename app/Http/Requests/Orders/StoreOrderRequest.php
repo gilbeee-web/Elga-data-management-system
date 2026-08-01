@@ -24,7 +24,7 @@ class StoreOrderRequest extends FormRequest
     {
         return [
             'orderReferences' => ['required', 'array', 'min:1'],
-            'orderReferences.*.order_number' => ['required', 'string', 'max:255'],
+            'orderReferences.*.order_number' => ['required', 'string', 'max:255', 'unique:order_references,order_number'],
             'orderReferences.*.items' => ['required', 'array', 'min:1'],
 
             'orderReferences.*.items.*.id' => ['required', 'integer', 'exists:products,id'],
@@ -40,6 +40,7 @@ class StoreOrderRequest extends FormRequest
         return [
             'orderReferences.required' => 'At least one order reference is required.',
             'orderReferences.*.order_number.required' => 'Each order reference must have an order number.',
+            'orderReferences.*.order_number.unique' => 'This order number already exists.',
             'orderReferences.*.items.required' => 'Each order reference must have at least one item.',
             'orderReferences.*.items.*.selected_variant_id.exists' => 'The selected product variant does not exist.',
             'orderReferences.*.items.*.qty.min' => 'Quantity must be at least 1.',

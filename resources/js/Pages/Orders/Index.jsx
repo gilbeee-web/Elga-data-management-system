@@ -4,6 +4,7 @@ import { Link, router } from "@inertiajs/react"
 import { useState } from "react";
 import { formatDateTime } from "../../Utils/formatDateTime";
 import { formatCurrency } from "../../Utils/formatCurrency";
+import TextInput from "../../Components/TextInput";
 
 export default function Index ({orders}){
 
@@ -15,31 +16,45 @@ export default function Index ({orders}){
     const [activeTab, setActiveTab] = useState(tabs[0]);
 
     const [currentSearch, setCurrentSearch] = useState(null);
+    const [currentFilter, setCurrentFilter] = useState(null);
+
+    const [isFetchingData, setIsFetchingData] = useState(false);
 
     const handleTab = (selectedTab) => {
+        setIsFetchingData(true);
 
-        let filterStatus = selectedTab;
-
-        if(selectedTab === 'payment'){
-            filterStatus = "awaiting_payment";
-        }else if(selectedTab === "shipping"){
-            filterStatus = "awaiting_shipping_fee";
+        // Map tab names to backend filter values
+        let filterValue = selectedTab;
+        if (selectedTab === "payment") {
+            filterValue = "awaiting_payment";
+        } else if (selectedTab === "shipping") {
+            filterValue = "awaiting_shipping_fee";
         }
 
-        router.get(route('order.index'), {filter_status: filterStatus, search: currentSearch}, {
-            preserveState: true,
-            preserveScroll: true,
-            only:['orders'],
-        });
-
+        setCurrentFilter(filterValue);
         setActiveTab(selectedTab);
-    }
 
-    const handleSearch = (value) => {
-        router.get(route('order.index'), { filter_status: currentFilter, search: value }, {
+        router.get(route('order.index'), { filter_status: filterValue, search: currentSearch }, {
             preserveState: true,
             preserveScroll: true,
             only: ['orders'],
+            onFinish: () => {
+                setIsFetchingData(false);
+            },
+        });
+    }
+
+    const handleSearch = () => {
+        
+        setIsFetchingData(true);
+
+        router.get(route('order.index'), { filter_status: currentFilter, search: currentSearch }, {
+            preserveState: true,
+            preserveScroll: true,
+            only: ['orders'],
+            onFinish: () => {
+                setIsFetchingData(false);
+            }
         });
     };
 
@@ -69,7 +84,7 @@ export default function Index ({orders}){
                 </h1>
 
                 <button 
-                    className="rounded-md text-md bg-green-500 px-3 py-2 text-white cursor-pointer hover:bg-green-400"
+                    className="rounded-md text-md bg-blue-500 px-3 py-2 text-white cursor-pointer hover:bg-blue-400 font-semibold"
                     onClick={() => router.post(route('order.saveDraft'))}
                 >
                     + Create order
@@ -176,12 +191,51 @@ export default function Index ({orders}){
 
 
 
-            <div className="mt-10">
+            <div className="mt-5">
+
+                {/* <div className="ml-20 relative w-full max-w-xs">
+                    <input
+                        type="text"
+                        placeholder="Search product..."
+                        className="w-full rounded-md py-2 pl-3 bg-white"
+                    />
+
+                    <button className="absolute top-0 right-0 h-full px-4 bg-[#DF9BAA] rounded-r-md flex items-center justify-center">
+                        <img
+                            src="/images/icons/search-icon.png"
+                            alt="Search"
+                            className="w-5 h-5"
+                        />
+                    </button>
+                </div> */}
+
+                <div className="w-full flex justify-end relative">
+                    <input 
+                        type="text" 
+                        className="min-w-xs rounded-md border border-gray-400 bg-white px-2 py-1"
+                        placeholder="Search order..."
+                        value={currentSearch}
+                        onChange={(e) => setCurrentSearch(e.target.value)}
+                        onKeyDown={(e) => {
+                            if(e.key === "Enter"){
+                                handleSearch(currentSearch);
+                            }
+                        }}
+                    />
+
+                    <button className="absolute top-0 right-0 h-full px-4 bg-[#DF9BAA] rounded-r-md flex items-center justify-center">
+                        <img
+                            src="/images/icons/search-icon.png"
+                            alt="Search"
+                            className="w-5 h-5"
+                        />
+                    </button>
+                </div>
                 
-                <table className="w-full text-sm text-left border-collapse bg-white shadow-md rounded-lg">
+                <table className="mt-5 w-full text-sm text-left border-collapse bg-white shadow-md rounded-lg">
                     <thead className="text-gray-600 uppercase text-xs border-b border-gray-300">
                         <tr className="bg-gray-300">
-                            <th className="p-3">TRANSACTION NUMBER / ORDER NUM</th>
+                            <th className="p-3">TRANSACTION NO. / ORDER NO.</th>
                             <th className="p-3">CUSTOMER NAME</th>
                             <th className="p-3">
                                 {activeTab === "payment" ? "REMAINING BALANCE" : "TOTAL AMOUNT"}
@@ -193,7 +247,18 @@ export default function Index ({orders}){
                         </tr>
                     </thead>
                     <tbody>
-                        {orders.data.length > 0 ?
+                        {
+                            isFetchingData ? 
+                            <tr>
+                                <td colSpan={5} className="py-12">
+                                    <div className="flex flex-col items-center justify-center gap-3">
+                                        <div className="animate-spin h-10 w-10 border-4 border-gray-300 border-t-blue-600 rounded-full" />
+                                        <span className="text-sm text-gray-500 font-medium">Loading orders...</span>
+                                    </div>
+                                </td>
+                            </tr>
+                            
+                            : orders.data.length > 0 ?
                             (
                                 orders.data.map((order) => (
                                     <tr 
@@ -206,8 +271,8 @@ export default function Index ({orders}){
                                             
                                             {
                                                 order.references.map((ref, index) => (
-                                                  <span className="text-sm">
-                                                    {ref.order_number} 
+                                                  <span className="text-sm" key={index}>
+                                                    #{ref.order_number} 
                                                     {index < order.references.length - 1 && " - "}
                                                   </span>  
                                             ))}
@@ -237,7 +302,7 @@ export default function Index ({orders}){
                             ) :
                             (
                                 <tr className="text-center">
-                                    <td colSpan={4} className="text-xl font-bold p-4">No orders yet.</td>
+                                    <td colSpan={5} className="text-xl font-bold p-4">No orders yet.</td>
                                 </tr>
                             )
                         }

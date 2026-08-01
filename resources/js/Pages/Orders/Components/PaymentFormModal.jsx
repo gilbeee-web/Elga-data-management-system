@@ -3,6 +3,7 @@ import TextInput from "../../../Components/TextInput";
 import { useEffect, useState } from "react";
 import { route } from "ziggy-js";
 import { formatCurrency } from "../../../Utils/formatCurrency";
+import Swal from "sweetalert2";
 
 export default function PaymentFormModal({order, onClose, payment, onSubmitPayment}){
 
@@ -36,16 +37,32 @@ export default function PaymentFormModal({order, onClose, payment, onSubmitPayme
         e.preventDefault();
 
         post(route('order.savePayment', order.id), {
+
             onSuccess: (page) => {
+
                 const isFullyPaid = Number(page.props.order.remaining_balance) === 0;
 
-                console.log("isFullyPaid submitted: ", isFullyPaid);
+                Swal.fire({
+                    toast: true,
+                    position: "top-end",
+                    icon: "success",
+                    title: "Payment saved!",
+                    showConfirmButton: false,
+                    timer: 2000,
+                    timerProgressBar: true,
+                });
 
                 onSubmitPayment(isFullyPaid);
             },
             onError: (errors) => {
-                console.log("Errors: ", errors);
-            }
+                Swal.fire({
+                    icon: "error",
+                    title: "Save payment failed",
+                    text: Object.values(errors)[0],
+                });
+
+                console.log("Errors: ", errors)
+            },
         });
     }
 
@@ -104,6 +121,7 @@ export default function PaymentFormModal({order, onClose, payment, onSubmitPayme
 
                             <input
                                 type="text"
+                                placeholder="0.00"
                                 className="w-50 border bg-[#F5F5F5] rounded-md px-3 py-1"
                                 value={
                                     isEditing
@@ -217,6 +235,7 @@ export default function PaymentFormModal({order, onClose, payment, onSubmitPayme
                     <TextInput 
                         label={"Reference Number:"}
                         type="text"
+                        placeholder="eg. gcash or gotyme"
                         className="min-w-80"
                         value={data.reference_number}
                         onChange={(e) => setData("reference_number", e.target.value)}

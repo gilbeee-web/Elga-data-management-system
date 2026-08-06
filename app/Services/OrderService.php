@@ -117,13 +117,10 @@ class OrderService{
             return;
         }
 
-
-
         $order->statusHistories()->create([
             'old_status' => $oldStatus,
             'new_status' => $newStatus,
-            // 'changed_by' => Auth::id(),
-            'changed_by' => 1,
+            'changed_by' => Auth::id(),
             'remarks' => $remarks,
         ]);
     }

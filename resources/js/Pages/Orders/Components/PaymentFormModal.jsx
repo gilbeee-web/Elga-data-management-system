@@ -135,28 +135,15 @@ export default function PaymentFormModal({order, onClose, payment, onSubmitPayme
                                 onChange={(e) => setData("payment_amount", e.target.value)}
                             />
 
-                        </div>
-
-                        {/* <div className="flex flex-col gap-y-1">
-                            <label htmlFor="payment_type" className="font-semibold">Payment Type:<span className="text-red-500">*</span></label>
-                            <select 
-                                name="payment_type"
-                                className="border bg-white p-2 rounded-md max-w-50" 
-                                value={data.payment_type}
-                                onChange={(e) => setData("payment_type",e.target.value)}
-                            >
-                                <option value="" disabled hidden>Select Payment Type</option>
-                                <option value="full">Full Payment</option>
-                                <option value="down_payment">Down Payment</option>
-                                <option value="balance">Balance Payment</option>
-                            </select>
-
-                            {errors.payment_type && (
+                            {errors.payment_amount && (
                                 <p className="text-red-500 text-sm mt-1">
-                                    {errors.payment_type}
+                                    {errors.payment_amount}
                                 </p>
                             )}
-                        </div> */}
+
+                        </div>
+
+                        
 
                         <div className="flex flex-col gap-y-1">
                             <label htmlFor="payment_method" className="font-semibold">Payment Method:<span className="text-red-500">*</span></label>
@@ -179,46 +166,7 @@ export default function PaymentFormModal({order, onClose, payment, onSubmitPayme
                                 </p>
                             )}
                         </div>
-
-
-                        
-
-
                     </div>
-
-                    {/* <div className="flex gap-x-5 items-center">
-
-                        <div className="flex flex-col gap-y-1">
-                            <label htmlFor="" className="font-semibold">Payment Amount: <span className="text-red-500">*</span></label>
-
-                            <input
-                                type="text"
-                                className="w-50 border bg-[#F5F5F5] rounded-md px-3 py-1"
-                                value={
-                                    isEditing
-                                        ? data.payment_amount
-                                        : data.payment_amount
-                                            ? formatCurrency(Number(data.payment_amount))
-                                            : ""
-                                }
-                                onFocus={() => setIsEditing(true)}
-                                onBlur={() => setIsEditing(false)}
-                                onChange={(e) => setData("payment_amount", e.target.value)}
-                            />
-
-                        </div>
-
-                        
-                    
-
-                        <TextInput 
-                            label={"MOP Name:"}
-                            type="text"
-                            placeholder="eg. Railey C"
-                            value={data.mop_name}
-                            onChange={(e) => setData("mop_name",e.target.value)}
-                        />
-                    </div> */}
 
                     <TextInput 
                         label={"MOP Name:"}
@@ -227,11 +175,10 @@ export default function PaymentFormModal({order, onClose, payment, onSubmitPayme
                         placeholder="eg. Railey C"
                         value={data.mop_name}
                         onChange={(e) => setData("mop_name",e.target.value)}
+                        required={true}
+                        error={errors.mop_name}
                     />
                     
-
-                    
-
                     <TextInput 
                         label={"Reference Number:"}
                         type="text"
@@ -240,6 +187,7 @@ export default function PaymentFormModal({order, onClose, payment, onSubmitPayme
                         value={data.reference_number}
                         onChange={(e) => setData("reference_number", e.target.value)}
                         required={true}
+                        error={errors.reference_number}
                     />
 
                     <div className="flex flex-col gap-y-1">
@@ -308,19 +256,6 @@ export default function PaymentFormModal({order, onClose, payment, onSubmitPayme
                         )}
                     </div>
 
-
-                    {/* <TextInput 
-                        label={"Remarks:"}
-                        type="text"
-                        className="min-w-80 h-20"
-                        value={data.referencec_number}
-                        onChange={(e) => setData("referencec_number",e.target.value)}
-                    /> */}
-
-                    
-
-
-                    
                     <div className="mt-3 flex gap-x-5 items-center justify-end">
                         <button 
                             className="bg-gray-400 text-white rounded-md px-3 py-2 cursor-pointer"

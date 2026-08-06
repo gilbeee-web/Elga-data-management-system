@@ -3,6 +3,7 @@
 namespace App\Services;
 use App\Models\Product;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
 
 class ProductService{
 
@@ -50,9 +51,31 @@ class ProductService{
 
         return DB::transaction(function () use ($product, $data) {
 
+            $imagePath = $product->image;
+
+            if(isset($data['image'])){
+
+                $file = $data['image'];
+                
+                //delete previous product image if updating
+                if ($product->image && Storage::disk('public')->exists($product->image)) {
+                    Storage::disk('public')->delete($product->image);
+                }
+
+                $fileName = $data['name'].'_'.time().'.'.$file->extension();
+
+                $imagePath = $file->storeAs(
+                    'products',
+                    $fileName,
+                    'public'
+                );
+
+            }
+
             $product->update([
                 'name' => $data['name'],
-                'category' => $data['category']
+                'category' => $data['category'],
+                'image' => $imagePath
             ]);
 
             //collect the variant_id that are present

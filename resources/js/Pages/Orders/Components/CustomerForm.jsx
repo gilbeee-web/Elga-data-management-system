@@ -50,7 +50,6 @@ export default function CustomerForm({order, changeTab, customer, getSaveCustome
                     title: "Save customer failed",
                     text: "Unable to save the customer.",
                 });
-
                 console.log("Errors: ", errors)
             },
         });

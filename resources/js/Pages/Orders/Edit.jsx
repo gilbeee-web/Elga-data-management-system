@@ -176,7 +176,7 @@ Thank you!`;
 
                 <div className="flex items-center">
                     <button className="cursor-pointer" onClick={() => router.visit(route('order.index'))}>
-                        <img src="/images/icons/arrow-back.png" alt="Arrow back"  className="object-contain w-8 h-8"/>
+                        <img src="/images/icons/arrow-back.png" alt="Arrow back"  className="object-contain w-5 h-5"/>
                     </button>
 
                     <h1 className="text-xl font-bold">{order.transaction_number}</h1>    

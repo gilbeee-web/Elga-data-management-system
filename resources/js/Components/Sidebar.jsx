@@ -1,6 +1,35 @@
+import Swal from "sweetalert2";
 import NavLink from "./NavLink";
+import { router } from "@inertiajs/react";
+import { route } from "ziggy-js";
 
 export default function Sidebar(){
+
+
+    const handleLogout = async () => {
+
+        const result = await Swal.fire({
+            title: "Logout",
+            text: "Are you sure you want to logout?",
+            icon: "warning",
+            showCancelButton: true,
+            confirmButtonColor: "#dc2626",
+            cancelButtonColor: "#6b7280",
+            confirmButtonText: "Confirm",
+            cancelButtonText: "Cancel",
+            reverseButtons: true
+        });
+
+        if(!result.isConfirmed){
+            return;
+        }
+
+
+        if(result.isConfirmed){
+            router.post(route('user.logout'));
+        }
+
+    }
     
     return(
         <aside className="w-64 shadow-md bg-white min-h-screen z-99 relative">
@@ -12,8 +41,8 @@ export default function Sidebar(){
 
             <nav className="py-5 space-y-2">
                 <NavLink
-                    href={route('dashboard')}
-                    active={route().current('dashboard')}
+                    href={route('dashboard.index')}
+                    active={route().current('dashboard.*')}
                 >
                     Dashboard
                 </NavLink>
@@ -37,13 +66,18 @@ export default function Sidebar(){
                 </NavLink>
 
                 <NavLink
+                    href={route('user.index')}
+                    active={route().current('user.*')}
                 >
-                    Settings
+                    Users
                 </NavLink>
                 
             </nav>
 
-            <div className="w-full absolute bottom-10 bg-red-500 hover:bg-red-400 flex justify-center items-center text-white p-3 cursor-pointer">
+            <div 
+                className="w-full absolute bottom-10 bg-red-500 hover:bg-red-400 flex justify-center items-center text-white p-3 cursor-pointer"
+                onClick={handleLogout}
+            >
 
                 <div className="flex items-center gap-x-3 text-lg font-semibold">
                     <img src="/images/icons/logout-icon.svg" alt="Logout icon" className="object-containt w-7 h-7"/>

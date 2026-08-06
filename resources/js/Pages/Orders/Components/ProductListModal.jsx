@@ -112,7 +112,7 @@ export default function ProductListModal({onClose, products, onAddProducts}){
 
                 <div className="mt-8 grid grid-cols-2 gap-x-10 gap-y-5 px-3">
                     {
-                        filteredProducts && (
+                        filteredProducts.length > 0 ? (
                             filteredProducts.map((product) => {
                                 
                                 const selected = isSelected(product.id);
@@ -155,6 +155,10 @@ export default function ProductListModal({onClose, products, onAddProducts}){
                                     </div>
                                 )
                             })
+                        ) :(
+                            <div className="w-full flex justify-center items-center col-span-2 my-10">
+                                <h1 className="text-lg font-bold text-gray-400">No products found.</h1>
+                            </div>
                         )
                     }
                 </div>

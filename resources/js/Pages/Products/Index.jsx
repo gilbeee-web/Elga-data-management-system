@@ -3,6 +3,8 @@ import Layout from "../../Layouts/AppLayout"
 import { route } from "ziggy-js";
 import { useState } from "react";
 import ProductModal from "./Components/ProductModal";
+import Swal from "sweetalert2";
+import { formatCurrency } from "../../Utils/formatCurrency";
 
 export default function Dashboard ({products}){
 
@@ -35,6 +37,32 @@ export default function Dashboard ({products}){
     const handleEditProduct = (id) => {
         router.visit(route('product.edit', id));
     }
+
+    const handleDeleteProduct = async (id) => {
+
+        const result = await Swal.fire({
+            title: "Delete product?",
+            text: "This product will removed permanently.",
+            icon: "warning",
+            showCancelButton: true,
+            confirmButtonColor: "#dc2626",
+            cancelButtonColor: "#6b7280",
+            confirmButtonText: "Confirm",
+            cancelButtonText: "Cancel",
+            reverseButtons: true
+        });
+
+        if(!result.isConfirmed){
+            return;
+        }
+
+        if(result.isConfirmed){
+            router.delete(route('product.destroy', id));
+            setProductInfo(null);
+        }
+        
+    }
+
 
     const tabs = ['all', 'clothes', 'bags', 'footwear', 'perfume', 'skincare'];
 
@@ -174,26 +202,6 @@ export default function Dashboard ({products}){
 
             </div>
 
-            {/* <div className="w-full mt-5 flex justify-end">
-
-               <div className="relative w-full max-w-xs">
-                    <input
-                        type="text"
-                        placeholder="Search product..."
-                        className="w-full rounded-md py-2 pl-3 bg-white"
-                    />
-
-                    <button className="absolute top-0 right-0 h-full px-4 bg-[#DF9BAA] rounded-r-md flex items-center justify-center">
-                        <img
-                            src="/images/icons/search-icon.png"
-                            alt="Search"
-                            className="w-5 h-5"
-                        />
-                    </button>
-                </div>
-
-            </div> */}
-
             <div className="grid grid-cols-4 gap-x-10 mt-10">
 
                 {products.data.length > 0 ? (
@@ -225,10 +233,12 @@ export default function Dashboard ({products}){
 
                                 <div className="px-3 py-2">
                                     {product.variants_min_price === product.variants_max_price ? (
-                                        <span className="font-semibold text-green-500">₱{product.variants_min_price}</span>
+                                        <span className="font-semibold text-green-500">{formatCurrency(product.variants_min_price)}</span>
                                     ) : (
                                         <span className="font-semibold">
-                                            ₱{product.variants_min_price} - ₱{product.variants_max_price}
+                                            {
+                                                formatCurrency(product.variants_min_price) - formatCurrency(product.variants_max_price)
+                                            }
                                         </span>
                                     )}
                                 </div>
@@ -256,6 +266,7 @@ export default function Dashboard ({products}){
                         product={productInfo}
                         onClose={() => setProductInfo(null)}
                         editProduct={handleEditProduct}
+                        deleteProduct={handleDeleteProduct}
                     />
                 )
             }

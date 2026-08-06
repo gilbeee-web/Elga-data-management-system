@@ -63,29 +63,6 @@ class OrderController extends Controller
         ]);
     }   
 
-    // public function filterOrder(Request $request){
-    //     $orders = Order::where('order_status', $request->filter_status)->get();
-
-    //     return response()->json($orders);
-    // }
-
-    // public function searchOrder(Request $request){
-
-    //     $orders = Order::join('order_references', 'orders.id', '=', 'order_references.order_id')
-    //         ->join('shipments', 'orders.id', '=', 'shipments.order_id')
-    //         ->select('orders.*', 'order_references.order_number', 'shipments.*')
-    //         ->where('orders.receiver_name', 'like', '%', $request->search, '%')
-    //         ->orWhere('orders.sender_name', 'like', '%', $request->search, '%')
-    //         ->orWhere('orders.transaction_number', '%', $request->search, '%')
-    //         ->orWhere('order_references.order_number', '%', $request->search, '%')
-    //         ->get();
-
-    //     return response()->json($orders);
-
-    // }
-
-
-
     public function edit(Order $order){
         
         //get the current customer data of the order to pass in the component
@@ -243,11 +220,11 @@ class OrderController extends Controller
 
         $validated = $request->validate([
             'order_id' => 'nullable|integer|exists:orders,id',
-            'container_type' => 'string|required',
-            'container_size' => 'string|required',
-            'raw_shipping_fee' => 'numeric|required',
-            'container_fee' => 'numeric|required',
-            'tracking_number' => 'string|required'
+            'container_type' => 'required|string',
+            'container_size' => 'required|string',
+            'raw_shipping_fee' => 'required|numeric',
+            'container_fee' => 'required|numeric',
+            'tracking_number' => 'required|string'
         ]);
 
         try{
@@ -300,7 +277,6 @@ class OrderController extends Controller
         try{
             $this->orderService->destroyPayment($order,$payment_id);
         }catch(Exception $e){
-            dd("Something went wrong: ", $e);
             return redirect()->back()->with(['error', 'Error in destroying payment.']);
         }
         

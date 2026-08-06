@@ -5,7 +5,7 @@ import Swal from "sweetalert2";
 
 export default function ShippingForm({shippingInfo, order, changeTab, customer}){
 
-    const {data, setData, post, processing, error} = useForm({
+    const {data, setData, post, processing, errors} = useForm({
         container_type: "",
         container_size: "",
         raw_shipping_fee: null,
@@ -15,11 +15,25 @@ export default function ShippingForm({shippingInfo, order, changeTab, customer})
 
     const [totalShippingFee, setTotalShippingFee] = useState(null);
     
+    const isFormEmpty = Object.values(data).every(
+        value => value === "" || value === null
+    );
     
     
     const saveShippingInfo = (e) => {
         
         e.preventDefault();
+
+        if(isFormEmpty){
+            Swal.fire({
+                icon: "warning",
+                title: "Save failed",
+                text: "Please fill up the shipping form.",
+            });
+
+            return;
+        }
+
 
         post(route("order.saveShippingInfo", order), {
 
@@ -82,6 +96,7 @@ export default function ShippingForm({shippingInfo, order, changeTab, customer})
     }, [data]);
 
     const [isEditingFee, setIsEditingFee] = useState(false);
+    const [isEditingContainerFee, setIsEditingContainerFee] = useState(false);
 
     
 
@@ -122,84 +137,151 @@ COMPLETE ADDRESS: ${customer.address}`;
 
                     <div className="flex flex-col gap-y-5">
 
-                        <div className="flex gap-x-3 items-center">
-                            <label htmlFor="" className="text-lg font-semibold">Package type:</label>
-                            <select 
-                                className="bg-white border px-5 py-2 rounded-md"
-                                value={data.container_type}
-                                onChange={(e) => setData("container_type", e.target.value)}
-                            >
-                                <option value="" hidden selected>Select type</option>
-                                <option value="pouch">Pouch</option>
-                                <option value="box">Box</option>
-                            </select>
-                        </div>
-                        
-                        <div className="flex gap-x-3 items-center">
-                            <label htmlFor="" className="text-lg font-semibold">Package size:</label>
-                            <select 
-                                className="bg-white border px-5 py-2 rounded-md"
-                                value={data.container_size}
-                                onChange={(e) => setData("container_size", e.target.value)}
-                            >
-                                <option value="" hidden selected>Select size</option>
-                                <option value="extra-small">Extra Small</option>
-                                <option value="small">Small</option>
-                                <option value="medium">Medium</option>
-                                <option value="large">Large</option>
-                            </select>
-                        </div>
                         
 
                         <div className="flex gap-x-3 items-center">
-                            <label htmlFor="" className="text-lg font-semibold">Shipping fee:</label>
-                            <input 
-                                type="text" 
-                                className="min-w-40 border rounded-md px-2 py-1 bg-[#F5F5F5]"
-                                
-                                value={
-                                    isEditingFee
-                                        ? data.raw_shipping_fee
-                                        : data.raw_shipping_fee
-                                            ? formatCurrency(Number(data.raw_shipping_fee))
-                                            : ""
-                                }
-                                onChange={(e) => setData("raw_shipping_fee", Number(e.target.value))}
-                                onFocus={() => setIsEditingFee(true)}
-                                onBlur={() => setIsEditingFee(false)}
-                            />
+                            <label htmlFor="" className="text-lg font-semibold"><span className="text-sm text-red-500">*</span> Package type:</label>
+                            <div className="flex flex-col"> 
+                                <select 
+                                    className="bg-white border px-5 py-2 rounded-md"
+                                    value={data.container_type}
+                                    onChange={(e) => setData("container_type", e.target.value)}
+                                >
+                                    <option value="" hidden selected>Select type</option>
+                                    <option value="pouch">Pouch</option>
+                                    <option value="box">Box</option>
+                                </select>
+
+                                {errors.container_type && (
+                                    <p className="text-red-500 text-sm mt-1">
+                                        {errors.container_type}
+                                    </p>
+                                )}
+
+                            </div>
+                            
+                        </div>
+
+                            
+                        
+                        
+                        <div className="flex gap-x-3 items-center">
+                            <label htmlFor="" className="text-lg font-semibold"><span className="text-sm text-red-500">*</span> Package size:</label>
+                            <div className="flex flex-col">
+                                <select 
+                                    className="bg-white border px-5 py-2 rounded-md"
+                                    value={data.container_size}
+                                    onChange={(e) => setData("container_size", e.target.value)}
+                                >
+                                    <option value="" hidden selected>Select size</option>
+                                    <option value="extra-small">Extra Small</option>
+                                    <option value="small">Small</option>
+                                    <option value="medium">Medium</option>
+                                    <option value="large">Large</option>
+                                </select>
+
+                                {errors.container_size && (
+                                    <p className="text-red-500 text-sm mt-1">
+                                        {errors.container_size}
+                                    </p>
+                                )}
+                            </div>
                         </div>
 
                         <div className="flex gap-x-3 items-center">
-                            <label htmlFor="" className="text-lg font-semibold">Package fee:</label>
-                            <input 
-                                type="text" 
-                                className="min-w-40 border rounded-md px-2 py-1 bg-[#F5F5F5]"
-                                value={
-                                    isEditingFee
-                                        ? data.container_fee
-                                        : data.container_fee
-                                            ? formatCurrency(Number(data.container_fee))
-                                            : ""
-                                }
+                            <label htmlFor="" className="text-lg font-semibold"><span className="text-sm text-red-500">*</span> Shipping fee:</label>
+                            <div className="flex flex-col"> 
+
+                                <input 
+                                    type="text" 
+                                    className="min-w-40 border rounded-md px-2 py-1 bg-[#F5F5F5]"
+                                    placeholder="0.00"
+                                    
+                                    value={
+                                        isEditingFee
+                                            ? data.raw_shipping_fee
+                                            : data.raw_shipping_fee
+                                                ? formatCurrency(Number(data.raw_shipping_fee))
+                                                : ""
+                                    }
+                                    onChange={(e) => {
+                                        const value = Number(e.target.value);
+
+                                        setData(
+                                            "raw_shipping_fee",
+                                            Number.isNaN(value) ? 0 : value
+                                        );
+                                    }}
+                                    onFocus={() => setIsEditingFee(true)}
+                                    onBlur={() => setIsEditingFee(false)}
+                                />
+
+
+
+                                {errors.raw_shipping_fee && (
+                                    <p className="text-red-500 text-sm mt-1">
+                                        {errors.raw_shipping_fee}
+                                    </p>
+                                )}
+
+                            </div>
+                            
+                        </div>
+                                                                      
+                        <div className="flex gap-x-3 items-center">
+                            <label htmlFor="" className="text-lg font-semibold"><span className="text-sm text-red-500">*</span> Package fee:</label>
+                            <div className="flex flex-col">
+                                <input 
+                                    type="text" 
+                                    className="min-w-40 border rounded-md px-2 py-1 bg-[#F5F5F5]"
+                                    value= {
+                                        isEditingContainerFee
+                                            ? data.container_fee
+                                            : data.container_fee
+                                                ? formatCurrency(Number(data.container_fee))
+                                                : 0
+                                    }
+                                    placeholder="0.00"
+                                    
+                                    onChange={(e) => {
+                                        const value = Number(e.target.value);
+
+                                        setData(
+                                            "container_fee",
+                                            Number.isNaN(value) ? 0 : value
+                                        );
+                                    }}
+                                    onFocus={() => setIsEditingContainerFee(true)}
+                                    onBlur={() => setIsEditingContainerFee(false)}
+                                />  
+
+                                {errors.container_fee && (
+                                    <p className="text-red-500 text-sm mt-1">
+                                        {errors.container_fee}
+                                    </p>
+                                )}
+                            </div>
                                 
-                                onChange={(e) => setData("container_fee", Number(e.target.value))}
-                                onFocus={() => setIsEditingFee(true)}
-                                onBlur={() => setIsEditingFee(false)}
-                            />    
                         </div>
 
                         <div className="flex items-center">
-                            <label htmlFor="" className="min-w-40 text-lg font-semibold">Tracking number:</label>
-                            <input 
-                                type="text" 
-                                className="min-w-50 border rounded-md px-2 py-1 bg-[#F5F5F5]"
-                                value={data.tracking_number}
-                                onChange={(e) => setData("tracking_number", e.target.value)}
-                            />
-                        </div>
-                        
+                            <label htmlFor="" className="min-w-40 text-lg font-semibold"><span className="text-sm text-red-500">*</span> Tracking number:</label>
+                            <div className="flex flex-col">
+                                <input 
+                                    type="text" 
+                                    className="min-w-50 border rounded-md px-2 py-1 bg-[#F5F5F5]"
+                                    value={data.tracking_number}
+                                    onChange={(e) => setData("tracking_number", e.target.value)}
+                                />
 
+                                {errors.tracking_number && (
+                                    <p className="text-red-500 text-sm mt-1">
+                                        {errors.tracking_number}
+                                    </p>
+                                )}
+                            </div>
+                            
+                        </div>
                     </div>
 
 

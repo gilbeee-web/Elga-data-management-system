@@ -3,10 +3,11 @@ import TextInput from "../../../Components/TextInput";
 import Layout from "../../../Layouts/AppLayout";
 import { router, useForm } from "@inertiajs/react";
 import { formatCurrency } from "../../../Utils/formatCurrency";
+import Swal from "sweetalert2";
 
 export default function ProductForm({mode, product}){
 
-    const {data, setData, post, put, processing,errors} = useForm({
+    const {data, setData, post, transform, errors} = useForm({
         name: "",
         category: "",
         image: null,
@@ -69,31 +70,67 @@ export default function ProductForm({mode, product}){
 
     const saveProduct = (e) => {
         e.preventDefault();
-        console.log("Submitting...");
 
-        console.log("Variants length: ", data.variants.length);
-        console.log("Variants: ", data.variants);
-
-        if(data.variants[0].variant_name === "" || data.variants[0].price === null || data.variants[0].product_code === "" ){
+        if (data.variants[0].variant_name === "" || data.variants[0].price === null || data.variants[0].product_code === "") {
             alert("Please add at least one product variant");
             return;
         }
 
-
         if (product && mode === "edit") {
-            
-            console.log("Product to update: ", data);
+            transform((data) => ({ ...data, _method: 'put' }));
 
-            put(route("product.update", product.id), {
+            post(route("product.update", product.id), {
+                forceFormData: true,
                 onStart: () => console.log("started"),
-                onSuccess: () => console.log("success"),
-                onError: (errors) => console.log(errors),
+                onSuccess: () => {
+                    console.log("success");
+
+                    Swal.fire({
+                        toast: true,
+                        position: "top-end",
+                        icon: "success",
+                        title: "Product updated successfully!",
+                        showConfirmButton: false,
+                        timer: 2000,
+                        timerProgressBar: true,
+                    });
+
+                },
+                onError: (errors) => {
+
+                    console.log(errors);
+
+                    Swal.fire({
+                        icon: "error",
+                        title: "Updating product failed",
+                        text: Object.values(errors)[0],
+                    });
+
+                } ,
                 onFinish: () => console.log("finished"),
             });
         } else {
             post(route("product.store"), {
+
+                onSuccess: () => {
+                    Swal.fire({
+                        toast: true,
+                        position: "top-end",
+                        icon: "success",
+                        title: "Product created successfully!",
+                        showConfirmButton: false,
+                        timer: 2000,
+                        timerProgressBar: true,
+                    });
+                },
+
                 onError: (errors) => {
-                    console.log("Errors: ", errors)
+                    Swal.fire({
+                        icon: "error",
+                        title: "Creating product failed",
+                        text: Object.values(errors)[0],
+                    });
+                    console.log("Errors: ", errors);
                 }
             });
         }
@@ -120,12 +157,21 @@ export default function ProductForm({mode, product}){
 
     return <>
         
-        {
-            mode === "create" ? (
-                <h1 className="text-xl font-bold">Add Product</h1>
-            ) : (
-                <h1 className="text-xl font-bold">Edit Product</h1>
-        )}
+        <div className="flex items-center">
+            <button className="cursor-pointer" onClick={() => router.visit(route('product.index'))}>
+                <img src="/images/icons/arrow-back.png" alt="Arrow back"  className="object-contain w-5 h-5"/>
+            </button>
+
+            {
+                mode === "create" ? (
+                    <h1 className="text-xl font-bold">Add Product</h1>
+                ) : (
+                    <h1 className="text-xl font-bold">Edit Product</h1>
+            )}
+
+        </div>
+
+        
         
 
         <form onSubmit={saveProduct}>

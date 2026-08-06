@@ -325,10 +325,11 @@ export default function ShipmentForm({order, customer, orderReferences, shipping
 
                         <div className="flex justify-between items-center text-sm font-semibold pt-1">
                             <span>Balance</span>
-                            {orderSummary.remaining_balance === 0 && (
+                            {orderSummary.remaining_balance <= 0 && (
                                 <span className="text-xs font-normal text-green-700 bg-green-100 px-2.5 py-0.5 rounded">
                                     Fully paid
                                 </span>
+                                
                             )}
                             {orderSummary.remaining_balance > 0 && (
                                 <span className="text-amber-700">{formatCurrency(orderSummary.remaining_balance)} due</span>

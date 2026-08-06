@@ -3,6 +3,7 @@ import NavLink from "@/Components/NavLink";
 import {route}  from "ziggy-js";
 import Navbar from "@/Components/Navbar";
 import Sidebar from "@/Components/Sidebar";
+import FlashMessage from "../Components/FlashMessage";
 
 export default function AppLayout({children, title}){
 
@@ -28,6 +29,9 @@ export default function AppLayout({children, title}){
 
             </div>
 
+            <div>
+                <FlashMessage />
+            </div>
         </div>
     );
 

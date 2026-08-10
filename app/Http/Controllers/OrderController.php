@@ -28,19 +28,19 @@ class OrderController extends Controller
 
     public function index(Request $request)
     {
-            $query = Order::with('references');
+        $query = Order::with('references');
 
-            if ($request->filled('filter_status') && $request->filter_status !== 'all') {
+        if ($request->filled('filter_status') && $request->filter_status !== 'all') {
 
-                if($request->filter_status === "awaiting_payment" || $request->filter_status === "payment_confirmed"){
-                    $query->whereIn('order_status', [
-                        'awaiting_payment',
-                        'payment_confirmed',
-                    ]);
-                }else{
-                    $query->where('order_status', $request->filter_status);
-                }                
-            }
+            if($request->filter_status === "awaiting_payment" || $request->filter_status === "payment_confirmed"){
+                $query->whereIn('order_status', [
+                    'awaiting_payment',
+                    'payment_confirmed',
+                ]);
+            }else{
+                $query->where('order_status', $request->filter_status);
+            }                
+        }
 
         if ($request->filled('search')) {
             $search = $request->search;

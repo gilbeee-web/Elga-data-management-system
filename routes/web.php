@@ -5,6 +5,7 @@ use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\LoginController;
 use App\Http\Controllers\OrderController;
 use App\Http\Controllers\ProductController;
+use App\Http\Controllers\ReportController;
 use App\Http\Controllers\UserController;
 use App\Models\Customer;
 use Illuminate\Support\Facades\Route;
@@ -74,6 +75,15 @@ Route::middleware('auth')->group(function(){
             Route::put('/{user}/credentials', 'updateCredentials')->name('user.updateCredentials');
             Route::delete('/{user}', 'destroy')->name('user.destroy');
             
+        });
+    });
+});
+
+
+Route::middleware('auth')->group(function(){
+    Route::prefix('/reports')->group(function(){
+        Route::controller(ReportController::class)->group(function(){
+            Route::get('/', 'index')->name('report.index');            
         });
     });
 });

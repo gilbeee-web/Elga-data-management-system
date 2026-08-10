@@ -61,6 +61,8 @@ export default function Sidebar(){
                 </NavLink>
 
                 <NavLink
+                    href={route('report.index')}
+                    active={route().current('report.*')}
                 >
                     Reports
                 </NavLink>

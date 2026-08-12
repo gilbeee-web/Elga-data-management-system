@@ -418,7 +418,7 @@ export default function OrderForm({order, changeTab, orderReferences: initialOrd
                                                             <button 
                                                                 type="button"
                                                                 onClick={() => handleOpenProductList(orderIndex)}
-                                                                className="bg-green-500 px-3 py-1 text-white rounded-md cursor-pointer hover:bg-green-400"
+                                                                className="bg-blue-500 px-3 py-1 text-white rounded-md cursor-pointer hover:bg-blue-400"
                                                             >
                                                                 + Add Item 
                                                             </button>

@@ -143,7 +143,7 @@ COMPLETE ADDRESS: ${customer.address}`;
                             <label htmlFor="" className="text-lg font-semibold"><span className="text-sm text-red-500">*</span> Package type:</label>
                             <div className="flex flex-col"> 
                                 <select 
-                                    className="bg-white border px-5 py-2 rounded-md"
+                                    className="bg-white border border-gray-400 px-5 py-2 rounded-md"
                                     value={data.container_type}
                                     onChange={(e) => setData("container_type", e.target.value)}
                                 >
@@ -169,7 +169,7 @@ COMPLETE ADDRESS: ${customer.address}`;
                             <label htmlFor="" className="text-lg font-semibold"><span className="text-sm text-red-500">*</span> Package size:</label>
                             <div className="flex flex-col">
                                 <select 
-                                    className="bg-white border px-5 py-2 rounded-md"
+                                    className="bg-white border border-gray-400 px-5 py-2 rounded-md"
                                     value={data.container_size}
                                     onChange={(e) => setData("container_size", e.target.value)}
                                 >
@@ -194,7 +194,7 @@ COMPLETE ADDRESS: ${customer.address}`;
 
                                 <input 
                                     type="text" 
-                                    className="min-w-40 border rounded-md px-2 py-1 bg-[#F5F5F5]"
+                                    className="min-w-40 border border-gray-400 rounded-md px-2 py-1 bg-[#F5F5F5]"
                                     placeholder="0.00"
                                     
                                     value={
@@ -233,13 +233,13 @@ COMPLETE ADDRESS: ${customer.address}`;
                             <div className="flex flex-col">
                                 <input 
                                     type="text" 
-                                    className="min-w-40 border rounded-md px-2 py-1 bg-[#F5F5F5]"
+                                    className="min-w-40 border border-gray-400 rounded-md px-2 py-1 bg-[#F5F5F5]"
                                     value= {
                                         isEditingContainerFee
                                             ? data.container_fee
                                             : data.container_fee
                                                 ? formatCurrency(Number(data.container_fee))
-                                                : 0
+                                                : ""
                                     }
                                     placeholder="0.00"
                                     
@@ -269,7 +269,7 @@ COMPLETE ADDRESS: ${customer.address}`;
                             <div className="flex flex-col">
                                 <input 
                                     type="text" 
-                                    className="min-w-50 border rounded-md px-2 py-1 bg-[#F5F5F5]"
+                                    className="min-w-50 border border-gray-400 rounded-md px-2 py-1 bg-[#F5F5F5]"
                                     value={data.tracking_number}
                                     onChange={(e) => setData("tracking_number", e.target.value)}
                                 />
@@ -304,21 +304,21 @@ COMPLETE ADDRESS: ${customer.address}`;
                             <div className="flex flex-col gap-y-1">
                                 <h1 className="text-sm font-semibold">Receiver Name:</h1>
                                 <div className="border px-3 py-1 min-w-70 rounded-md text-center bg-[#F5F5F5]">
-                                    <span className="font-semibold">{customer.receiver_name}</span>
+                                    <span className="font-semibold">{customer.receiver_name ?? "--"}</span>
                                 </div>
                             </div>
 
                             <div className="flex flex-col gap-y-1">
                                 <h1 className="text-sm font-semibold">Contact Number:</h1>
                                 <div className="border px-3 py-1 min-w-70 rounded-md text-center bg-[#F5F5F5]">
-                                    <span className="font-semibold">{customer.contact_number}</span>
+                                    <span className="font-semibold">{customer.contact_number ?? "--"}</span>
                                 </div>
                             </div>
 
                             <div className="flex flex-col gap-y-1">
                                 <h1 className="text-sm font-semibold">Address:</h1>
                                 <div className="border px-3 py-1 min-w-70 max-w-80 rounded-md text-center bg-[#F5F5F5]">
-                                    <span className="font-semibold">{customer.address}</span>
+                                    <span className="font-semibold">{customer.address ?? "--"}</span>
                                 </div>
                             </div>
 

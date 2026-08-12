@@ -13,7 +13,7 @@ import Payment from "./Components/Payment";
 import ShipmentForm from "./Components/ShipmentForm";
 
 
-export default function Edit({order, status, customer, orderReferences, shipmentInfo, payments, orderSummary}){
+export default function Edit({order, status, customer, orderReferences, shipmentInfo, payments, orderSummary, user}){
 
     // console.log("Customers: ", customer);
 
@@ -170,7 +170,7 @@ Thank you!`;
 
     return <>
 
-        <Layout title={"Orders"}>
+        <Layout title={"Orders"} user={user}>
             
             <div className="flex justify-between items-center">
 
@@ -287,7 +287,7 @@ Thank you!`;
 
                     <span className="absolute top-0">
                         <img 
-                            src={order.remaining_balance <= 0 ? "/images/icons/completed.svg" : "/images/icons/incomplete.svg"}
+                            src={order.total_amount > 0 && order.remaining_balance <= 0 ? "/images/icons/completed.svg" : "/images/icons/incomplete.svg"}
                             alt="" 
                             className="object-contain w-5 h-5"
                         />
@@ -391,7 +391,7 @@ Thank you!`;
                         <div className="flex flex-col gap-y-1">
                             <h1 className="text-sm font-semibold">Customer name:</h1>
                             <div className="border px-3 py-1 rounded-md text-center bg-[#F5F5F5] capitalize">
-                                <span>{orderSummary.receiver_name}</span>
+                                <span>{orderSummary.receiver_name ?? "--"}</span>
                             </div>
                         </div>
 

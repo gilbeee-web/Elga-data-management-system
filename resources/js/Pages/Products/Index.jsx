@@ -1,12 +1,12 @@
 import { router } from "@inertiajs/react"
 import Layout from "../../Layouts/AppLayout"
 import { route } from "ziggy-js";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import ProductModal from "./Components/ProductModal";
 import Swal from "sweetalert2";
 import { formatCurrency } from "../../Utils/formatCurrency";
 
-export default function Dashboard ({products}){
+export default function Dashboard ({products, user}){
 
     const [productInfo, setProductInfo] = useState(null);
 
@@ -63,13 +63,30 @@ export default function Dashboard ({products}){
         
     }
 
-
     const tabs = ['all', 'clothes', 'bags', 'footwear', 'perfume', 'skincare'];
 
     const [activeTab, setActiveTab] = useState(tabs[0]);
 
+    const [previewImage, setPreviewImage] = useState(null);
+
+    useEffect(() => {
+        if (!previewImage) return;
+
+        const handleKeyDown = (e) => {
+            if (e.key === 'Escape') {
+                setPreviewImage(null);
+            }
+        };
+
+        window.addEventListener('keydown', handleKeyDown);
+
+        return () => {
+            window.removeEventListener('keydown', handleKeyDown);
+        };
+    }, [previewImage]);
+
     return <>
-        <Layout title={"Products"}>
+        <Layout title={"Products"} user={user}>
             
             
             <div className="w-full flex justify-between items-center">
@@ -219,11 +236,31 @@ export default function Dashboard ({products}){
                                     Sold: {product.variants_sum_sold}
                                 </div>
 
-                                <img 
+                                <div className="relative group overflow-hidden rounded-t-xl">
+                                    <img 
+                                        src={product.image ? `/storage/${product.image}` : 'images/default_product.png'}
+                                        alt="Product Image" 
+                                        className="w-full h-40 object-cover object-center"
+                                    />
+
+                                    <div 
+                                        className="absolute inset-0 bg-black/40 flex flex-col items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-200"
+                                        onClick={(e) => {
+                                            e.stopPropagation(); // prevent triggering viewProduct
+                                            setPreviewImage(product.image ? `/storage/${product.image}` : 'images/default_product.png');
+                                        }}
+                                    >
+                                        
+                                        <img src="/images/icons/view.svg" className="w-8 h-8 invert" />
+                                        <span className="text-white text-sm">View</span>
+                                    </div>
+                                </div>
+
+                                {/* <img 
                                     src={product.image ? `/storage/${product.image}` : 'images/default_product.png'}
                                     alt="Product Image" 
                                     className="w-full h-40 object-cover object-center rounded-t-xl"
-                                />
+                                /> */}
 
                                
                                 <div className="px-3 py-2">
@@ -258,6 +295,25 @@ export default function Dashboard ({products}){
                 )}
                 
             </div>
+
+            {previewImage && (
+                <div 
+                    className="fixed inset-0 bg-[rgb(0,0,0,0.5)] z-99 flex items-center justify-center"
+                    onClick={() => setPreviewImage(null)}
+                >
+
+                    <button className="absolute top-4 right-4 text-white text-3xl cursor-pointer hover:text-gray-300" onClick={() => setPreviewImage(null)}>
+                        &times;
+                    </button>
+                    
+                    <img 
+                        src={previewImage}
+                        alt="Full preview"
+                        className="max-w-full max-h-full object-contain rounded-lg"
+                        onClick={(e) => e.stopPropagation()}
+                    />
+                </div>
+            )}
 
 
             {

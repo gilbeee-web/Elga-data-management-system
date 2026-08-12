@@ -184,7 +184,7 @@ export default function CustomerForm({order, changeTab, customer, getSaveCustome
                             placeholder="Enter address..."
                             name="address"
                             value={data.address}
-                            className="border rounded-md text-sm w-170 p-2 bg-[#F5F5F5]"
+                            className="border border-gray-400 rounded-md text-sm w-170 p-2 bg-white"
                             onChange={(e) => handleFieldChange("address", e.target.value)}
                         />
 

@@ -3,11 +3,11 @@ import { Link } from "@inertiajs/react";
 
 export default function Navbar({title}){
 
-    const [isOpenProfile, setOpenProfile] = useState(false);
+    // const [isOpenProfile, setOpenProfile] = useState(false);
 
-    function toggleProfile(){
-        setOpenProfile(!isOpenProfile);
-    }
+    // function toggleProfile(){
+    //     setOpenProfile(!isOpenProfile);
+    // }
 
 
 
@@ -19,22 +19,22 @@ export default function Navbar({title}){
                 {title}
             </h1>
 
-            <div className="relative">
+            <div className="">
 
 
-                <button 
-                    className="flex items-center gap-x-10 bg-white shadow-md rounded-l-full px-10 cursor-pointer"
-                    onClick={toggleProfile}
+                <div
+                    className="flex items-center gap-x-10 bg-white shadow-md rounded-l-full px-10"
+                   
                 >
                     <div className="flex flex-col items-center py-1">
                         <p className="font-bold text-lg">Gilbert</p>
                         <p className="text-gray-500 text-xs font-semibold">Admin</p>
                     </div>
 
-                    <img src="/images/logo/default-profile.jpg"  className="object-contain w-10 rounded-full border" />
-                </button>
+                    <img src="/images/logo/default-profile.jpg"  className="object-contain w-10 rounded-full border border-gray-300" />
+                </div>
 
-                {
+                {/* {
                     isOpenProfile &&
                     <div
                         className="absolute right-0 w-[200px] bg-white rounded-lg shadow-lg rounded-bl-4xl"
@@ -44,7 +44,7 @@ export default function Navbar({title}){
                             Logout
                         </Link>
                     </div>
-                }
+                } */}
             </div>
 
         </header>

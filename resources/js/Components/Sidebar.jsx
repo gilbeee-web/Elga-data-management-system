@@ -3,8 +3,9 @@ import NavLink from "./NavLink";
 import { router } from "@inertiajs/react";
 import { route } from "ziggy-js";
 
-export default function Sidebar(){
+export default function Sidebar({user}){
 
+    console.log("User: ", user);
 
     const handleLogout = async () => {
 
@@ -43,12 +44,14 @@ export default function Sidebar(){
                 <NavLink
                     href={route('dashboard.index')}
                     active={route().current('dashboard.*')}
+                    icon={"/images/icons/home.svg"}
                 >
-                    Dashboard
+                    Home
                 </NavLink>
                 <NavLink
                     href={route('order.index')}
                     active={route().current('order.*')}
+                    icon={"/images/icons/orders.svg"}
                 >
                     Orders
                 </NavLink>
@@ -67,12 +70,17 @@ export default function Sidebar(){
                     Reports
                 </NavLink>
 
-                <NavLink
-                    href={route('user.index')}
-                    active={route().current('user.*')}
-                >
-                    Users
-                </NavLink>
+                {
+                    user.role === 'super_admin' && (
+                        <NavLink
+                            href={route('user.index')}
+                            active={route().current('user.*')}
+                        >
+                            Users
+                        </NavLink>
+                    )
+                }
+                
                 
             </nav>
 

@@ -5,7 +5,7 @@ import Navbar from "@/Components/Navbar";
 import Sidebar from "@/Components/Sidebar";
 import FlashMessage from "../Components/FlashMessage";
 
-export default function AppLayout({children, title}){
+export default function AppLayout({children, title, user}){
 
     return (
 
@@ -14,7 +14,7 @@ export default function AppLayout({children, title}){
             <div className="flex h-screen">
                 
                 
-                <Sidebar />
+                <Sidebar user={user} />
 
                 
                 <div className="flex-1 flex flex-col bg-[#DFDFDF]">

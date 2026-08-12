@@ -20,8 +20,8 @@ export default function TextInput({
                 value={value ?? ""}
                 placeholder={placeholder}
                 onChange={onChange}
-                className={`w-50 rounded-md px-2 py-1 bg-[#F5F5F5]
-                    ${error ? "border border-red-500" : "border"}
+                className={`w-50 rounded-md px-2 py-1 bg-white
+                    ${error ? "border border-red-500" : "border border-gray-500"}
                     ${className}`}
             />
 

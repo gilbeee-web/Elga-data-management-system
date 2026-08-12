@@ -83,7 +83,9 @@ Route::middleware('auth')->group(function(){
 Route::middleware('auth')->group(function(){
     Route::prefix('/reports')->group(function(){
         Route::controller(ReportController::class)->group(function(){
-            Route::get('/', 'index')->name('report.index');            
+            Route::get('/', 'index')->name('report.index');
+            Route::get('/export/pdf', 'exportPdf')->name('report.export.pdf');
+            Route::get('/export/excel', 'exportExcel')->name('report.export.excel');       
         });
     });
 });

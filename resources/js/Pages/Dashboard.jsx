@@ -8,7 +8,7 @@ import { router } from "@inertiajs/react";
 import { route } from "ziggy-js";
 
 export default function Dashboard ({
-        totalSales, totalOrders, pendingOrders, totalSfCollected, recentOrders, salesTrend, orderStatusDistribution, view
+        totalSales, totalOrders, pendingOrders, totalSfCollected, recentOrders, salesTrend, orderStatusDistribution, view, user
 }){
 
     const statusClasses = {
@@ -38,7 +38,7 @@ export default function Dashboard ({
 
 
     return <>
-        <Layout title={"Dashboard"}>
+        <Layout title={"Dashboard"} user={user}>
             
             <div className="h-full w-[95%]">
 
@@ -101,7 +101,10 @@ export default function Dashboard ({
                 </div>
 
                 <div className="mt-5 pb-5">
-                    <table className="w-full text-sm text-left border-collapse bg-white shadow-md rounded-lg">
+
+                    <h1 className="text-lg font-bold">Recent Orders</h1>
+
+                    <table className="mt-3 w-full text-sm text-left border-collapse bg-white shadow-md rounded-lg">
                         <thead className="text-gray-500 uppercase text-xs border-b border-gray-300">
                             <tr className="">
                                 <th className="p-3">TRANSACTION NO. / ORDER NO.</th>

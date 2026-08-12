@@ -10,6 +10,7 @@ use App\Models\Shipment;
 use App\Services\OrderService;
 use Exception;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Inertia\Inertia;
 use Illuminate\Validation\ValidationException;
 
@@ -60,6 +61,7 @@ class OrderController extends Controller
         return Inertia::render('Orders/Index', [
             'orders' => $orders,
             'filters' => $request->only(['filter_status', 'search']),
+            'user' => Auth::user()
         ]);
     }   
 
@@ -137,7 +139,8 @@ class OrderController extends Controller
                 'total_paid' => $totalPaid,
                 'total_amount' => $order->total_amount,
                 'remaining_balance' => $order->remaining_balance
-            ]
+            ],
+            'user' => Auth::user()
         ]);
     }
 

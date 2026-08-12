@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Product;
 use App\Services\ProductService;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Inertia\Inertia;
 
 class ProductController extends Controller
@@ -40,6 +41,7 @@ class ProductController extends Controller
 
         return Inertia::render('Products/Index', [
             'products' => $products,
+            'user' => Auth::user()
         ]);
 
     }
@@ -58,7 +60,7 @@ class ProductController extends Controller
     }
 
     public function create(){
-        return Inertia::render('Products/CreateProduct');
+        return Inertia::render('Products/CreateProduct', ['user' => Auth::user()]);
     }
 
 
@@ -90,7 +92,8 @@ class ProductController extends Controller
         $product->load('variants');
 
         return Inertia::render('Products/EditProduct', [
-            'product' => $product
+            'product' => $product,
+            'user' => Auth::user()
         ]);
     }
 

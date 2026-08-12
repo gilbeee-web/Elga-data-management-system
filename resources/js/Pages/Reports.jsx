@@ -1,13 +1,13 @@
 import { useState } from "react";
 import Layout from "../Layouts/AppLayout";
-import ReportsDateRange from "../Components/ReportsDateRange";
 import { router, useForm } from "@inertiajs/react";
 import SummaryCard from "../Components/SummaryCard"; 
 import { formatDateTime } from "../Utils/formatDateTime";
 import { formatCurrency } from "../Utils/formatCurrency";
 import ReportFilterModal from "../Components/ReportFilterModal";
+import ExportButton from "../Components/ExportButton";
 
-export default function Reports({filters, summaryCards, transactions}){
+export default function Reports({filters, summaryCards, transactions, user}){
 
     console.log("Summary cards: ", summaryCards.totalOrders);
     console.log("Transactions: ", transactions);
@@ -30,10 +30,12 @@ export default function Reports({filters, summaryCards, transactions}){
             onFinish: () => setIsFetchingData(false),
         });
     };
-    
+
+    const [isExport, setIsExport] = useState(false);
+
     return <>
 
-        <Layout title={"Reports"}>
+        <Layout title={"Reports"} user={user}>
 
             <h1 className="text-lg font-bold">Sales Report</h1>
 
@@ -74,8 +76,10 @@ export default function Reports({filters, summaryCards, transactions}){
 
                 </div>
 
-                <div className="">
-                    <button className="bg-green-500 text-white px-3 py-2 rounded-md">Export</button>
+                <div>
+                
+                    <ExportButton filters={filters}/>
+
                 </div>
 
 
@@ -188,6 +192,38 @@ export default function Reports({filters, summaryCards, transactions}){
 
                     </tbody>
                 </table>
+                
+                {transactions.data.length > 0 && (
+                    <div className="flex justify-between items-center mt-4 text-sm text-gray-600">
+                        <span>
+                            Showing {transactions.from ?? 0}–{transactions.to ?? 0} of {transactions.total} transactions
+                        </span>
+                        <div className="flex gap-1">
+                            {transactions.links.map((link, i) => (
+                                <button
+                                    key={i}
+                                    disabled={!link.url}
+                                    onClick={() =>
+                                        link.url &&
+                                        router.get(
+                                            link.url,
+                                            {},
+                                            { preserveState: true, preserveScroll: true}
+                                        )
+                                    }
+                                    className={`px-3 py-1 rounded ${
+                                        link.active
+                                            ? 'bg-blue-500 text-white'
+                                            : 'bg-gray-100 hover:bg-gray-200'
+                                    } ${!link.url ? 'opacity-40 cursor-not-allowed' : 'cursor-pointer'}`}
+                                    dangerouslySetInnerHTML={{ __html: link.label }}
+                                />
+                            ))}
+                        </div>
+                    </div>
+                )}
+
+
             </div>
 
 

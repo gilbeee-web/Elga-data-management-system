@@ -167,9 +167,9 @@ export default function ShipmentForm({order, customer, orderReferences, shipping
 
                     <div className="mt-2">
                         <ul className="flex gap-x-3 items-center">
-                            <li className="font-semibold text-gray-500">{customer.receiver_name}</li>
-                            <li className="font-semibold text-gray-500"><span className="text-black">|</span> {customer.contact_number}</li>
-                            <li className="font-semibold text-gray-500"><span className="text-black">|</span> {customer.address}</li>
+                            <li className="font-semibold text-gray-500">{customer.receiver_name ?? "--"}</li>
+                            <li className="font-semibold text-gray-500"><span className="text-black">|</span> {customer.contact_number ?? "--"}</li>
+                            <li className="font-semibold text-gray-500"><span className="text-black">|</span> {customer.address ?? "--"}</li>
                         </ul>
                     </div>
                     
@@ -258,9 +258,9 @@ export default function ShipmentForm({order, customer, orderReferences, shipping
 
                     <div className="mt-2">
                         <ul className="flex gap-x-3 items-center">
-                            <li className="font-semibold text-gray-500 capitalize">{shippingInfo.container_size} {shippingInfo.container_type}</li>
-                            <li className="font-semibold text-gray-500"><span className="text-black">|</span> Fee {formatCurrency(shippingInfo.total_shipping_fee)}</li>
-                            <li className="font-semibold text-gray-500"><span className="text-black">|</span> {shippingInfo.tracking_number}</li>
+                            <li className="font-semibold text-gray-500 capitalize">{shippingInfo?.container_size ?? "--"} {shippingInfo?.container_type ?? "--"}</li>
+                            <li className="font-semibold text-gray-500"><span className="text-black">|</span> Fee {formatCurrency(shippingInfo?.total_shipping_fee ?? 0)}</li>
+                            <li className="font-semibold text-gray-500"><span className="text-black">|</span> {shippingInfo?.tracking_number ?? "--"}</li>
                         </ul>
                     </div>
 

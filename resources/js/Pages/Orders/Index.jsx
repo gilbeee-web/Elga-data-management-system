@@ -6,7 +6,7 @@ import { formatDateTime } from "../../Utils/formatDateTime";
 import { formatCurrency } from "../../Utils/formatCurrency";
 import TextInput from "../../Components/TextInput";
 
-export default function Index ({orders}){
+export default function Index ({orders, user}){
 
 
     console.log("Orders: ", orders);
@@ -76,7 +76,7 @@ export default function Index ({orders}){
 
 
     return <>
-        <Layout title={"Orders"}>
+        <Layout title={"Orders"} user={user}>
             
             <div className="flex justify-between items-center">
                 <h1 className="font-bold text-2xl border-b-3 inline-block border-red-500">
@@ -192,23 +192,6 @@ export default function Index ({orders}){
 
 
             <div className="mt-5">
-
-                {/* <div className="ml-20 relative w-full max-w-xs">
-                    <input
-                        type="text"
-                        placeholder="Search product..."
-                        className="w-full rounded-md py-2 pl-3 bg-white"
-                    />
-
-                    <button className="absolute top-0 right-0 h-full px-4 bg-[#DF9BAA] rounded-r-md flex items-center justify-center">
-                        <img
-                            src="/images/icons/search-icon.png"
-                            alt="Search"
-                            className="w-5 h-5"
-                        />
-                    </button>
-                </div> */}
-
                 <div className="w-full flex justify-end relative">
                     <input 
                         type="text" 
@@ -234,7 +217,7 @@ export default function Index ({orders}){
                 
                 <table className="mt-5 w-full text-sm text-left border-collapse bg-white shadow-md rounded-lg">
                     <thead className="text-gray-600 uppercase text-xs border-b border-gray-300">
-                        <tr className="bg-gray-300">
+                        <tr>
                             <th className="p-3">TRANSACTION NO. / ORDER NO.</th>
                             <th className="p-3">CUSTOMER NAME</th>
                             <th className="p-3">
@@ -278,7 +261,7 @@ export default function Index ({orders}){
                                             ))}
                                             
                                         </td>
-                                        <td className="p-3">{order.sender_name}</td>
+                                        <td className="p-3">{order.sender_name ?? "--"}</td>
                                         <td className="p-3">
                                             {
                                                 activeTab === "payment" 

@@ -6,6 +6,7 @@ use App\Models\Order;
 use App\Models\Payment;
 use App\Models\Shipment;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Inertia\Inertia;
 
 class DashboardController extends Controller
@@ -67,7 +68,8 @@ class DashboardController extends Controller
             'recentOrders' => $recentOrders,
             'salesTrend' => $salesTrend,
             'orderStatusDistribution' => $orderStatusBreakdown,
-            'view' => $view
+            'view' => $view,
+            'user' => Auth::user()
         ]);
     }
 }

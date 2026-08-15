@@ -6,6 +6,7 @@ import { formatDateTime } from "../Utils/formatDateTime";
 import { formatCurrency } from "../Utils/formatCurrency";
 import ReportFilterModal from "../Components/ReportFilterModal";
 import ExportButton from "../Components/ExportButton";
+import { ArrowLeftRight, ChartNoAxesCombined, Funnel, Search, Truck } from "lucide-react";
 
 export default function Reports({filters, summaryCards, transactions, user}){
 
@@ -37,14 +38,14 @@ export default function Reports({filters, summaryCards, transactions, user}){
 
         <Layout title={"Reports"} user={user}>
 
-            <h1 className="text-lg font-bold">Sales Report</h1>
+            <h1 className="font-bold text-2xl">Sales Report</h1>
 
             <div className="w-full mt-5 flex justify-between items-center">
 
                 <div className="flex gap-x-5 items-center">
                 
                     <div className="flex items-center gap-2 bg-white border border-[#E2E0D8] rounded-lg px-3 h-10 w-100">
-                        <img src="/images/icons/search.svg" alt="Search icon" className="object-contain w-5 h-5 opacity-50" />
+                        <Search strokeWidth={1} size={20} color="gray"/>
 
                         <input
                             type="text"
@@ -64,11 +65,7 @@ export default function Reports({filters, summaryCards, transactions, user}){
                         className="flex gap-x-2 items-center border border-gray-300 shadow-sm px-3 py-2 bg-white rounded-lg cursor-pointer hover:bg-gray-100"
                         onClick={() => setOpenFilter(true)}
                     >
-                        <img
-                            src="/images/icons/filter.svg"
-                            alt="Filter"
-                            className="object-contain w-5 h-5"
-                        />
+                        <Funnel strokeWidth={2} size={15} />
 
                         <span className="text-sm font-semibold">Filter</span>
 
@@ -101,7 +98,7 @@ export default function Reports({filters, summaryCards, transactions, user}){
                     cardName={"Transactions"}
                     isCurrency={false}
                     value={summaryCards.totalTransactions}
-                    icon={"/images/icons/transaction.svg"}
+                    icon={ArrowLeftRight}
                     
                 />
 
@@ -109,7 +106,7 @@ export default function Reports({filters, summaryCards, transactions, user}){
                     cardName={"Sales"}
                     isCurrency={true}
                     value={summaryCards.totalSales}
-                    icon={"/images/icons/sales.svg"}
+                    icon={ChartNoAxesCombined}
                     
                 />
 
@@ -119,8 +116,7 @@ export default function Reports({filters, summaryCards, transactions, user}){
                     cardName={"Shipping fee collected"}
                     isCurrency={true}
                     value={summaryCards.totalSfCollected}
-                    icon={"/images/icons/truck-icon.svg"}
-                    
+                    icon={Truck}
                 />
             </div>
 

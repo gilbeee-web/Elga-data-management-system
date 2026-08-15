@@ -418,6 +418,27 @@ class OrderService{
     }
 
 
+    public function cancelOrder(Order $order)
+    {
+        if ($order->order_status === 'cancelled') {
+            throw ValidationException::withMessages([
+                'error' => 'This order is already cancelled.'
+            ]);
+        }
+
+        if ($order->order_status === 'shipped') {
+            throw ValidationException::withMessages([
+                'error' => 'Shipped orders cannot be cancelled directly.'
+            ]);
+        }
+
+        $order->update([
+            'order_status' => 'cancelled',
+        ]);
+
+        return $order;
+    }
+
     
 
 }

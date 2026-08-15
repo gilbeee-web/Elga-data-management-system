@@ -122,7 +122,7 @@ export default function PaymentFormModal({order, onClose, payment, onSubmitPayme
                             <input
                                 type="text"
                                 placeholder="0.00"
-                                className="w-50 border bg-[#F5F5F5] rounded-md px-3 py-1"
+                                className="w-50 border border-gray-400 bg-white rounded-md px-3 py-1"
                                 value={
                                     isEditing
                                         ? data.payment_amount
@@ -149,7 +149,7 @@ export default function PaymentFormModal({order, onClose, payment, onSubmitPayme
                             <label htmlFor="payment_method" className="font-semibold">Payment Method:<span className="text-red-500">*</span></label>
                             <select 
                                 name="payment_method"
-                                className="border bg-white px-2 py-1 rounded-md max-w-50"
+                                className="border border-gray-400 bg-white px-2 py-1 rounded-md max-w-55"
                                 value={data.payment_method}
                                 onChange={(e) => setData("payment_method",e.target.value)}
                             >
@@ -244,7 +244,7 @@ export default function PaymentFormModal({order, onClose, payment, onSubmitPayme
                         <textarea 
                             value={data.remarks}
                             onChange={(e) => setData("remarks",e.target.value)} 
-                            className="border p-3 rounded-md"
+                            className="border border-gray-400 p-3 rounded-md"
                         >
 
                         </textarea>

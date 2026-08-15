@@ -6,6 +6,7 @@ import { formatCurrency } from "../Utils/formatCurrency";
 import { formatDateTime } from "../Utils/formatDateTime";
 import { router } from "@inertiajs/react";
 import { route } from "ziggy-js";
+import { ChartNoAxesCombined, ClipboardClock, ShoppingCart, Truck } from "lucide-react";
 
 export default function Dashboard ({
         totalSales, totalOrders, pendingOrders, totalSfCollected, recentOrders, salesTrend, orderStatusDistribution, view, user
@@ -60,7 +61,7 @@ export default function Dashboard ({
                         cardName={"Sales"}
                         isCurrency={true}
                         value={totalSales}
-                        icon={"/images/icons/sales.svg"}
+                        icon={ChartNoAxesCombined}
                         
                     />
 
@@ -68,7 +69,7 @@ export default function Dashboard ({
                         cardName={"Orders"}
                         isCurrency={false}
                         value={totalOrders}
-                        icon={"/images/icons/orders.svg"}
+                        icon={ShoppingCart}
                        
                     />
 
@@ -76,7 +77,7 @@ export default function Dashboard ({
                         cardName={"Pending orders"}
                         isCurrency={false}
                         value={totalOrders}
-                        icon={"/images/icons/pending-orders.svg"}
+                        icon={ClipboardClock}
                        
                     />
 
@@ -84,7 +85,7 @@ export default function Dashboard ({
                         cardName={"Shipping fee collected"}
                         isCurrency={true}
                         value={totalSfCollected}
-                        icon={"/images/icons/truck-icon.svg"}
+                        icon={Truck}
                        
                     />
                 </div>

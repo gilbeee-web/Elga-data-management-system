@@ -1,3 +1,4 @@
+import { SquarePen, Trash2 } from "lucide-react";
 import { formatCurrency } from "../../../Utils/formatCurrency";
 
 export default function ProductModal({product, onClose, editProduct, deleteProduct}){
@@ -41,16 +42,18 @@ export default function ProductModal({product, onClose, editProduct, deleteProdu
 
                     <div className="flex gap-x-3 items-center">
                         <button 
-                            className="p-2 text-sm bg-green-500 rounded-md text-white cursor-pointer hover:bg-green-400"
+                            className="p-2 flex gap-x-2 items-center text-sm border border-gray-400 bg-white hover:bg-gray-100 rounded-md cursor-pointer font-semibold"
                             onClick={() => editProduct(product.id)}
                         >
-                            Edit product
+                            <SquarePen size={20}/>
+                            Edit
                         </button>
                         <button 
-                            className="p-2 text-sm bg-red-700 rounded-md text-white cursor-pointer hover:bg-red-600"
+                            className="p-2 flex gap-x-2 items-center text-sm bg-red-500 rounded-md text-white font-semibold cursor-pointer hover:bg-red-400"
                             onClick={() => deleteProduct(product.id)}
                         >
-                            Delete product
+                            <Trash2 size={20}/>
+                            Delete
                         </button>
                     </div>
                 </div>

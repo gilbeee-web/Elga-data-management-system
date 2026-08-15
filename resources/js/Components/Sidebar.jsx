@@ -2,6 +2,7 @@ import Swal from "sweetalert2";
 import NavLink from "./NavLink";
 import { router } from "@inertiajs/react";
 import { route } from "ziggy-js";
+import { FileText, LayoutDashboard, LogOut, ShoppingBag, ShoppingBasket, ShoppingCart, UsersRound } from "lucide-react";
 
 export default function Sidebar({user}){
 
@@ -36,23 +37,24 @@ export default function Sidebar({user}){
         <aside className="w-64 shadow-md bg-white min-h-screen z-99 relative">
 
             <div className="px-3 py-3 font-bold text-lg shadow-sm flex gap-x-3 items-center bg-[#C3252B] bg-[#DF9BAA]">
-                <p>Logo</p>
-                <h1>App</h1>
+                <img src="/images/logo/elga-logo.jpg" alt="Elga logo" className="object-contain w-7 h-7 rounded-full border border-gray-400 shadow-md" />
+                <h1 className="text-lg text-white font-bold">Elga DMS</h1>
             </div>
 
             <nav className="py-5 space-y-2">
                 <NavLink
                     href={route('dashboard.index')}
                     active={route().current('dashboard.*')}
-                    icon={"/images/icons/home.svg"}
                 >
-                    Home
+                    <LayoutDashboard size={20}/>
+                    Dashboard
                 </NavLink>
                 <NavLink
                     href={route('order.index')}
                     active={route().current('order.*')}
-                    icon={"/images/icons/orders.svg"}
                 >
+                    
+                    <ShoppingCart size={20}/>
                     Orders
                 </NavLink>
 
@@ -60,6 +62,7 @@ export default function Sidebar({user}){
                     href={route('product.index')}
                     active={route().current('product.*')}
                 >
+                    <ShoppingBasket size={20}/>
                     Products
                 </NavLink>
 
@@ -67,6 +70,7 @@ export default function Sidebar({user}){
                     href={route('report.index')}
                     active={route().current('report.*')}
                 >
+                    <FileText size={20}/>
                     Reports
                 </NavLink>
 
@@ -76,6 +80,7 @@ export default function Sidebar({user}){
                             href={route('user.index')}
                             active={route().current('user.*')}
                         >
+                            <UsersRound size={20}/>
                             Users
                         </NavLink>
                     )
@@ -90,7 +95,7 @@ export default function Sidebar({user}){
             >
 
                 <div className="flex items-center gap-x-3 text-lg font-semibold">
-                    <img src="/images/icons/logout-icon.svg" alt="Logout icon" className="object-containt w-7 h-7"/>
+                    <LogOut size={30}/>
                     Logout
                 </div>
                 

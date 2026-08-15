@@ -5,13 +5,14 @@ import { useState } from "react";
 import { formatDateTime } from "../../Utils/formatDateTime";
 import { formatCurrency } from "../../Utils/formatCurrency";
 import TextInput from "../../Components/TextInput";
+import { CircleOff, HandCoins, PackageCheck, RotateCwFadingClock, Search, SquarePen, Truck } from "lucide-react";
 
 export default function Index ({orders, user}){
 
 
     console.log("Orders: ", orders);
 
-    const tabs = ['all', 'draft', 'shipping', 'payment', 'processing', 'shipped'];
+    const tabs = ['all', 'draft', 'shipping', 'payment', 'processing', 'shipped', 'cancelled'];
 
     const [activeTab, setActiveTab] = useState(tabs[0]);
 
@@ -23,7 +24,6 @@ export default function Index ({orders, user}){
     const handleTab = (selectedTab) => {
         setIsFetchingData(true);
 
-        // Map tab names to backend filter values
         let filterValue = selectedTab;
         if (selectedTab === "payment") {
             filterValue = "awaiting_payment";
@@ -65,6 +65,7 @@ export default function Index ({orders, user}){
         payment_confirmed: "bg-blue-500",
         processing: "bg-yellow-500",
         shipped: "bg-green-500",
+        cancelled: "bg-gray-800", 
     };
 
     const orderStatusDisplay = {
@@ -79,7 +80,7 @@ export default function Index ({orders, user}){
         <Layout title={"Orders"} user={user}>
             
             <div className="flex justify-between items-center">
-                <h1 className="font-bold text-2xl border-b-3 inline-block border-red-500">
+                <h1 className="font-bold text-2xl">
                     Order List
                 </h1>
 
@@ -114,12 +115,13 @@ export default function Index ({orders, user}){
                     onClick={() => handleTab(tabs[1])}
                 >
                     <span
-                        className={`text-2xl font-bold ${
+                        className={`flex gap-x-2 items-center text-2xl font-bold ${
                             activeTab === tabs[1] 
                             ? "border-b-3 border-green-600"
                             : "text-gray-400"
                         }`}
                     >
+                        <SquarePen strokeWidth={2} size={20} />
                         Draft
                     </span>
                     
@@ -130,12 +132,13 @@ export default function Index ({orders, user}){
                     onClick={() => handleTab(tabs[2])}
                 >
                     <span
-                        className={`text-2xl font-bold ${
+                        className={`flex gap-x-2 items-center text-2xl font-bold ${
                             activeTab === tabs[2] 
                             ? "border-b-3 border-green-600"
                             : "text-gray-400"
                         }`}
                     >
+                        <Truck strokeWidth={2} size={20} />
                         Shipping
                     </span>
                     
@@ -146,12 +149,13 @@ export default function Index ({orders, user}){
                     onClick={() => handleTab(tabs[3])}
                 >
                     <span
-                        className={`text-2xl font-bold ${
+                        className={`flex gap-x-2 items-center text-2xl font-bold ${
                             activeTab === tabs[3] 
                             ? "border-b-3 border-green-600"
                             : "text-gray-400"
                         }`}
                     >
+                        <HandCoins strokeWidth={2} size={20} />
                         Payment
                     </span>
                     
@@ -162,12 +166,13 @@ export default function Index ({orders, user}){
                     onClick={() => handleTab(tabs[4])}
                 >
                     <span
-                        className={`text-2xl font-bold ${
+                        className={`flex gap-x-2 items-center text-2xl font-bold ${
                             activeTab === tabs[4] 
                             ? "border-b-3 border-green-600"
                             : "text-gray-400"
                         }`}
                     >
+                        <RotateCwFadingClock strokeWidth={2} size={20} />
                         Processing
                     </span>
                 </button>
@@ -177,13 +182,30 @@ export default function Index ({orders, user}){
                     onClick={() => handleTab(tabs[5])}
                 >
                     <span
-                        className={`text-2xl font-bold ${
+                        className={`flex gap-x-2 items-center text-2xl font-bold ${
                             activeTab === tabs[5] 
                             ? "border-b-3 border-green-600"
                             : "text-gray-400"
                         }`}
                     >
+                        <PackageCheck strokeWidth={2} size={20} />
                         Shipped
+                    </span>
+                </button>
+
+                <button 
+                    className="text-start cursor-pointer"
+                    onClick={() => handleTab(tabs[6])}
+                >
+                    <span
+                        className={`flex gap-x-2 items-center text-2xl font-bold ${
+                            activeTab === tabs[6] 
+                            ? "border-b-3 border-green-600"
+                            : "text-gray-400"
+                        }`}
+                    >
+                        <CircleOff strokeWidth={2} size={20} />
+                        Cancelled
                     </span>
                 </button>
 
@@ -207,11 +229,7 @@ export default function Index ({orders, user}){
                     />
 
                     <button className="absolute top-0 right-0 h-full px-4 bg-[#DF9BAA] rounded-r-md flex items-center justify-center">
-                        <img
-                            src="/images/icons/search-icon.png"
-                            alt="Search"
-                            className="w-5 h-5"
-                        />
+                        <Search size={20} color={"#FFFF"} strokeWidth={3} />
                     </button>
                 </div>
                 

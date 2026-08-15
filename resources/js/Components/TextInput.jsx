@@ -8,6 +8,7 @@ export default function TextInput({
     className = "",
     error = "",
     required = false,
+    isDisabled
 }){
     return(
         <div className="flex flex-col gap-y-1">
@@ -20,8 +21,10 @@ export default function TextInput({
                 value={value ?? ""}
                 placeholder={placeholder}
                 onChange={onChange}
-                className={`w-50 rounded-md px-2 py-1 bg-white
-                    ${error ? "border border-red-500" : "border border-gray-500"}
+                disabled={isDisabled}
+                className={`w-50 rounded-md px-2 py-1
+                    ${isDisabled ? "bg-gray-100 text-gray-500 cursor-not-allowed" : "bg-white"}
+                    ${error ? "border border-red-500" : isDisabled ? "border border-gray-300" : "border border-gray-500"}
                     ${className}`}
             />
 

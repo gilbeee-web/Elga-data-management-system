@@ -308,6 +308,31 @@ class OrderController extends Controller
     }
 
 
+    public function destroyOrder(Order $order)
+    {
+        if ($order->payments()->exists()) {
+            return back()->with('error', 'Cannot delete an order with existing payments. This record must be kept for financial history.');
+        }
+
+        if (!in_array($order->order_status, ['draft', 'cancelled'])) {
+            return back()->with('error', 'Only draft or cancelled orders can be deleted.');
+        }
+
+        $order->delete();
+        return redirect()->route('order.index')->with('success', 'Order deleted.');
+    }
+
+    public function cancelOrder(Order $order){
+        try{
+            $this->orderService->cancelOrder($order);
+        }catch(Exception $e){
+            return redirect()->back()->with('error', 'Error in cancelling the order.');
+        }
+        
+        return redirect()->route('order.index')->with('success', 'Order cancelled.');
+    }
+
+
 
 
 

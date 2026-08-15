@@ -6,7 +6,7 @@ import { router, useForm } from "@inertiajs/react";
 import { formatCurrency } from "../../../Utils/formatCurrency";
 import Swal from "sweetalert2";
 
-export default function OrderForm({order, changeTab, orderReferences: initialOrderReferences}){
+export default function OrderForm({order, changeTab, orderReferences: initialOrderReferences, readOnly}){
 
 
     console.log("Order Form (order references init): ", initialOrderReferences);
@@ -359,7 +359,11 @@ export default function OrderForm({order, changeTab, orderReferences: initialOrd
                                                         placeholder="Enter order number"
                                                         value={order.order_number}
                                                         onChange={(e) => handleOrderNumberChange(orderIndex, e.target.value)}
-                                                        className="border border-gray-400 rounded-md bg-white py-1 px-2"
+                                                        disabled={readOnly}
+                                                        className={`border rounded-md bg-white py-1 px-2 ${
+                                                            readOnly ? "bg-gray-100 border-gray-300 text-gray-500"
+                                                            : "bg-white border-gray-400"
+                                                        }`}
                                                     />
                                                 </div>
 
@@ -446,22 +450,26 @@ export default function OrderForm({order, changeTab, orderReferences: initialOrd
 
                                                                     <div className="flex flex-col min-w-0">
                                                                         <h1 className="text-sm font-medium uppercase truncate">
-                                                                            {item.name}
+                                                                            {item.name} {readOnly && (<span className="text-gray-400">- {item.variants.find(v => v.id === item.selected_variant_id)?.variant_name ?? ""}</span>)}
                                                                         </h1>
-
-                                                                        <select
-                                                                            value={item.selected_variant_id ?? ""}
-                                                                            onChange={(e) =>
-                                                                                handleItemChange(orderIndex, itemIndex, "selected_variant_id", Number(e.target.value))
-                                                                            }
-                                                                            className="text-xs text-gray-500 cursor-pointer bg-transparent focus:outline-none"
-                                                                        >
-                                                                            {item.variants.map((variant) => (
-                                                                                <option value={variant.id} key={variant.id}>
-                                                                                    {variant.variant_name}
-                                                                                </option>
-                                                                            ))}
-                                                                        </select>
+                                                                        {
+                                                                            !readOnly && (
+                                                                                <select
+                                                                                    value={item.selected_variant_id ?? ""}
+                                                                                    onChange={(e) =>
+                                                                                        handleItemChange(orderIndex, itemIndex, "selected_variant_id", Number(e.target.value))
+                                                                                    }
+                                                                                    className="text-xs text-gray-500 cursor-pointer bg-transparent focus:outline-none"
+                                                                                >
+                                                                                    {item.variants.map((variant) => (
+                                                                                        <option value={variant.id} key={variant.id}>
+                                                                                            {variant.variant_name}
+                                                                                        </option>
+                                                                                    ))}
+                                                                                </select>
+                                                                            )
+                                                                        }
+                                                                        
                                                                     </div>
                                                                 </div>
 
@@ -486,7 +494,11 @@ export default function OrderForm({order, changeTab, orderReferences: initialOrd
                                                                             onChange={(e) =>
                                                                                 handleItemChange(orderIndex, itemIndex, "qty", Number(e.target.value))
                                                                             }
-                                                                            className="py-1.5 border border-gray-300 w-16 rounded-md text-center text-sm bg-white focus:outline-none focus:ring-2 focus:ring-blue-200 focus:border-blue-400"
+                                                                            disabled={readOnly}
+                                                                            className={`py-1.5 border w-16 rounded-md text-center text-sm bg-white  ${
+                                                                                readOnly ? "bg-gray-100 border-gray-300 text-gray-500"
+                                                                                : "bg-white border-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-200 focus:border-blue-400"
+                                                                            }`}
                                                                         />
                                                                     </div>
 
@@ -499,7 +511,11 @@ export default function OrderForm({order, changeTab, orderReferences: initialOrd
                                                                             onChange={(e) =>
                                                                                 handleItemChange(orderIndex, itemIndex, "discount", Number(e.target.value))
                                                                             }
-                                                                            className="py-1.5 border border-gray-300 w-16 rounded-md text-center text-sm bg-white focus:outline-none focus:ring-2 focus:ring-blue-200 focus:border-blue-400"
+                                                                            disabled={readOnly}
+                                                                            className={`py-1.5 border w-16 rounded-md text-center text-sm bg-white  ${
+                                                                                readOnly ? "bg-gray-100 border-gray-300 text-gray-500"
+                                                                                : "bg-white border-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-200 focus:border-blue-400"
+                                                                            }`}
                                                                         />
                                                                     </div>
 
@@ -510,28 +526,39 @@ export default function OrderForm({order, changeTab, orderReferences: initialOrd
                                                                             {formatCurrency(getItemTotal(item))}
                                                                         </div>
                                                                     </div>
-
-                                                                    <button
-                                                                        onClick={() => handleRemoveItem(orderIndex, itemIndex)}
-                                                                        type="button"
-                                                                        aria-label="Remove item"
-                                                                        className="w-7 h-7 cursor-pointer flex items-center justify-center rounded-md border border-gray-300 text-red-600 hover:bg-red-50 flex-shrink-0"
-                                                                    >
-                                                                        X
-                                                                    </button>
+                                                                    
+                                                                    {
+                                                                        !readOnly ? (
+                                                                            <button
+                                                                                onClick={() => handleRemoveItem(orderIndex, itemIndex)}
+                                                                                type="button"
+                                                                                aria-label="Remove item"
+                                                                                className="w-7 h-7 cursor-pointer flex items-center justify-center rounded-md border border-gray-300 text-red-600 hover:bg-red-50 flex-shrink-0"
+                                                                            >
+                                                                                X
+                                                                            </button>
+                                                                        ):
+                                                                        <div></div>
+                                                                    }
+                                                                    
                                                                 </div>
                                                             </div>
                                                         ))}
 
-                                                        <div className="flex justify-center mt-4">
-                                                            <button
-                                                                type="button"
-                                                                className="text-sm text-gray-500 border border-gray-300 hover:bg-gray-50 px-4 py-1.5 rounded-md flex items-center gap-1 cursor-pointer"
-                                                                onClick={() => handleOpenProductList(orderIndex)}
-                                                            >
-                                                                + Add item
-                                                            </button>
-                                                        </div>
+                                                        {
+                                                            !readOnly && (
+                                                                <div className="flex justify-center mt-4">
+                                                                    <button
+                                                                        type="button"
+                                                                        className="text-sm text-gray-500 border border-gray-300 hover:bg-gray-50 px-4 py-1.5 rounded-md flex items-center gap-1 cursor-pointer"
+                                                                        onClick={() => handleOpenProductList(orderIndex)}
+                                                                    >
+                                                                        + Add item
+                                                                    </button>
+                                                                </div>
+                                                            )
+                                                        }
+                                                        
                                                     </div>
                                                 )
                                             }
@@ -548,7 +575,7 @@ export default function OrderForm({order, changeTab, orderReferences: initialOrd
                         }
                         
                         {
-                            data.orderReferences?.length > 0 && data.orderReferences[0].items?.length > 0 && (
+                            data.orderReferences?.length > 0 && data.orderReferences[0].items?.length > 0 && !readOnly && (
 
                                 <div className="h-full flex items-center gap-4 pb-5">
                                     <div className="flex-1 border-t border-gray-300"></div>
@@ -573,11 +600,18 @@ export default function OrderForm({order, changeTab, orderReferences: initialOrd
             </div>
 
             <div className="sticky bottom-0 bg-white border-t border-gray-200 rounded-t-xl shadow-[0_-4px_12px_rgba(0,0,0,0.06)] px-6 py-4 flex items-center justify-between">
- 
+                
+                
+
                 <div className="flex items-center gap-7">
 
-                   
-            
+                    {
+                        readOnly && (
+                            <div className="bg-gray-200 px-3 py-2 rounded-md">
+                                <span className="text-sm font-semibold">Review total:</span>  
+                            </div>
+                        )
+                    }
                     <div className="flex flex-col">
                         <span className="text-xs text-gray-400">Qty</span>
                         <span className="text-sm font-medium text-gray-900">{grandTotals.grand_totalQty}</span>
@@ -601,47 +635,32 @@ export default function OrderForm({order, changeTab, orderReferences: initialOrd
                     </div>
             
                 </div>
-            
-                <button
-                    type="submit"
-                    className="h-[42px] px-7 bg-green-500 hover:bg-green-600 text-white text-sm font-medium rounded-md cursor-pointer"
-                >
-                    Save
-                </button>
-            
-            </div>
-
-            {/* <div className="bg-white shadow-lg border border-gray-400 rounded-md min-h-20 w-full">
-                    
-                <div className="h-full flex justify-between items-center px-5">
-
-                    <div className="flex gap-x-5 items-center">
-                        <h1>Subtotal: {formatCurrency(grandTotals.grand_totalSubtotal)}</h1>
-                        <h1>Grand Total: {formatCurrency(grandTotals.grand_finalTotal)}</h1>
-                        <h1>Total Discount: {formatCurrency(grandTotals.grand_totalDiscount)}</h1>
-                        <h1>Total Qty: {grandTotals.grand_totalQty}</h1>
-                    </div>
-
-                    <div className="">
+                
+                {
+                    !readOnly ? (
                         <button
-                            disabled={data.orderReferences?.length > 0 && data.orderReferences[0].items.length <= 0}
-                            className={
-                                data.orderReferences?.length > 0 && data.orderReferences[0].items.length > 0
-                                    ? "bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-md cursor-pointer"
-                                    : "bg-gray-400 text-white px-4 py-2 rounded-md cursor-pointer"
-                            }
                             type="submit"
+                            className="h-[42px] px-7 bg-green-500 hover:bg-green-600 text-white text-sm font-medium rounded-md cursor-pointer"
                         >
                             Save
                         </button>
-                    </div>
+                    ) :
+                    (
+                        <div className="absolute bottom-5 right-3 flex justify-end">
+                            <button 
+                                type="button" 
+                                className="px-8 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-400 cursor-pointer"
+                                onClick={() => changeTab("shipping")}
+                            >
+                                Next
+                            </button>
+                        </div>
+                    )
 
-
-                </div>
-
+                }
                 
-
-            </div> */}
+            
+            </div>
         </form>
 
         {/* modal to search and add product to order number */}

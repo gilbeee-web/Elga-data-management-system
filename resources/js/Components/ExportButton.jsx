@@ -1,3 +1,4 @@
+import { Share } from 'lucide-react';
 import { useState, useRef, useEffect } from 'react';
 
 export default function ExportButton({ filters }) {
@@ -54,7 +55,7 @@ export default function ExportButton({ filters }) {
                 className="bg-blue-500 text-white px-3 py-2 rounded-md cursor-pointer hover:bg-blue-600 flex gap-x-2 items-center"
                 onClick={() => setIsExport(!isExport)}
             >
-                <img src="/images/icons/export.svg" alt="Export icon" className="object-contain w-4 h-4" />
+                <Share strokeWidth={2} size={15} />
                 <span className='font-semibold'>Export</span>
             </button>
 

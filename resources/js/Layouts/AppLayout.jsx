@@ -19,7 +19,7 @@ export default function AppLayout({children, title, user}){
                 
                 <div className="flex-1 flex flex-col bg-[#DFDFDF]">
 
-                    <Navbar title={title} />
+                    <Navbar title={title} user={user} />
                     
                     <main className="py-3 px-6 overflow-y-auto flex-1">
                         {children}

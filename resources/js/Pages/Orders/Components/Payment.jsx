@@ -6,7 +6,7 @@ import Swal from "sweetalert2";
 import { router } from "@inertiajs/react";
 import { route } from "ziggy-js";
 
-export default function Payment({order, orderSummary, payments, changeTab}){
+export default function Payment({order, orderSummary, payments, changeTab, readOnly}){
 
     console.log("Payments: ", payments);
 
@@ -87,7 +87,7 @@ export default function Payment({order, orderSummary, payments, changeTab}){
                         <h2 className="text-lg font-semibold">Payment History:</h2>
 
                         {
-                            payments.length > 0 && (
+                            payments.length > 0 && !readOnly && (
                                 <button
                                     className="bg-blue-500 hover:bg-blue-400 rounded-md px-3 py-1 text-white font-semibold cursor-pointer"
                                     onClick={() => setOpenPaymentForm(true)}
@@ -118,27 +118,35 @@ export default function Payment({order, orderSummary, payments, changeTab}){
                                     payments.map((payment) => (
                                         <div 
                                             key={payment.id} 
-                                            className="relative mb-5 bg-white border border-gray-400 rounded-xl p-3 flex justify-between shadow-md cursor-pointer hover:bg-gray-100"
+                                            className={`relative mb-5 border rounded-xl p-3 flex justify-between shadow-md
+                                                ${readOnly 
+                                                    ? "bg-gray-50 border-gray-300 cursor-default" 
+                                                    : "bg-white border-gray-400 cursor-pointer hover:bg-gray-100"}`}
                                             onClick={() => {
+                                                if (readOnly) return;
                                                 setSelectedPayment(payment);
                                                 setOpenPaymentForm(true);
                                             }}  
-
                                         >
-                                            <div className="absolute -top-2 -right-2 z-99">
-                                                <button 
-                                                    onClick={(e) => {
-                                                        e.stopPropagation();
-                                                        removePayment(payment.id)
-                                                    }}
-                                                >
-                                                    <img 
-                                                        src={'/images/icons/remove-btn.svg'} 
-                                                        alt="Remove Btn" 
-                                                        className="cursor-pointer object-contain h-5 w-5"
-                                                    />
-                                                </button>
-                                            </div>
+                                            {
+                                                !readOnly && (
+                                                    <div className="absolute -top-2 -right-2 z-99">
+                                                        <button 
+                                                            onClick={(e) => {
+                                                                e.stopPropagation();
+                                                                removePayment(payment.id)
+                                                            }}
+                                                        >
+                                                            <img 
+                                                                src={'/images/icons/remove-btn.svg'} 
+                                                                alt="Remove Btn" 
+                                                                className="cursor-pointer object-contain h-5 w-5"
+                                                            />
+                                                        </button>
+                                                    </div>
+                                                )
+                                            }
+                                            
 
 
                                             <div className="flex gap-x-5">
@@ -156,11 +164,11 @@ export default function Payment({order, orderSummary, payments, changeTab}){
 
                                                 <div className="flex flex-col gap-y-3">
                                                     <div className="flex flex-col">
-                                                        <h1 className="text-xl font-bold text-green-600">{formatCurrency(payment.payment_amount)}</h1>
-                                                        <h1 className="text-md font-semibold text-gray-500">{payment.method} {payment.mop_name}</h1>
+                                                        <h1 className="text-xl font-bold text-green-500">{formatCurrency(payment.payment_amount)}</h1>
+                                                        <h1 className="text-md font-semibold">{payment.mop_name}</h1>
                                                     </div>
-                                                    <h1 className="text-sm font-semibold text-gray-500">
-                                                        Ref No: {payment.reference_number}
+                                                    <h1 className="text-sm font-semibold">
+                                                        <span className="text-gray-500">Ref No:</span> {payment.reference_number}
                                                     </h1>
                                                 </div>
                                             </div>
@@ -174,7 +182,7 @@ export default function Payment({order, orderSummary, payments, changeTab}){
                                                 </h1>
                                                 
                                                 <div className="flex gap-x-1 items-center">
-                                                    <h1 className="font-semibold text-xs">Date:</h1>
+                                                    <h1 className="font-semibold text-xs text-gray-400">Date:</h1>
                                                     <span className="text-xs">{ formatDateTime(payment.paid_at) }</span>
                                                 </div>
 

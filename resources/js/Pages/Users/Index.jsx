@@ -2,7 +2,8 @@ import { useState } from "react"
 import Layout from "../../Layouts/AppLayout"
 import UserForm from "./Components/UserForm";
 import TextInput from "../../Components/TextInput";
-export default function Index({users}){
+import { Mail, Search, SquarePen, Trash2, UserPlus } from "lucide-react";
+export default function Index({users, current_user}){
 
     const [openUserForm, setOpenUserForm] = useState(false);
 
@@ -24,7 +25,7 @@ export default function Index({users}){
     return <>
 
         
-        <Layout title={"Manage Users"}>
+        <Layout title={"Manage Users"} user={current_user}>
 
             <div className="flex justify-between items-center">
                 <h1 className="text-2xl font-bold">
@@ -33,13 +34,14 @@ export default function Index({users}){
 
                 <button 
                     type="button"
-                    className="rounded-md text-md bg-blue-500 px-3 py-2 text-white cursor-pointer hover:bg-blue-400"
+                    className="flex gap-x-2 items-center rounded-md text-md bg-blue-500 px-3 py-2 text-white cursor-pointer hover:bg-blue-400"
                     onClick={() => {
                         setOpenUserForm(true);
                         setMode("create");
                     }}
-                >
-                    + Add user
+                >  
+                    <UserPlus size={15}/>
+                    Add user
                 </button>
             </div>
 
@@ -47,7 +49,7 @@ export default function Index({users}){
 
                 <div className="w-full flex gap-3 mb-6">
                     <div className="flex-1 flex items-center gap-2 bg-white border border-[#E2E0D8] rounded-lg px-3 h-10">
-                        <img src="/images/icons/search.svg" alt="Search icon" className="object-contain w-5 h-5 opacity-50" />
+                        <Search size={20} color="gray"/>
 
                         <input
                             type="text"
@@ -101,7 +103,7 @@ export default function Index({users}){
 
                                             <td className="p-3">
                                                 <div className="flex gap-x-2 items-center">
-                                                    <img src="/images/icons/message-icon.svg" alt="" className="object-contain w-5 h-5"/>
+                                                    <Mail size={15} color="gray"/>
                                                     <span className="text-sm text-gray-500">{user.email}</span>
                                                 </div>
                                             </td>
@@ -120,11 +122,11 @@ export default function Index({users}){
                                                         className="cursor-pointer"
                                                         onClick={() => editUser(user)}
                                                     >
-                                                        <img src="/images/icons/edit-icon.svg" alt="" className="object-contain w-5 h-5" />
+                                                        <SquarePen size={20}/>
                                                     </button>
 
                                                     <button className="cursor-pointer">
-                                                        <img src="/images/icons/delete-icon.svg" alt="" className="object-contain w-8 h-8" />
+                                                       <Trash2 size={20}/>
                                                     </button>
                                                 </div>
                                             </td>

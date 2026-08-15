@@ -83,7 +83,7 @@ export default function ProductListModal({onClose, products, onAddProducts}){
                                 }))
                             }
                             type="text" 
-                            className="min-w-120 border border-gray-400 rounded-md px-2 py-2 bg-[#F5F5F5]"
+                            className="min-w-120 border border-gray-400 rounded-md px-2 py-2 bg-white"
                             placeholder="Enter product name..."
                         />
                     </div>
@@ -98,7 +98,7 @@ export default function ProductListModal({onClose, products, onAddProducts}){
                                     category: e.target.value,
                                 }))
                             }
-                            className="min-w-50 border border-gray-400 rounded-md px-2 py-2 bg-[#F5F5F5]"
+                            className="min-w-50 border border-gray-400 rounded-md px-2 py-2 bg-white"
                         >
                             <option value="">All</option>
                             <option value="bag">Bags</option>

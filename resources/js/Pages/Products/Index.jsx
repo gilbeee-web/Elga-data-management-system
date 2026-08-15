@@ -5,6 +5,7 @@ import { useEffect, useState } from "react";
 import ProductModal from "./Components/ProductModal";
 import Swal from "sweetalert2";
 import { formatCurrency } from "../../Utils/formatCurrency";
+import { CirclePlus, Eye, Flower, Handbag, Search, Shirt, SportShoe, Toolbox } from "lucide-react";
 
 export default function Dashboard ({products, user}){
 
@@ -66,6 +67,44 @@ export default function Dashboard ({products, user}){
     const tabs = ['all', 'clothes', 'bags', 'footwear', 'perfume', 'skincare'];
 
     const [activeTab, setActiveTab] = useState(tabs[0]);
+    const [currentSearch, setCurrentSearch] = useState("");
+    const [currentCategory, setCurrentCategory] = useState("all");
+
+    const [isFetchingData, setIsFetchingData] = useState(false);
+
+
+
+    const handleTab = async (selectedTab) => {
+
+        setIsFetchingData(true);
+
+        let categoryValue = selectedTab;
+        
+        setCurrentCategory(categoryValue);
+        setActiveTab(selectedTab);
+
+        router.get(route('product.index'), { category: categoryValue, search: currentSearch }, {
+            preserveState: true,
+            preserveScroll: true,
+            onFinish: () => {
+                setIsFetchingData(false);
+            },
+        });
+    }
+
+    const handleSearch = () => {
+        
+        setIsFetchingData(true);
+
+        router.get(route('product.index'), { category: currentCategory, search: currentSearch }, {
+            preserveState: true,
+            preserveScroll: true,
+            onFinish: () => {
+                setIsFetchingData(false);
+            }
+        });
+    };
+
 
     const [previewImage, setPreviewImage] = useState(null);
 
@@ -91,15 +130,16 @@ export default function Dashboard ({products, user}){
             
             <div className="w-full flex justify-between items-center">
 
-                <h1 className="font-bold text-2xl border-b-3 inline-block border-red-500">
+                <h1 className="font-bold text-2xl">
                     Product List
                 </h1>
 
                 <button 
-                    className="rounded-md text-md bg-blue-500 px-3 py-2 text-white cursor-pointer hover:bg-blue-400"
+                    className="flex gap-x-2 items-center rounded-md text-md bg-blue-500 px-3 py-2 text-white cursor-pointer hover:bg-blue-400"
                     onClick={() => router.visit(route("product.create"))}
                 >
-                    + Add product
+                    <CirclePlus size={15} />
+                    <span>Add product</span>
                 </button>
 
             </div>
@@ -128,12 +168,13 @@ export default function Dashboard ({products, user}){
                     onClick={() => handleTab(tabs[1])}
                 >
                     <span
-                        className={`text-2xl font-bold ${
+                        className={`flex gap-x-2 items-center text-2xl font-bold ${
                             activeTab === tabs[1] 
                             ? "border-b-3 border-green-600"
                             : "text-gray-400"
                         }`}
                     >
+                        <Shirt strokeWidth={2} size={20}/>
                         Clothes
                     </span>
                     
@@ -144,12 +185,13 @@ export default function Dashboard ({products, user}){
                     onClick={() => handleTab(tabs[2])}
                 >
                     <span
-                        className={`text-2xl font-bold ${
+                        className={`flex gap-x-2 items-center text-2xl font-bold ${
                             activeTab === tabs[2] 
                             ? "border-b-3 border-green-600"
                             : "text-gray-400"
                         }`}
                     >
+                        <Handbag strokeWidth={2} size={20}/>
                         Bags
                     </span>
                     
@@ -160,12 +202,13 @@ export default function Dashboard ({products, user}){
                     onClick={() => handleTab(tabs[3])}
                 >
                     <span
-                        className={`text-2xl font-bold ${
+                        className={`flex gap-x-2 items-center text-2xl font-bold ${
                             activeTab === tabs[3] 
                             ? "border-b-3 border-green-600"
                             : "text-gray-400"
                         }`}
                     >
+                        <SportShoe strokeWidth={2} size={20} />
                         Footwear
                     </span>
                     
@@ -176,12 +219,13 @@ export default function Dashboard ({products, user}){
                     onClick={() => handleTab(tabs[4])}
                 >
                     <span
-                        className={`text-2xl font-bold ${
+                        className={`flex gap-x-2 items-center text-2xl font-bold ${
                             activeTab === tabs[4] 
                             ? "border-b-3 border-green-600"
                             : "text-gray-400"
                         }`}
                     >
+                        <Flower strokeWidth={2} size={20} />
                         Perfumes
                     </span>
                 </button>
@@ -191,110 +235,120 @@ export default function Dashboard ({products, user}){
                     onClick={() => handleTab(tabs[5])}
                 >
                     <span
-                        className={`text-2xl font-bold ${
+                        className={`flex gap-x-2 items-center text-2xl font-bold ${
                             activeTab === tabs[5] 
                             ? "border-b-3 border-green-600"
                             : "text-gray-400"
                         }`}
                     >
+                        <Toolbox strokeWidth={2} size={20} />
                         Skincare
                     </span>
                 </button>
 
-                <div className="ml-20 relative w-full max-w-xs">
+                <div className="relative w-full max-w-xs">
                     <input
                         type="text"
                         placeholder="Search product..."
+                        value={currentSearch}
+                        onChange={(e) => setCurrentSearch(e.target.value)}
                         className="w-full rounded-md py-2 pl-3 bg-white"
+                        onKeyDown={(e) => {
+                            if(e.key === "Enter"){
+                                handleSearch(currentSearch);
+                            }
+                        }}
                     />
 
                     <button className="absolute top-0 right-0 h-full px-4 bg-[#DF9BAA] rounded-r-md flex items-center justify-center">
-                        <img
-                            src="/images/icons/search-icon.png"
-                            alt="Search"
-                            className="w-5 h-5"
-                        />
+                        <Search size={20} color={"#FFFF"}/>
                     </button>
                 </div>
 
             </div>
+            
+            {
+                isFetchingData ? (
+                    <div className="mt-10 w-full flex flex-col items-center justify-center gap-3">
+                        <div className="animate-spin h-10 w-10 border-4 border-gray-300 border-t-blue-600 rounded-full" />
+                        <span className="text-sm text-gray-500 font-medium">Loading more...</span>
+                    </div>
+                ) :
+                (
+                    <div className="grid grid-cols-4 gap-x-10 mt-10">
 
-            <div className="grid grid-cols-4 gap-x-10 mt-10">
-
-                {products.data.length > 0 ? (
-                    products.data.map((product) => (
-                        <div key={product.id}>
-                            
-                            <div 
-                                className="bg-green-50 border-2 border-[#DF9BAA] rounded-xl shadow relative cursor-pointer transition-transform duration-200 hover:scale-105"
-                                onClick={() => viewProduct(product.id)}
-                            >
-                                
-                                <div 
-                                    className="absolute top-2 right-2 bg-[#E0DD94] text-[#949556] text-xs px-3 py-1 font-bold rounded-full"
-                                >
-                                    Sold: {product.variants_sum_sold}
-                                </div>
-
-                                <div className="relative group overflow-hidden rounded-t-xl">
-                                    <img 
-                                        src={product.image ? `/storage/${product.image}` : 'images/default_product.png'}
-                                        alt="Product Image" 
-                                        className="w-full h-40 object-cover object-center"
-                                    />
-
+                        {products.data.length > 0 ? (
+                            products.data.map((product) => (
+                                <div key={product.id}>
+                                    
                                     <div 
-                                        className="absolute inset-0 bg-black/40 flex flex-col items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-200"
-                                        onClick={(e) => {
-                                            e.stopPropagation(); // prevent triggering viewProduct
-                                            setPreviewImage(product.image ? `/storage/${product.image}` : 'images/default_product.png');
-                                        }}
+                                        className="bg-green-50 border-2 border-[#DF9BAA] rounded-xl shadow relative cursor-pointer transition-transform duration-200 hover:scale-105"
+                                        onClick={() => viewProduct(product.id)}
                                     >
                                         
-                                        <img src="/images/icons/view.svg" className="w-8 h-8 invert" />
-                                        <span className="text-white text-sm">View</span>
+                                        <div 
+                                            className="absolute top-2 right-2 bg-[#E0DD94] text-[#949556] text-xs px-3 py-1 font-bold rounded-full"
+                                        >
+                                            Sold: {product.variants_sum_sold}
+                                        </div>
+
+                                        <div className="relative group overflow-hidden rounded-t-xl">
+                                            <img 
+                                                src={product.image ? `/storage/${product.image}` : 'images/default_product.png'}
+                                                alt="Product Image" 
+                                                className="w-full h-40 object-cover object-center"
+                                            />
+
+                                            <div 
+                                                className="absolute inset-0 bg-black/40 flex flex-col items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-200"
+                                                onClick={(e) => {
+                                                    e.stopPropagation(); // prevent triggering viewProduct
+                                                    setPreviewImage(product.image ? `/storage/${product.image}` : 'images/default_product.png');
+                                                }}
+                                            >
+                                                
+                                                <Eye size={40} color={"#FFFF"}/>
+                                                
+                                            </div>
+                                        </div>
+        
+                                        <div className="px-3 py-2">
+                                            <h1 className="font-semibold text-lg">{ product.name }</h1>
+                                            <p className="text-sm text-gray-500 capitalize font-semibold">{product.category}</p>
+                                        </div>
+
+                                        <div className="px-3 py-2">
+                                            {product.variants_min_price === product.variants_max_price ? (
+                                                <span className="font-semibold text-green-500">{formatCurrency(product.variants_min_price)}</span>
+                                            ) : (
+                                                <span className="font-semibold">
+                                                    {
+                                                        formatCurrency(product.variants_min_price) - formatCurrency(product.variants_max_price)
+                                                    }
+                                                </span>
+                                            )}
+                                        </div>
+
                                     </div>
                                 </div>
-
-                                {/* <img 
-                                    src={product.image ? `/storage/${product.image}` : 'images/default_product.png'}
-                                    alt="Product Image" 
-                                    className="w-full h-40 object-cover object-center rounded-t-xl"
-                                /> */}
-
-                               
-                                <div className="px-3 py-2">
-                                    <h1 className="font-semibold text-xl">{ product.name }</h1>
-                                    <p className="text-sm text-gray-500 capitalize font-semibold">{product.category}</p>
+                            ))
+                        ) : (
+                            <div
+                                className="border-2 border-dashed h-65 bg-white rounded-md cursor-pointer hover:bg-gray-100"
+                                onClick={() => router.visit(route("product.create"))}
+                            >
+                                <div className="flex gap-x-2 h-full items-center justify-center">
+                                    <CirclePlus  />
+                                    <h1 className="font-semibold text-lg">Add Product</h1>
                                 </div>
-
-                                <div className="px-3 py-2">
-                                    {product.variants_min_price === product.variants_max_price ? (
-                                        <span className="font-semibold text-green-500">{formatCurrency(product.variants_min_price)}</span>
-                                    ) : (
-                                        <span className="font-semibold">
-                                            {
-                                                formatCurrency(product.variants_min_price) - formatCurrency(product.variants_max_price)
-                                            }
-                                        </span>
-                                    )}
-                                </div>
-
                             </div>
-                        </div>
-                    ))
-                ) : (
-                    <div
-                        className="border border-dashed h-80 bg-white rounded-md cursor-pointer hover:bg-gray-200"
-                        onClick={() => router.visit(route("product.create"))}
-                    >
-                        <div className="flex h-full items-center justify-center">
-                            <h1>+ Add Product</h1>
-                        </div>
+                        )}
+                        
                     </div>
-                )}
-                
-            </div>
+                )
+            }
+
+            
 
             {previewImage && (
                 <div 

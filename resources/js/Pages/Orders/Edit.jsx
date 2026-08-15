@@ -11,6 +11,7 @@ import { formatCurrency } from "../../Utils/formatCurrency";
 import Swal from "sweetalert2";
 import Payment from "./Components/Payment";
 import ShipmentForm from "./Components/ShipmentForm";
+import { Ban, ChevronDown, ChevronLeft, CircleAlert, CircleCheck, CircleCheckBig, Copy, Trash2 } from "lucide-react";
 
 
 export default function Edit({order, status, customer, orderReferences, shipmentInfo, payments, orderSummary, user}){
@@ -20,8 +21,9 @@ export default function Edit({order, status, customer, orderReferences, shipment
     // console.log("Order References: ", orderReferences);
 
     // console.log("Shipping info: ", shipmentInfo);
-    console.log("Remaining balance: ", order.remaining_balance);
+    // console.log("Remaining balance: ", order.remaining_balance);
 
+    const isLocked = ['shipped', 'cancelled'].includes(order.order_status);
 
     const [selectedCustomer, setSelectedCustomer] = useState(customer);
 
@@ -31,12 +33,49 @@ export default function Edit({order, status, customer, orderReferences, shipment
 
 
     const handleTab = (selectedTab) => {
-        
-        console.log("Tab: ", selectedTab);
+        const hasCustomer = selectedCustomer && selectedCustomer.sender_name;
+        const hasOrderItems = orderReferences && orderReferences.length > 0;
+        const hasShipping = shipmentInfo && shipmentInfo.raw_shipping_fee;
+        const hasPayments = payments && payments.length > 0;
+
+        let title = "Cannot proceed yet";
+        let message = "";
+
+        if (selectedTab === 'order' && !hasCustomer) {
+            message = "Please complete the Customer Info tab first.";
+        } else if (selectedTab === 'shipping') {
+            if (!hasCustomer) {
+                message = "Please complete the Customer Info tab first.";
+            } else if (!hasOrderItems) {
+                message = "Please add at least one order item first.";
+            }
+        } else if (selectedTab === 'payment') {
+            if (!hasCustomer) {
+                message = "Please complete the Customer Info tab first.";
+            } else if (!hasOrderItems) {
+                message = "Please add at least one order item first.";
+            } else if (!hasShipping) {
+                message = "Please set the shipping fee first.";
+            }
+        } else if (selectedTab === 'shipment') {
+            if (!hasCustomer) {
+                message = "Please complete the Customer Info tab first.";
+            } else if (!hasOrderItems) {
+                message = "Please add at least one order item first.";
+            } else if (!hasShipping) {
+                message = "Please set the shipping fee first.";
+            } else if (!hasPayments && order.remaining_balance > 0) {
+                message = "Please settle the payment first.";
+            }
+        }
+
+        if (message !== "") {
+            Swal.fire({ title, text: message, icon: "info" });
+            return;
+        }
 
         setActiveTab(selectedTab);
-
-    }
+    };
 
     const [saveCustomers, setSaveCustomers] = useState(null);
     const [isOpenCustomerBook, setOpenCustomerBook] = useState(false);
@@ -165,6 +204,61 @@ Thank you!`;
         payment_confirmed: "bg-blue-500",
         processing: "bg-yellow-500",
         shipped: "bg-green-500",
+        cancelled: "bg-gray-800"
+    };
+
+    const [openStatusSettings, setOpenStatusSettings] = useState(false);
+
+    const handleOrderStatus = async () => {
+
+        let title = "";
+        let message = "";
+        const isDraft = order.order_status === 'draft';
+
+        if (isDraft) {
+            title = "Delete Order";
+            message = "This draft has no payments or confirmed details. Delete it permanently?";
+        }else if (order.order_status === 'cancelled') {
+            title = "Delete Cancelled Order";
+            message = "This will permanently delete this cancelled order and its data. This cannot be undone.";
+        } else if (order.order_status === 'shipped') {
+            title = "Cannot Cancel";
+            message = "Shipped orders can't be cancelled directly. Please process a return/refund instead.";
+        } else {
+            title = "Cancel Order";
+            message = "This will mark the order as cancelled, but the data will remain stored in the system.";
+        }
+
+        // block the action entirely for shipped/cancelled — just show info, no confirm needed
+        if (order.order_status === 'shipped') {
+            await Swal.fire({ title, text: message, icon: "info" });
+            return;
+        }
+
+        const result = await Swal.fire({
+            title,
+            text: message,
+            icon: "warning",
+            showCancelButton: true,
+            confirmButtonColor: "#dc2626",
+            cancelButtonColor: "#6b7280",
+            confirmButtonText: "Confirm",
+            cancelButtonText: "Cancel",
+            reverseButtons: true
+        });
+
+        if (!result.isConfirmed) return;
+
+        // actually perform the action
+        if (isDraft || order.order_status === 'cancelled') {
+            router.delete(route('order.destroy', order.id), {
+                onSuccess: () => Swal.fire('Deleted!', 'The draft has been removed.', 'success'),
+            });
+        } else {
+            router.patch(route('order.cancel', order.id), {}, {
+                onSuccess: () => Swal.fire('Cancelled!', 'The order has been cancelled.', 'success'),
+            });
+        }
     };
     
 
@@ -176,7 +270,7 @@ Thank you!`;
 
                 <div className="flex items-center">
                     <button className="cursor-pointer" onClick={() => router.visit(route('order.index'))}>
-                        <img src="/images/icons/arrow-back.png" alt="Arrow back"  className="object-contain w-5 h-5"/>
+                        <ChevronLeft size={30} />
                     </button>
 
                     <h1 className="text-xl font-bold">{order.transaction_number}</h1>    
@@ -186,16 +280,46 @@ Thank you!`;
                 <div className="flex gap-x-3 items-center">
                     <h1 className="text-lg font-bold">Status:</h1>
 
-                    <span 
-                        className={`px-5 py-2 rounded-md text-white capitalize font-semibold
-                            ${statusClasses[order.order_status] || "bg-gray-500"}`
-                        }
-                    >
-                       {orderStatusDisplay[order.order_status] ?? order.order_status}
-                    </span>
-                </div>
-            </div>
+                    <div className="relative">
+                        <button 
+                            className={`flex gap-x-3 items-center px-5 py-2 rounded-md text-white capitalize font-semibold cursor-pointer
+                                ${statusClasses[order.order_status] || "bg-gray-500"}`
+                            }
+                            onClick={() => setOpenStatusSettings(!openStatusSettings)}
+                        >
+                            {orderStatusDisplay[order.order_status] ?? order.order_status}
+                            <span>
+                                <ChevronDown strokeWidth={2} size={20} />
+                            </span>
+                        </button>
 
+                        {openStatusSettings && (
+                            <div className="absolute right-0 top-full mt-2 bg-white rounded-md shadow-lg border border-gray-200 py-1 w-40 z-20">
+                                <button 
+                                    onClick={handleOrderStatus}
+                                    className="w-full flex gap-x-2 items-center text-left px-3 py-2 text-sm text-red-500 font-semibold hover:bg-gray-100 cursor-pointer"
+                                >
+                                    {
+                                        order.order_status === 'draft' || order.order_status === 'cancelled'
+                                        ? <Trash2 size={20} color="red"/>
+                                        : <Ban size={20} />
+                                    }
+
+                                    {order.order_status === 'draft' || order.order_status === 'cancelled'
+                                        ? "Delete Order" 
+                                        : order.order_status === 'shipped' 
+                                            ? "No Actions Available"
+                                            : "Cancel Order"
+                                    }
+                                </button>
+                            </div>
+                        )}
+
+                    </div>
+                    
+                </div>
+                
+            </div>
 
             <div className="mt-3 w-[75%] grid grid-cols-5 gap-3 pl-5">
 
@@ -215,11 +339,13 @@ Thank you!`;
 
                     
                     <span className="absolute top-0">
-                        <img 
-                            src={hasCustomerData ? "/images/icons/completed.svg" : "/images/icons/incomplete.svg"}
-                            alt="" 
-                            className="object-contain w-5 h-5"
-                        />
+                        {
+                            hasCustomerData ? (
+                                <CircleCheckBig strokeWidth={2} size={20} color="green" />
+                            ) : (
+                                <CircleAlert strokeWidth={2} size={20} color="red"/>
+                            )
+                        }
                     </span>
                 </button>
 
@@ -238,11 +364,13 @@ Thank you!`;
                     </span>
 
                     <span className="absolute top-0">
-                        <img 
-                            src={orderReferences.length > 0 ? "/images/icons/completed.svg" : "/images/icons/incomplete.svg"}
-                            alt="" 
-                            className="object-contain w-5 h-5"
-                        />
+                        {
+                            orderReferences.length > 0 ? (
+                                <CircleCheckBig strokeWidth={2} size={20} color="green" />
+                            ) : (
+                                <CircleAlert strokeWidth={2} size={20} color="red"/>
+                            )
+                        }
                     </span>
                     
                 </button>
@@ -262,11 +390,13 @@ Thank you!`;
                     </span>
 
                     <span className="absolute top-0">
-                        <img 
-                            src={shipmentInfo ? "/images/icons/completed.svg" : "/images/icons/incomplete.svg"}
-                            alt="" 
-                            className="object-contain w-5 h-5"
-                        />
+                        {
+                            shipmentInfo > 0 ? (
+                                <CircleCheckBig strokeWidth={2} size={20} color="green" />
+                            ) : (
+                                <CircleAlert strokeWidth={2} size={20} color="red"/>
+                            )
+                        }
                     </span>
                     
                 </button>
@@ -286,11 +416,13 @@ Thank you!`;
                     </span>
 
                     <span className="absolute top-0">
-                        <img 
-                            src={order.total_amount > 0 && order.remaining_balance <= 0 ? "/images/icons/completed.svg" : "/images/icons/incomplete.svg"}
-                            alt="" 
-                            className="object-contain w-5 h-5"
-                        />
+                        {
+                            order.total_amount > 0 && order.remaining_balance <= 0 ? (
+                                <CircleCheckBig strokeWidth={2} size={20} color="green" />
+                            ) : (
+                                <CircleAlert strokeWidth={2} size={20} color="red"/>
+                            )
+                        }
                     </span>
                     
                 </button>
@@ -306,7 +438,7 @@ Thank you!`;
                             : "text-gray-400"
                         }`}
                     >
-                        Review & Ship
+                        {isLocked ? "Summary" : "Review & Ship"}
                     </span>
                 </button>
 
@@ -316,10 +448,11 @@ Thank you!`;
                 {
                     activeTab === "customer" && (
                         <CustomerForm 
-                            changeTab={handleTab} 
+                            changeTab={(tab) => setActiveTab(tab)} 
                             order={order} 
                             customer={selectedCustomer}
                             getSaveCustomers={handleGetSaveCustomers}
+                            readOnly={isLocked}
                         />
                     )
                 }
@@ -337,10 +470,10 @@ Thank you!`;
                 {
                     activeTab === "order" && (
                         <OrderForm 
-                            changeTab={handleTab}
+                            changeTab={(tab) => setActiveTab(tab)}
                             order={order} 
                             orderReferences={orderReferences}
-                            
+                            readOnly={isLocked}
                         />
                     )
                 }
@@ -348,10 +481,11 @@ Thank you!`;
                 {
                     activeTab === "shipping" && (
                         <ShippingForm 
-                            changeTab={handleTab}
+                            changeTab={(tab) => setActiveTab(tab)}
                             shippingInfo={shipmentInfo}
                             order={order}
                             customer={selectedCustomer}
+                            readOnly={isLocked}
                         /> 
                     )
                 }
@@ -359,10 +493,11 @@ Thank you!`;
                 {
                     activeTab === "payment" && (
                         <Payment 
-                            changeTab={handleTab}
+                            changeTab={(tab) => setActiveTab(tab)}
                             order={order}
                             orderSummary={orderSummary}
                             payments={payments}
+                            readOnly={isLocked}
                         />
                     )
                 }
@@ -370,13 +505,14 @@ Thank you!`;
                 {
                     activeTab === "shipment" && (
                         <ShipmentForm 
-                            changeTab={handleTab}
+                            changeTab={(tab) => setActiveTab(tab)}
                             order={order}
                             shippingInfo={shipmentInfo}
                             customer={selectedCustomer}
                             orderReferences={orderReferences}
                             orderSummary={orderSummary}
                             payments={payments}
+                            readOnly={isLocked}
                         /> 
                     )
                 }
@@ -458,7 +594,7 @@ Thank you!`;
                             className="border px-2 py-1 rounded-md hover:bg-gray-200 cursor-pointer"
                             onClick={copyOrderSummary}
                         >
-                            <img src="/images/icons/copy-icon.svg" alt="Copy icon" className="object-contain w-5 h-5"/>
+                            <Copy strokeWidth={2} size={20} />
                         </button>
                     </div>
                     

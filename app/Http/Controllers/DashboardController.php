@@ -19,9 +19,9 @@ class DashboardController extends Controller
         $view   = $request->view ?? 'daily'; 
 
         $range = match($period) {
-            'week'  => [now()->startOfWeek(), now()->endOfWeek()],
-            'month' => [now()->startOfMonth(), now()->endOfMonth()],
-            'year'  => [now()->startOfYear(), now()->endOfYear()],
+            'weekly'  => [now()->startOfWeek(), now()->endOfWeek()],
+            'monthly' => [now()->startOfMonth(), now()->endOfMonth()],
+            'yearly'  => [now()->startOfYear(), now()->endOfYear()],
             default => [now()->startOfDay(), now()->endOfDay()],
         };
 

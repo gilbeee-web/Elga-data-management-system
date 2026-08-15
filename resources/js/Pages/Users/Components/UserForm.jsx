@@ -3,6 +3,7 @@ import { useEffect, useState } from "react"
 import TextInput from "../../../Components/TextInput";
 import { route } from "ziggy-js";
 import UserCredentialForm from "./UserCredentialsForm";
+import { Camera } from "lucide-react";
 
 export default function UserForm({user, onClose, mode}){
 
@@ -136,11 +137,11 @@ export default function UserForm({user, onClose, mode}){
                                         <img 
                                             src={profilePic ? profilePic : "/images/logo/default-profile.jpg"}
                                             alt="Profile pic" 
-                                            className="h-40 w-40 rounded-full object-cover cursor-pointer"
+                                            className="h-40 w-40 shadow-sm bg-gray-400 rounded-full object-cover cursor-pointer"
                                         />
 
-                                        <div className="absolute bottom-0 right-0 translate-x-1/4 translate-y-1/4 bg-white rounded-full p-1 shadow">
-                                            <img src="/images/icons/camera-icon.svg" alt="" className="h-5 w-5 object-contain" />
+                                        <div className="absolute bottom-5 right-5 translate-x-1/4 translate-y-1/4 bg-white rounded-full p-1 shadow">
+                                            <Camera size={15}/>
                                         </div>
                                     </label>
 
@@ -177,7 +178,7 @@ export default function UserForm({user, onClose, mode}){
                                             name="role"
                                             value={data.role} 
                                             onChange={(e) => setData("role", e.target.value)}
-                                            className="border bg-white px-5 py-2 rounded-md"
+                                            className="border border-gray-400 bg-white px-5 py-2 rounded-md"
                                         >
                                             <option value="super_admin">Super admin</option>
                                             <option value="admin">Admin</option>

@@ -4,6 +4,7 @@ import Layout from "../../../Layouts/AppLayout";
 import { router, useForm } from "@inertiajs/react";
 import { formatCurrency } from "../../../Utils/formatCurrency";
 import Swal from "sweetalert2";
+import { ChevronLeft, CirclePlus, CircleX, ImagePlus } from "lucide-react";
 
 export default function ProductForm({mode, product}){
 
@@ -157,9 +158,10 @@ export default function ProductForm({mode, product}){
 
     return <>
         
-        <div className="flex items-center">
+        <div className="flex gap-x-2 items-center">
             <button className="cursor-pointer" onClick={() => router.visit(route('product.index'))}>
-                <img src="/images/icons/arrow-back.png" alt="Arrow back"  className="object-contain w-5 h-5"/>
+                <ChevronLeft strokeWidth={2} size={30}/>
+               
             </button>
 
             {
@@ -190,18 +192,19 @@ export default function ProductForm({mode, product}){
                         value={data.name}
                         onChange={(e) => setData("name", e.target.value)}
                         error={errors.name}
+                        placeholder="eg. clothes"
                     />
 
                     
                     
 
                     <div className="flex flex-col">
-                        <label htmlFor="category">Product category:</label>
+                        <label htmlFor="category" className="font-semibold">Product category:</label>
                         <select 
                             name="category"
                             value={data.category} 
                             onChange={(e) => setData("category", e.target.value)}
-                            className="border bg-white px-5 py-2 rounded-md"
+                            className="border border-gray-400 bg-white px-5 py-2 rounded-md"
                         >
                             <option value="" disabled hidden>Select Category</option>
                             <option value="bag">Bag</option>
@@ -223,7 +226,7 @@ export default function ProductForm({mode, product}){
                 <div className="mt-5 flex flex-col">
                     <label>Product Image:</label>
 
-                    <label htmlFor="product_image" className="cursor-pointer inline-block w-fit">
+                    <label htmlFor="product_image" className="mt-2 cursor-pointer inline-block w-fit">
 
                         {previewImage ? (
 
@@ -237,10 +240,7 @@ export default function ProductForm({mode, product}){
 
                             <div className="border-2 border-dashed w-70 h-35 rounded-md flex items-center justify-center hover:bg-gray-200">
                                 <div className="flex flex-col items-center">
-                                    <img
-                                        src="/images/icons/add-photo-icon.png"
-                                        className="w-10 h-10"
-                                    />
+                                    <ImagePlus size={40} strokeWidth={2}/>
 
                                     <span>Upload Image</span>
 
@@ -279,20 +279,6 @@ export default function ProductForm({mode, product}){
                     </h1>
                 </div>
                 
-                {/* <div className="grid grid-cols-[1fr_1fr_1fr_auto] font-semibold">
-
-                    <div>Variant <span className="text-red-500">*</span></div>
-
-                    <div>Product Code <span className="text-red-500">*</span></div>
-
-                    <div>Price <span className="text-red-500">*</span></div>
-
-                    <div></div>
-
-                </div> */}
-
-                
-
                 {data.variants.map((item, index) => (
                     <div
                         key={index}
@@ -314,6 +300,7 @@ export default function ProductForm({mode, product}){
                             onChange={(e) =>
                                 updateVariant(index, "variant_name", e.target.value)
                             }
+                            placeholder="Do not empty"
                         />
 
                         <TextInput
@@ -322,17 +309,20 @@ export default function ProductForm({mode, product}){
                             onChange={(e) =>
                                 updateVariant(index, "product_code", e.target.value)
                             }
+                            placeholder="A01"
                         />
 
                         <div className="flex gap-x-10 items-center">
                             <input
                                 type="text"
-                                className="w-30 border bg-[#F5F5F5] rounded-md px-3 py-1"
+                                className="w-30 border border-gray-400 rounded-md px-3 py-1"
                                 value={
                                     editingPrice === index
                                         ? item.price
-                                        : formatCurrency(item.price)
+                                        : item.price ? formatCurrency(item.price)
+                                        : "" 
                                 }
+                                placeholder="0.00"
                                 onFocus={() => setEditingPrice(index)}
                                 onBlur={() => setEditingPrice(null)}
                                 onChange={(e) =>
@@ -342,12 +332,8 @@ export default function ProductForm({mode, product}){
 
                             {
                                 data.variants.length > 1 && (
-                                    <button onClick={() => removeVariant(index)}>
-                                        <img 
-                                            src={'/images/icons/remove-btn.svg'} 
-                                            alt="Remove Btn" 
-                                            className="cursor-pointer object-contain h-5 w-5"
-                                        />
+                                    <button type="button" onClick={() => removeVariant(index)} className="cursor-pointer">
+                                       <CircleX strokeWidth={2} color="red" size={20} />
                                     </button>
                                 )
                             }
@@ -358,14 +344,14 @@ export default function ProductForm({mode, product}){
                 ))}
 
 
-                <div className="mt-5 border-t flex justify-center items-center">
+                <div className="mt-5 border-t border-gray-300 flex justify-center items-center">
                 
                     <button 
                         type="button"
                         className="flex gap-x-2 items-center mt-2 cursor-pointer transition-transform duration-200 hover:scale-110"
                         onClick={addVariant}
                     >
-                        <img src={"/images/icons/add-icon.png"} alt="" className="object-contain w-5 h-5"/>
+                        <CirclePlus strokeWidth={2} size={20}/>
                         <span className="text-md font-semibold">Add</span>
                     </button>
                     
@@ -377,7 +363,7 @@ export default function ProductForm({mode, product}){
 
                 <button 
                     type="button"
-                    className="bg-gray-300 px-3 py-2 rounded-md text-white cursor-pointer hover:bg-gray-400"
+                    className="border border-gray-300 bg-white px-3 py-2 rounded-md cursor-pointer"
                     onClick={() => router.visit(route('product.index'))}
                 >
                     Cancel

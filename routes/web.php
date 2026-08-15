@@ -37,7 +37,9 @@ Route::middleware('auth')->group(function(){
             Route::post('/{order}/save-shipping-info', 'saveShippingInfo')->name('order.saveShippingInfo');
             Route::post('/{order}/save-payment', 'savePayment')->name('order.savePayment');
             Route::post('/{order}/shipped', 'shippedOrder')->name('order.shippedOrder');
+            Route::delete('/{order}', 'destroyOrder')->name('order.destroy');
             Route::delete('/{order}/{payment_id}', 'destroyPayment')->name('order.destroyPayment');
+            Route::patch('/{order}', 'cancelOrder')->name('order.cancel');
         });
     });
 });

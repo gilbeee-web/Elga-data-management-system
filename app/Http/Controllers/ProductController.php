@@ -24,7 +24,7 @@ class ProductController extends Controller
 
         $query = Product::query()->where('is_active', true);
 
-        if($request->category){
+        if($request->category && $request->category !== 'all'){
             $query->where('category', $request->category);
         }
 

@@ -3,7 +3,7 @@ import { formatCurrency } from "../../../Utils/formatCurrency";
 import { useEffect, useState } from "react";
 import Swal from "sweetalert2";
 
-export default function ShippingForm({shippingInfo, order, changeTab, customer}){
+export default function ShippingForm({shippingInfo, order, changeTab, customer, readOnly}){
 
     const {data, setData, post, processing, errors} = useForm({
         container_type: "",
@@ -140,14 +140,21 @@ COMPLETE ADDRESS: ${customer.address}`;
                         
 
                         <div className="flex gap-x-3 items-center">
-                            <label htmlFor="" className="text-lg font-semibold"><span className="text-sm text-red-500">*</span> Package type:</label>
-                            <div className="flex flex-col"> 
+                            <label htmlFor="container_type" className="text-lg font-semibold">
+                                <span className="text-sm text-red-500">*</span> Package type:
+                            </label>
+                            <div className="flex flex-col">
                                 <select 
-                                    className="bg-white border border-gray-400 px-5 py-2 rounded-md"
+                                    id="container_type"
+                                    className={`border px-5 py-2 rounded-md
+                                        ${readOnly 
+                                            ? "bg-gray-100 border-gray-300 text-gray-500" 
+                                            : "bg-white border-gray-400 cursor-pointer"}`}
                                     value={data.container_type}
+                                    disabled={readOnly}
                                     onChange={(e) => setData("container_type", e.target.value)}
                                 >
-                                    <option value="" hidden selected>Select type</option>
+                                    <option value="" hidden>Select type</option>
                                     <option value="pouch">Pouch</option>
                                     <option value="box">Box</option>
                                 </select>
@@ -157,9 +164,7 @@ COMPLETE ADDRESS: ${customer.address}`;
                                         {errors.container_type}
                                     </p>
                                 )}
-
                             </div>
-                            
                         </div>
 
                             
@@ -169,9 +174,13 @@ COMPLETE ADDRESS: ${customer.address}`;
                             <label htmlFor="" className="text-lg font-semibold"><span className="text-sm text-red-500">*</span> Package size:</label>
                             <div className="flex flex-col">
                                 <select 
-                                    className="bg-white border border-gray-400 px-5 py-2 rounded-md"
                                     value={data.container_size}
                                     onChange={(e) => setData("container_size", e.target.value)}
+                                    className={`border px-5 py-2 rounded-md
+                                        ${readOnly 
+                                            ? "bg-gray-100 border-gray-300 text-gray-500" 
+                                            : "bg-white border-gray-400 cursor-pointer"}`}
+                                    disabled={readOnly}
                                 >
                                     <option value="" hidden selected>Select size</option>
                                     <option value="extra-small">Extra Small</option>
@@ -194,9 +203,13 @@ COMPLETE ADDRESS: ${customer.address}`;
 
                                 <input 
                                     type="text" 
-                                    className="min-w-40 border border-gray-400 rounded-md px-2 py-1 bg-[#F5F5F5]"
+                                    className={`border rounded-md text-sm min-w-40 px-2 py-1 ${
+                                        readOnly 
+                                            ? "bg-gray-100 border-gray-300 text-gray-500" 
+                                            : "bg-white border-gray-400"
+                                    }`}
                                     placeholder="0.00"
-                                    
+                                    disabled={readOnly}
                                     value={
                                         isEditingFee
                                             ? data.raw_shipping_fee
@@ -233,7 +246,12 @@ COMPLETE ADDRESS: ${customer.address}`;
                             <div className="flex flex-col">
                                 <input 
                                     type="text" 
-                                    className="min-w-40 border border-gray-400 rounded-md px-2 py-1 bg-[#F5F5F5]"
+                                    className={`border rounded-md text-sm min-w-40 px-2 py-1 ${
+                                        readOnly 
+                                            ? "bg-gray-100 border-gray-300 text-gray-500" 
+                                            : "bg-white border-gray-400"
+                                    }`}
+                                    disabled={readOnly}
                                     value= {
                                         isEditingContainerFee
                                             ? data.container_fee
@@ -269,7 +287,12 @@ COMPLETE ADDRESS: ${customer.address}`;
                             <div className="flex flex-col">
                                 <input 
                                     type="text" 
-                                    className="min-w-50 border border-gray-400 rounded-md px-2 py-1 bg-[#F5F5F5]"
+                                    className={`border rounded-md text-sm min-w-50 px-2 py-1 ${
+                                        readOnly 
+                                            ? "bg-gray-100 border-gray-300 text-gray-500" 
+                                            : "bg-white border-gray-400"
+                                    }`}
+                                    disabled={readOnly}
                                     value={data.tracking_number}
                                     onChange={(e) => setData("tracking_number", e.target.value)}
                                 />
@@ -335,6 +358,8 @@ COMPLETE ADDRESS: ${customer.address}`;
             <div className="min-h-20 sticky bottom-0 px-6 py-4border-t border-gray-200 rounded-t-xl shadow-[0_-4px_12px_rgba(0,0,0,0.06)] bg-white">
                 
                 <div className="h-full flex justify-between items-center">
+                    
+
                     <div className="flex gap-x-3 items-center">
                         <h1 className="font-semibold text-lg">Total Shipping fee:</h1>
                         <span className="font-bold text-3xl text-red-500">
@@ -342,12 +367,28 @@ COMPLETE ADDRESS: ${customer.address}`;
                         </span>
                     </div>
                     
-                    <button
-                        className="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-md cursor-pointer"
-                        type="submit"
-                    >
-                        Save
-                    </button>
+                    {
+                        !readOnly ? (
+                            <button
+                                className="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-md cursor-pointer"
+                                type="submit"
+                            >
+                                Save
+                            </button>
+                        ):
+                        (
+                            <div className="absolute bottom-5 right-3 flex justify-end">
+                                <button 
+                                    type="button" 
+                                    className="px-8 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-400 cursor-pointer"
+                                    onClick={() => changeTab("payment")}
+                                >
+                                    Next
+                                </button>
+                            </div>
+                        )
+                    }
+                    
                 </div>
 
             </div>

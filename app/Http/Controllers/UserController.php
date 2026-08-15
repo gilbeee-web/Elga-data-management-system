@@ -19,8 +19,12 @@ class UserController extends Controller
     public function index(){
         
         $users = User::all();
+        $current_user = Auth::user();
 
-        return Inertia::render('Users/Index', ['users' => $users]);
+        return Inertia::render('Users/Index', [
+            'users' => $users,
+            'current_user' => $current_user
+        ]);
     }
 
     public function store(Request $request){

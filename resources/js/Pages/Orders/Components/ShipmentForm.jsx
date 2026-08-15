@@ -3,7 +3,7 @@ import TextInput from "../../../Components/TextInput";
 import { formatCurrency } from "../../../Utils/formatCurrency";
 import Swal from "sweetalert2";
 
-export default function ShipmentForm({order, customer, orderReferences, shippingInfo, orderSummary, payments, changeTab}){
+export default function ShipmentForm({order, customer, orderReferences, shippingInfo, orderSummary, payments, changeTab, readOnly}){
 
     
    
@@ -152,15 +152,20 @@ export default function ShipmentForm({order, customer, orderReferences, shipping
                             <img src="/images/icons/person-outline.svg" alt="Order icon" className="object-contain w-6 h-6" />
                             <h1 className="font-semibold text-base">Customer</h1>
                         </div>
-                    
-                        <div>
-                            <button 
-                                className="cursor-pointer"
-                                onClick={() => changeTab("customer")}
-                            >
-                                <img src="/images/icons/edit-icon.svg" alt="Edit icon" className="object-contain w-4 h-4 hover:invert"/>
-                            </button>
-                        </div>
+
+                        {
+                            !readOnly && (
+                                <div>
+                                    <button 
+                                        className="cursor-pointer"
+                                        onClick={() => changeTab("customer")}
+                                    >
+                                        <img src="/images/icons/edit-icon.svg" alt="Edit icon" className="object-contain w-4 h-4 hover:invert"/>
+                                    </button>
+                                </div>
+                            )
+                        }
+                        
                     </div>
                     
 
@@ -183,12 +188,17 @@ export default function ShipmentForm({order, customer, orderReferences, shipping
                             <h1 className="font-semibold text-base">Order</h1>
                         </div>
 
-                        <button 
-                            className="cursor-pointer"
-                            onClick={() => changeTab("order")}
-                        >
-                            <img src="/images/icons/edit-icon.svg" alt="Edit icon" className="object-contain w-4 h-4 hover:opacity-70" />
-                        </button>
+                        {
+                            !readOnly && (
+                                <button 
+                                    className="cursor-pointer"
+                                    onClick={() => changeTab("order")}
+                                >
+                                    <img src="/images/icons/edit-icon.svg" alt="Edit icon" className="object-contain w-4 h-4 hover:opacity-70" />
+                                </button>
+                            )
+                        }
+                        
                     </div>
 
                     <table className="w-full text-sm">
@@ -207,7 +217,7 @@ export default function ShipmentForm({order, customer, orderReferences, shipping
 
                                 return (
                                     <tr key={orderIndex} className="border-b border-gray-100">
-                                        <td className="py-2 text-gray-900">{order.order_number}</td>
+                                        <td className="py-2 text-gray-900">#{order.order_number}</td>
                                         <td className="py-2 text-right text-gray-600">{totalQty}</td>
                                         <td className="py-2 text-right text-gray-600">{formatCurrency(totalDiscount)}</td>
                                         <td className="py-2 text-right text-gray-900">{formatCurrency(finalTotal)}</td>
@@ -243,15 +253,20 @@ export default function ShipmentForm({order, customer, orderReferences, shipping
                             <img src="/images/icons/truck-icon.svg" alt="Order icon" className="object-contain w-6 h-6" />
                             <h1 className="font-semibold text-base">Shipping</h1>
                         </div>
-                    
-                        <div>
-                            <button 
-                                className="cursor-pointer"
-                                onClick={() => changeTab("shipping")}
-                            >
-                                <img src="/images/icons/edit-icon.svg" alt="Edit icon" className="object-contain w-4 h-4 hover:invert"/>
-                            </button>
-                        </div>
+                        
+                        {
+                            !readOnly && (
+                                <div>
+                                    <button 
+                                        className="cursor-pointer"
+                                        onClick={() => changeTab("shipping")}
+                                    >
+                                        <img src="/images/icons/edit-icon.svg" alt="Edit icon" className="object-contain w-4 h-4 hover:invert"/>
+                                    </button>
+                                </div>
+                            )
+                        }
+                        
                     </div>
                     
 
@@ -283,13 +298,18 @@ export default function ShipmentForm({order, customer, orderReferences, shipping
                             <img src="/images/icons/payment-icon.svg" alt="Payment icon" className="object-contain w-6 h-6" />
                             <h1 className="font-semibold text-base">Payment</h1>
                         </div>
-
-                        <button 
-                            className="cursor-pointer"
-                            onClick={() => changeTab("payment")}
-                        >
-                            <img src="/images/icons/edit-icon.svg" alt="Edit icon" className="object-contain w-4 h-4 hover:opacity-70" />
-                        </button>
+                        
+                        {
+                            !readOnly && (
+                                <button 
+                                    className="cursor-pointer"
+                                    onClick={() => changeTab("payment")}
+                                >
+                                    <img src="/images/icons/edit-icon.svg" alt="Edit icon" className="object-contain w-4 h-4 hover:opacity-70" />
+                                </button>
+                            )
+                        }
+                        
                     </div>
 
                     <table className="w-full text-sm">
@@ -340,16 +360,21 @@ export default function ShipmentForm({order, customer, orderReferences, shipping
                         </div>
                     </div>
                 </div>
-
-                <div className="mt-5 flex justify-end">
-                    <button 
-                        className="flex gap-x-2 bg-green-500 hover:bg-green-400 p-2 rounded-md items-center cursor-pointer text-white font-bold"
-                        type="submit"
-                    >
-                        <img src="/images/icons/shipped-icon.svg" alt="Order icon" className="object-contain w-8 h-8"/>
-                        Shipped
-                    </button>
-                </div>
+                
+                {
+                    !readOnly && (
+                        <div className="mt-5 flex justify-end">
+                            <button 
+                                className="flex gap-x-2 bg-green-500 hover:bg-green-400 p-2 rounded-md items-center cursor-pointer text-white font-bold"
+                                type="submit"
+                            >
+                                <img src="/images/icons/shipped-icon.svg" alt="Order icon" className="object-contain w-8 h-8"/>
+                                Shipped
+                            </button>
+                        </div>
+                    )
+                }
+                
 
                 
             </div>

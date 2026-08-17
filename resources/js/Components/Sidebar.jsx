@@ -38,7 +38,7 @@ export default function Sidebar({user}){
 
             <div className="px-3 py-3 font-bold text-lg shadow-sm flex gap-x-3 items-center bg-[#C3252B] bg-[#DF9BAA]">
                 <img src="/images/logo/elga-logo.jpg" alt="Elga logo" className="object-contain w-7 h-7 rounded-full border border-gray-400 shadow-md" />
-                <h1 className="text-lg text-white font-bold">Elga DMS</h1>
+                <h1 className="text-lg text-white font-bold font-['Times_New_Roman',serif]">Elga <span className="text-xs">OMS</span></h1>
             </div>
 
             <nav className="py-5 space-y-2">

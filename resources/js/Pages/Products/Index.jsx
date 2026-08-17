@@ -5,7 +5,7 @@ import { useEffect, useState } from "react";
 import ProductModal from "./Components/ProductModal";
 import Swal from "sweetalert2";
 import { formatCurrency } from "../../Utils/formatCurrency";
-import { CirclePlus, Eye, Flower, Handbag, Search, Shirt, SportShoe, Toolbox } from "lucide-react";
+import { CirclePlus, Eye, Flower, Handbag, Search, Shirt, ShoppingBag, SportShoe, Toolbox } from "lucide-react";
 
 export default function Dashboard ({products, user}){
 
@@ -252,7 +252,7 @@ export default function Dashboard ({products, user}){
                         placeholder="Search product..."
                         value={currentSearch}
                         onChange={(e) => setCurrentSearch(e.target.value)}
-                        className="w-full rounded-md py-2 pl-3 bg-white"
+                        className="w-full rounded-md py-2 pl-3 bg-white focus:outline-none focus:ring-1 focus:ring-[#DF9BAA]"
                         onKeyDown={(e) => {
                             if(e.key === "Enter"){
                                 handleSearch(currentSearch);
@@ -292,24 +292,38 @@ export default function Dashboard ({products, user}){
                                             Sold: {product.variants_sum_sold}
                                         </div>
 
-                                        <div className="relative group overflow-hidden rounded-t-xl">
-                                            <img 
-                                                src={product.image ? `/storage/${product.image}` : 'images/default_product.png'}
-                                                alt="Product Image" 
-                                                className="w-full h-40 object-cover object-center"
-                                            />
+                                        <div className="relative group overflow-hidden rounded-t-xl min-h-50 w-full">
+                                            {
+                                                product.image ? (
+                                                    <div>
+                                                        <img 
+                                                            src={`/storage/${product.image}`}
+                                                            alt="Product Image" 
+                                                            className="w-full h-50 object-cover object-center"
+                                                        />
 
-                                            <div 
-                                                className="absolute inset-0 bg-black/40 flex flex-col items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-200"
-                                                onClick={(e) => {
-                                                    e.stopPropagation(); // prevent triggering viewProduct
-                                                    setPreviewImage(product.image ? `/storage/${product.image}` : 'images/default_product.png');
-                                                }}
-                                            >
-                                                
-                                                <Eye size={40} color={"#FFFF"}/>
-                                                
-                                            </div>
+                                                        <div 
+                                                            className="absolute inset-0 bg-black/40 flex flex-col items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-200"
+                                                            onClick={(e) => {
+                                                                e.stopPropagation(); // prevent triggering viewProduct
+                                                                setPreviewImage(product.image ? `/storage/${product.image}` : 'images/default_product.png');
+                                                            }}
+                                                        >
+                                                            
+                                                            <Eye size={40} color={"#FFFF"}/>
+                                                            
+                                                        </div>
+                                                    </div>
+                
+                                                    
+                                                ) : (
+                                                    <div className="h-50 w-full flex justify-center items-center bg-black/20">
+                                                        <ShoppingBag size={100} color="gray"/>
+                                                    </div>
+                                                )
+                                            }
+                                            
+                                            
                                         </div>
         
                                         <div className="px-3 py-2">

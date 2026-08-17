@@ -217,7 +217,7 @@ export default function Index ({orders, user}){
                 <div className="w-full flex justify-end relative">
                     <input 
                         type="text" 
-                        className="min-w-xs rounded-md border border-gray-400 bg-white px-2 py-1"
+                        className="min-w-xs rounded-md border border-gray-400 bg-white px-2 py-1 focus:outline-none focus:ring-1 focus:ring-[#DF9BAA]"
                         placeholder="Search order..."
                         value={currentSearch}
                         onChange={(e) => setCurrentSearch(e.target.value)}

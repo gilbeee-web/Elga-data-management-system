@@ -1,6 +1,7 @@
 import { useForm } from "@inertiajs/react";
 import TextInput from "../../../Components/TextInput";
 import { useEffect } from "react";
+import { ChevronLeft } from "lucide-react";
 
 export default function UserCredentialForm({user, back, updateCredentialSuccess}){
 
@@ -38,12 +39,12 @@ export default function UserCredentialForm({user, back, updateCredentialSuccess}
 
     return <>
 
-        <div className="flex items-center my-5 ">
+        <div className="flex items-center my-5">
             <button className="cursor-pointer" onClick={back}>
-                <img src="/images/icons/arrow-back.png" alt="Arrow back"  className="object-contain w-5 h-5"/>
+                <ChevronLeft size={25}/>
             </button>
 
-            <h1 className="font-bold">User credentials</h1>    
+            <h1 className="font-bold text-lg">User credentials</h1>    
 
         </div>
     

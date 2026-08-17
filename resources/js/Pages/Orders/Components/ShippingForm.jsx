@@ -2,6 +2,7 @@ import { useForm } from "@inertiajs/react";
 import { formatCurrency } from "../../../Utils/formatCurrency";
 import { useEffect, useState } from "react";
 import Swal from "sweetalert2";
+import { Copy } from "lucide-react";
 
 export default function ShippingForm({shippingInfo, order, changeTab, customer, readOnly}){
 
@@ -316,7 +317,7 @@ COMPLETE ADDRESS: ${customer.address}`;
                                 className="border px-2 py-1 rounded-md hover:bg-gray-200 cursor-pointer"
                                 onClick={copyCustomerInfo}
                             >
-                                <img src="/images/icons/copy-icon.svg" alt="Copy icon" className="object-contain w-4 h-4"/>
+                                <Copy size={20}/>
                             </button>
 
                             <h1 className="font-bold text-xl">Delivery Details</h1>

@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { formatCurrency } from "../../../Utils/formatCurrency";
+import { Search, ShoppingBag } from "lucide-react";
 
 export default function ProductListModal({onClose, products, onAddProducts}){
     
@@ -72,8 +73,29 @@ export default function ProductListModal({onClose, products, onAddProducts}){
 
 
                 <div className="mt-5 flex justify-between">
+
                     <div className="flex flex-col">
                         <label htmlFor="">Search product(s):</label>
+                        <div className="flex items-center gap-2 bg-white border border-[#E2E0D8] rounded-lg px-3 h-10 w-100">
+                            <Search strokeWidth={1} size={20} color="gray"/>
+
+                            <input
+                                type="text"
+                                placeholder="Enter product name or code..."
+                                value={filterValue.searchName}
+                                onChange={(e) =>
+                                    setFilterValue((prev) => ({
+                                        ...prev,
+                                        searchName: e.target.value,
+                                    }))
+                                }
+                                className="w-full border-none outline-none text-sm text-[#2C2C2A] placeholder:text-[#8A8880] bg-transparent"
+                            />
+                        </div>
+                    </div>
+                    
+                    {/* <div className="flex flex-col">
+                        
                         <input 
                             value={filterValue.searchName}
                             onChange={(e) =>
@@ -86,7 +108,7 @@ export default function ProductListModal({onClose, products, onAddProducts}){
                             className="min-w-120 border border-gray-400 rounded-md px-2 py-2 bg-white"
                             placeholder="Enter product name..."
                         />
-                    </div>
+                    </div> */}
 
                     <div className="flex flex-col">
                         <label htmlFor="">Category:</label>
@@ -129,11 +151,20 @@ export default function ProductListModal({onClose, products, onAddProducts}){
                                         <div className="flex gap-x-5">
 
                                             <div className="border border-gray-200 rounded-md flex-shrink-0 h-20 w-20 overflow-hidden">
-                                                <img 
-                                                    src={`/storage/${product.image}`}
-                                                    alt={product.name} 
-                                                    className="h-full w-full object-cover object-center"
-                                                />
+                                                {
+                                                    product.image ? (
+                                                        <img 
+                                                            src={`/storage/${product.image}`}
+                                                            alt={product.name} 
+                                                            className="h-full w-full object-cover object-center"
+                                                        />
+                                                    ) : (
+                                                        <div className="h-20 w-full flex justify-center items-center bg-black/20">
+                                                            <ShoppingBag size={30} color="gray"/>
+                                                        </div>
+                                                    )
+                                                }
+                                                
                                             </div>
 
                                             <div className="flex flex-col justify-between">

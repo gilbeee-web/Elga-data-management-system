@@ -5,6 +5,7 @@ import { route } from "ziggy-js";
 import { router, useForm } from "@inertiajs/react";
 import { formatCurrency } from "../../../Utils/formatCurrency";
 import Swal from "sweetalert2";
+import { ShoppingBag, Trash2 } from "lucide-react";
 
 export default function OrderForm({order, changeTab, orderReferences: initialOrderReferences, readOnly}){
 
@@ -375,7 +376,7 @@ export default function OrderForm({order, changeTab, orderReferences: initialOrd
                                                                 type="button"
                                                                 className="cursor-pointer p-3"
                                                             >
-                                                            <img src={"/images/icons/delete-icon.svg"} alt="Delete Icon" className="object-contain w-8 h-8 border rounded-md hover:bg-gray-100"/>
+                                                            <Trash2 size={20} color="red"/>
                                                             </button>
                                                         )
                                                     }
@@ -441,11 +442,20 @@ export default function OrderForm({order, changeTab, orderReferences: initialOrd
                                                                 {/* Product */}
                                                                 <div className="flex gap-x-3 items-center min-w-0">
                                                                     <div className="border border-gray-200 rounded-md flex-shrink-0 h-12 w-12 overflow-hidden bg-[#F7F7F4]">
-                                                                        <img
-                                                                            src={`/storage/${item.image}`}
-                                                                            alt={item.name}
-                                                                            className="h-full w-full object-cover object-center"
-                                                                        />
+                                                                        {
+                                                                            item.image ? (
+                                                                                <img
+                                                                                    src={`/storage/${item.image}`}
+                                                                                    alt={item.name}
+                                                                                    className="h-full w-full object-cover object-center"
+                                                                                />
+                                                                            ) : (
+                                                                                <div className="h-12 w-full flex justify-center items-center bg-black/10">
+                                                                                    <ShoppingBag size={20} color="gray"/>
+                                                                                </div>
+                                                                            )
+                                                                        }
+                                                                        
                                                                     </div>
 
                                                                     <div className="flex flex-col min-w-0">

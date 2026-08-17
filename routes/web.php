@@ -64,6 +64,8 @@ Route::middleware('auth')->group(function(){
 
 Route::prefix('/users')->controller(UserController::class)->group(function () {
     Route::post('/login', 'login')->name('user.login');
+    Route::put('/{user}/password', 'updatePassword')->name('user.updatePassword'); // admin side (main user) forgot password
+    Route::post('/verify-email', 'verifyUserEmail')->name('user.verifyEmail');
 });
 
 Route::middleware('auth')->group(function(){
@@ -74,9 +76,8 @@ Route::middleware('auth')->group(function(){
             Route::post('/', 'store')->name('user.store');
             Route::post('/logout', 'logout')->name('user.logout');
             Route::put('/{user}', 'update')->name('user.update');
-            Route::put('/{user}/credentials', 'updateCredentials')->name('user.updateCredentials');
+            Route::put('/{user}/credentials', 'updateCredentials')->name('user.updateCredentials'); //super_admin side (updating user credentials include email)       
             Route::delete('/{user}', 'destroy')->name('user.destroy');
-            
         });
     });
 });

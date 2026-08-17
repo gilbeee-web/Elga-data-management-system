@@ -2,6 +2,7 @@ import { router, useForm } from "@inertiajs/react";
 import TextInput from "../../../Components/TextInput";
 import { formatCurrency } from "../../../Utils/formatCurrency";
 import Swal from "sweetalert2";
+import { HandCoins, Package, SquarePen, Truck, User } from "lucide-react";
 
 export default function ShipmentForm({order, customer, orderReferences, shippingInfo, orderSummary, payments, changeTab, readOnly}){
 
@@ -149,7 +150,7 @@ export default function ShipmentForm({order, customer, orderReferences, shipping
                     <div className="flex justify-between">
 
                         <div className="flex items-center gap-2">
-                            <img src="/images/icons/person-outline.svg" alt="Order icon" className="object-contain w-6 h-6" />
+                            <User size={20} />
                             <h1 className="font-semibold text-base">Customer</h1>
                         </div>
 
@@ -160,7 +161,7 @@ export default function ShipmentForm({order, customer, orderReferences, shipping
                                         className="cursor-pointer"
                                         onClick={() => changeTab("customer")}
                                     >
-                                        <img src="/images/icons/edit-icon.svg" alt="Edit icon" className="object-contain w-4 h-4 hover:invert"/>
+                                        <SquarePen  size={20}/>
                                     </button>
                                 </div>
                             )
@@ -184,7 +185,7 @@ export default function ShipmentForm({order, customer, orderReferences, shipping
                 <div className="mt-5 w-full border border-gray-200 shadow-sm rounded-lg p-4">
                     <div className="flex justify-between items-center mb-3">
                         <div className="flex items-center gap-2">
-                            <img src="/images/icons/package.svg" alt="Order icon" className="object-contain w-6 h-6" />
+                            <Package size={20}/>
                             <h1 className="font-semibold text-base">Order</h1>
                         </div>
 
@@ -194,7 +195,7 @@ export default function ShipmentForm({order, customer, orderReferences, shipping
                                     className="cursor-pointer"
                                     onClick={() => changeTab("order")}
                                 >
-                                    <img src="/images/icons/edit-icon.svg" alt="Edit icon" className="object-contain w-4 h-4 hover:opacity-70" />
+                                    <SquarePen size={20}/>
                                 </button>
                             )
                         }
@@ -250,7 +251,7 @@ export default function ShipmentForm({order, customer, orderReferences, shipping
                     <div className="flex justify-between">
 
                         <div className="flex items-center gap-2">
-                            <img src="/images/icons/truck-icon.svg" alt="Order icon" className="object-contain w-6 h-6" />
+                            <Truck size={20}/>
                             <h1 className="font-semibold text-base">Shipping</h1>
                         </div>
                         
@@ -261,7 +262,7 @@ export default function ShipmentForm({order, customer, orderReferences, shipping
                                         className="cursor-pointer"
                                         onClick={() => changeTab("shipping")}
                                     >
-                                        <img src="/images/icons/edit-icon.svg" alt="Edit icon" className="object-contain w-4 h-4 hover:invert"/>
+                                        <SquarePen size={20} />
                                     </button>
                                 </div>
                             )
@@ -295,7 +296,7 @@ export default function ShipmentForm({order, customer, orderReferences, shipping
                 <div className="mt-5 w-full border-2 border-gray-200 shadow-sm rounded-lg p-4">
                     <div className="flex justify-between items-center mb-3">
                         <div className="flex items-center gap-2">
-                            <img src="/images/icons/payment-icon.svg" alt="Payment icon" className="object-contain w-6 h-6" />
+                            <HandCoins size={20}/>
                             <h1 className="font-semibold text-base">Payment</h1>
                         </div>
                         
@@ -305,7 +306,7 @@ export default function ShipmentForm({order, customer, orderReferences, shipping
                                     className="cursor-pointer"
                                     onClick={() => changeTab("payment")}
                                 >
-                                    <img src="/images/icons/edit-icon.svg" alt="Edit icon" className="object-contain w-4 h-4 hover:opacity-70" />
+                                    <SquarePen size={20}/>
                                 </button>
                             )
                         }
@@ -368,7 +369,7 @@ export default function ShipmentForm({order, customer, orderReferences, shipping
                                 className="flex gap-x-2 bg-green-500 hover:bg-green-400 p-2 rounded-md items-center cursor-pointer text-white font-bold"
                                 type="submit"
                             >
-                                <img src="/images/icons/shipped-icon.svg" alt="Order icon" className="object-contain w-8 h-8"/>
+                                <Truck size={20}/>
                                 Shipped
                             </button>
                         </div>

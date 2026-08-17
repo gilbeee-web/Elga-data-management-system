@@ -152,8 +152,9 @@ class UserController extends Controller
             'password' => ['required', 'string'],
         ]);
 
-        
-        if (!Auth::attempt($user)) {
+        $remember = $request->has('remember');
+
+        if (!Auth::attempt($user, $remember)) {
             throw ValidationException::withMessages([
                 'email' => 'Incorrect email or password.',
             ]);
@@ -175,13 +176,36 @@ class UserController extends Controller
         return redirect(route('index'));
     }
 
+    public function verifyUserEmail(Request $request){
+
+        // dd($request->all());
+
+        $validated = $request->validate([
+            'email' => 'required|string',
+        ]);
+
+        $user = User::where('email', $validated['email'])->first();
+
+        if(!$user){
+            return response()->json(['error' => 'Email does not match to any user, please try again.'], 404);
+        }
+
+        return response()->json($user->id);
+    }
+
     //update passsword admin side (main user)
     public function updatePassword(Request $request, User $user)
     {
+
+        // dd($request->all());
        
         // Validate only new password and its confirmation
         $validated = $request->validate([
             'new_password' => 'required|string|min:8|confirmed',
+        ], [
+            'new_password.confirmed' => 'New password and confirmation do not match.',
+            'new_password.required' => 'Please enter a new password.',
+            'new_password.min' => 'Password must be at least 8 characters.',
         ]);
 
         // Save new password
@@ -190,5 +214,8 @@ class UserController extends Controller
 
         return redirect()->back()->with(['success' => 'Password updated successfully!']);
     }
+
+
+   
 
 }

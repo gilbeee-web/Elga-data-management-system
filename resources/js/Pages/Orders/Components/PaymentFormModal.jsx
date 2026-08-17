@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { route } from "ziggy-js";
 import { formatCurrency } from "../../../Utils/formatCurrency";
 import Swal from "sweetalert2";
+import { ImagePlus } from "lucide-react";
 
 export default function PaymentFormModal({order, onClose, payment, onSubmitPayment}){
 
@@ -207,10 +208,7 @@ export default function PaymentFormModal({order, onClose, payment, onSubmitPayme
 
                                 <div className="border-2 border-dashed w-60 h-25 rounded-md flex items-center justify-center hover:bg-gray-200">
                                     <div className="flex flex-col items-center">
-                                        <img
-                                            src="/images/icons/add-photo-icon.png"
-                                            className="w-10 h-10"
-                                        />
+                                        <ImagePlus size={30}/>
 
                                         <span>Upload Image</span>
 

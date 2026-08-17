@@ -391,7 +391,7 @@ Thank you!`;
 
                     <span className="absolute top-0">
                         {
-                            shipmentInfo > 0 ? (
+                            shipmentInfo ? (
                                 <CircleCheckBig strokeWidth={2} size={20} color="green" />
                             ) : (
                                 <CircleAlert strokeWidth={2} size={20} color="red"/>

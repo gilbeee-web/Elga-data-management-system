@@ -227,7 +227,9 @@ class OrderController extends Controller
             'container_size' => 'required|string',
             'raw_shipping_fee' => 'required|numeric',
             'container_fee' => 'required|numeric',
-            'tracking_number' => 'required|string'
+            'tracking_number' => 'required|string|unique:shipments,tracking_number'
+        ],[
+            'tracking_number.unique' => 'This tracking number already exists.'
         ]);
 
         try{
@@ -248,12 +250,14 @@ class OrderController extends Controller
         // dd($request->all());
 
         $validated = $request->validate([
-            'payment_method' => 'string|required',
-            'payment_amount' => 'numeric|required',
-            'mop_name' => 'string|required',
-            'reference_number' => 'string|required',
+            'payment_method' => 'required|string',
+            'payment_amount' => 'required|numeric',
+            'mop_name' => 'required|string',
+            'reference_number' => 'required|string|unique:payments,reference_number',
             'proof_image' => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
             'remarks' => 'nullable|string'
+        ], [
+            'reference_number.unique' => 'This reference number already exists.'
         ]);
 
         try {
@@ -263,13 +267,6 @@ class OrderController extends Controller
         } catch (Exception $e) {
             return redirect()->back()->with('error', 'Error in adding payment.');
         }
-
-        // try{
-        //     $this->orderService->savePayment($order, $validated);
-        // }catch(Exception $e){
-        //     return redirect()->back()->with('error', 'Error in adding payment.');
-        // }
-
 
         return redirect()->back()->with('success', 'Payment added successfully!');
     }
@@ -289,8 +286,6 @@ class OrderController extends Controller
 
 
     public function shippedOrder(Order $order, Request $request){
-
-        // dd($request->all());
 
         $validated = $request->validate([
             'sf_payment_reference' => 'string|nullable'

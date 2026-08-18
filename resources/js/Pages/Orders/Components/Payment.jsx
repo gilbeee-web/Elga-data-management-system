@@ -1,10 +1,11 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { formatCurrency } from "../../../Utils/formatCurrency";
 import PaymentFormModal from "./PaymentFormModal";
 import { formatDateTime } from "../../../Utils/formatDateTime";
 import Swal from "sweetalert2";
 import { router } from "@inertiajs/react";
 import { route } from "ziggy-js";
+import { CircleX, Eye } from "lucide-react";
 
 export default function Payment({order, orderSummary, payments, changeTab, readOnly}){
 
@@ -73,6 +74,26 @@ export default function Payment({order, orderSummary, payments, changeTab, readO
 
     const overpayment = orderSummary.total_paid - orderSummary.remaining_balance;
 
+    const [previewImage, setPreviewImage] = useState(null);
+
+    useEffect(() => {
+        if (!previewImage) return;
+
+        const handleKeyDown = (e) => {
+            if (e.key === 'Escape') {
+                setPreviewImage(null);
+            }
+        };
+
+        window.addEventListener('keydown', handleKeyDown);
+
+        return () => {
+            window.removeEventListener('keydown', handleKeyDown);
+        };
+    }, [previewImage]);
+
+    console.log("Preview Image: ", previewImage);
+
     return <>
 
         <div className="rounded-md bg-white p-5 h-125 flex flex-col">
@@ -130,18 +151,15 @@ export default function Payment({order, orderSummary, payments, changeTab, readO
                                         >
                                             {
                                                 !readOnly && (
-                                                    <div className="absolute -top-2 -right-2 z-99">
+                                                    <div className="absolute -top-3 -right-2 z-99">
                                                         <button 
                                                             onClick={(e) => {
                                                                 e.stopPropagation();
                                                                 removePayment(payment.id)
                                                             }}
+                                                            className="cursor-pointer"
                                                         >
-                                                            <img 
-                                                                src={'/images/icons/remove-btn.svg'} 
-                                                                alt="Remove Btn" 
-                                                                className="cursor-pointer object-contain h-5 w-5"
-                                                            />
+                                                            <CircleX strokeWidth={3} color="red"/>
                                                         </button>
                                                     </div>
                                                 )
@@ -151,15 +169,35 @@ export default function Payment({order, orderSummary, payments, changeTab, readO
 
                                             <div className="flex gap-x-5">
                                                 <div className="border border-gray-200 rounded-md flex-shrink-0 h-20 w-20 overflow-hidden">
-                                                    <img
-                                                        src={
-                                                            payment.proof_image
-                                                                ? `/storage/${payment.proof_image}`
-                                                                : paymentMethodImages[payment.payment_method]
-                                                        }
-                                                        alt="Proof Image"
-                                                        className="h-full w-full object-cover object-center"
-                                                    />
+                                                    {
+                                                        payment.proof_image ? (
+                                                            <div className="relative group h-full w-full">
+                                                                <img
+                                                                    src={`/storage/${payment.proof_image}`}
+                                                                    alt="Proof Image"
+                                                                    className="h-full w-full object-cover object-center"
+                                                                />
+
+                                                                <div 
+                                                                    className="absolute inset-0 bg-black/40 flex flex-col items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-200"
+                                                                    onClick={(e) => {
+                                                                        e.stopPropagation(); 
+                                                                        setPreviewImage(`/storage/${payment.proof_image}`);
+                                                                    }}
+                                                                >
+                                                                    <Eye size={25} color={"#FFFF"}/>
+                                                                </div>
+                                                            </div>
+                                                        ) : (
+                                                            <div>
+                                                                <img
+                                                                    src={paymentMethodImages[payment.payment_method]}
+                                                                    alt="Proof Image"
+                                                                    className="h-full w-full object-cover object-center"
+                                                                />
+                                                            </div>
+                                                        )
+                                                    }
                                                 </div>
 
                                                 <div className="flex flex-col gap-y-3">
@@ -202,6 +240,25 @@ export default function Payment({order, orderSummary, payments, changeTab, readO
                         )
                     }
                 </div>
+
+                {previewImage && (
+                    <div 
+                        className="fixed inset-0 bg-[rgb(0,0,0,0.5)] z-99 flex items-center justify-center"
+                        onClick={() => setPreviewImage(null)}
+                    >
+
+                        <button className="absolute top-4 right-4 text-white text-3xl cursor-pointer hover:text-gray-300" onClick={() => setPreviewImage(null)}>
+                            &times;
+                        </button>
+                        
+                        <img 
+                            src={previewImage}
+                            alt="Full preview"
+                            className="max-w-full max-h-full object-contain rounded-lg"
+                            onClick={(e) => e.stopPropagation()}
+                        />
+                    </div>
+                )}
 
               
                 <div className="w-[80%] border max-h-95 rounded-lg p-3">

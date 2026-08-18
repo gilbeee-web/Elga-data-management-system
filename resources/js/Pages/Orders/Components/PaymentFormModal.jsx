@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { route } from "ziggy-js";
 import { formatCurrency } from "../../../Utils/formatCurrency";
 import Swal from "sweetalert2";
-import { ImagePlus } from "lucide-react";
+import { CircleX, Eye, ImagePlus, Trash2 } from "lucide-react";
 
 export default function PaymentFormModal({order, onClose, payment, onSubmitPayment}){
 
@@ -12,6 +12,7 @@ export default function PaymentFormModal({order, onClose, payment, onSubmitPayme
     console.log("Payment data (payment form): ", payment);
 
     const {data, setData, post, processing, errors} = useForm({
+        payment_id: null,
         payment_method: "",
         payment_amount: null,
         mop_name: "",
@@ -73,6 +74,7 @@ export default function PaymentFormModal({order, onClose, payment, onSubmitPayme
         if(payment){
 
             setData({
+                payment_id: payment.id,
                 payment_method: payment.payment_method,
                 payment_amount: payment.payment_amount,
                 mop_name: payment.mop_name,
@@ -87,7 +89,52 @@ export default function PaymentFormModal({order, onClose, payment, onSubmitPayme
         }
 
 
-    }, [payment])
+    }, [payment]);
+
+    const [showImagePreview, setShowImagePreview] = useState(null);
+
+    useEffect(() => {
+        if (!previewImage) return;
+
+        const handleKeyDown = (e) => {
+            if (e.key === 'Escape') {
+                setShowImagePreview(false);
+            }
+        };
+
+        window.addEventListener('keydown', handleKeyDown);
+
+        return () => {
+            window.removeEventListener('keydown', handleKeyDown);
+        };
+    }, [showImagePreview]);
+
+
+    const handleRemoveProofImage = async (e) => {
+        e.stopPropagation();
+
+        const result = await Swal.fire({
+            title: "Remove this slip?",
+            text: "This slip will removed permanently.",
+            icon: "warning",
+            showCancelButton: true,
+            confirmButtonColor: "#dc2626",
+            cancelButtonColor: "#6b7280",
+            confirmButtonText: "Confirm",
+            cancelButtonText: "Cancel",
+            reverseButtons: true
+        });
+
+        if(!result.isConfirmed){
+            return;
+        }
+        
+        
+        if(result.isConfirmed){
+            setPreviewImage(null);
+            setData("proof_image", null);
+        }        
+    }
 
 
     return <>
@@ -194,33 +241,45 @@ export default function PaymentFormModal({order, onClose, payment, onSubmitPayme
                     <div className="flex flex-col gap-y-1">
                         <label className="font-semibold">Proof of Payment:</label>
 
-                        <label htmlFor="product_image" className="cursor-pointer inline-block w-fit">
-
-                            {previewImage ? (
-
+                        {previewImage ? (
+                            <div className="mt-5 relative px-2 py-1 border border-gray-400 rounded-md w-fit group">
                                 <img
                                     src={previewImage}
                                     alt="Preview"
-                                    className="w-auto h-30 rounded-md border"
+                                    className="w-auto h-30 rounded-md border cursor-pointer"
+                                    onClick={() => setShowImagePreview(true)}
                                 />
 
-                            ) : (
+                                <div 
+                                    className="absolute h-full inset-0 flex items-center justify-center bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity duration-200 cursor-pointer rounded-md"
+                                    onClick={() => setShowImagePreview(true)}
+                                >
+                                    <Eye size={28} color={"#FFF"}/>
+                                </div>
 
+                                <div className="absolute -right-2 -top-3">
+                                    <button 
+                                        type="button"
+                                        className="text-xl cursor-pointer"
+                                        onClick={handleRemoveProofImage}
+                                    >
+                                        <CircleX strokeWidth={3} color="red" size={20}/>
+                                    </button>
+                                </div>
+                            </div>
+                        ) : (
+                            <label htmlFor="product_image" className="cursor-pointer inline-block w-fit">
                                 <div className="border-2 border-dashed w-60 h-25 rounded-md flex items-center justify-center hover:bg-gray-200">
                                     <div className="flex flex-col items-center">
                                         <ImagePlus size={30}/>
-
                                         <span>Upload Image</span>
-
                                         <span className="text-xs text-gray-500">
                                             Allowed format: JPG, JPEG, PNG
                                         </span>
                                     </div>
                                 </div>
-
-                            )}
-
-                        </label>
+                            </label>
+                        )}
 
                         <input
                             id="product_image"
@@ -236,6 +295,25 @@ export default function PaymentFormModal({order, onClose, payment, onSubmitPayme
                             </span>
                         )}
                     </div>
+
+                    {showImagePreview && (
+                        <div 
+                            className="fixed inset-0 bg-[rgb(0,0,0,0.5)] z-99 flex items-center justify-center"
+                            onClick={() => setShowImagePreview(null)}
+                        >
+
+                            <button className="absolute top-4 right-4 text-white text-3xl cursor-pointer hover:text-gray-300" onClick={() => setShowImagePreview(null)}>
+                                &times;
+                            </button>
+                            
+                            <img 
+                                src={previewImage}
+                                alt="Full preview"
+                                className="max-w-full max-h-full object-contain rounded-lg"
+                                onClick={(e) => e.stopPropagation()}
+                            />
+                        </div>
+                    )}
 
                     <div className="flex flex-col gap-y-1">
                         <label htmlFor="remarks" className="font-semibold">Remarks:</label>

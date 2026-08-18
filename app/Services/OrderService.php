@@ -13,6 +13,7 @@ use App\Models\Shipment;
 use Exception;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\ValidationException;
 
 class OrderService{
@@ -263,35 +264,33 @@ class OrderService{
 
         return DB::transaction(function() use ($data, $order, $paymentId){
 
-            // dd($order->toArray());
-
             $existingAmount = 0;
+            $existingPayment = null;
             
             //if editing get the existing payment amount
             if($paymentId){
-                $existingAmount = Payment::where('id', $paymentId)
+                $existingPayment = Payment::where('id', $paymentId)
                     ->where('order_id', $order->id)
-                    ->value('payment_amount') ?? 0;
+                    ->first();
+
+                $existingAmount = $existingPayment->payment_amount ?? 0;
             }
 
             // if existing amount is not 0 it "give back" to original balance that replaced the previous payment
             // add again the existing amount that subtract in the previous payment (edit mode)
             $availableBalance = $order->remaining_balance + $existingAmount;
 
-
             // dd($availableBalance);
 
             //avoid overpayment
             if ($data['payment_amount'] > $availableBalance) {
-
-                // dd("Pasok");
-
                 throw ValidationException::withMessages([
                     'payment_amount' => 'Payment exceeds the remaining balance.'
                 ]);
             }
 
             $proof_imagePath = null;
+            $shouldDeleteOldImage = false;
 
             if(!empty($data['proof_image'])){
 
@@ -304,6 +303,13 @@ class OrderService{
                     $fileName,
                     'public'
                 );
+
+                $shouldDeleteOldImage = true;
+            }
+
+            // Delete the old file from storage if it's being replaced or removed
+            if ($shouldDeleteOldImage && $existingPayment && $existingPayment->proof_image) {
+                Storage::disk('public')->delete($existingPayment->proof_image);
             }
 
             $isFullPayment = bccomp((string) $data['payment_amount'], (string) $availableBalance, 2) === 0;

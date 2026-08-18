@@ -139,7 +139,7 @@ export default function Edit({order, status, customer, orderReferences, shipment
 Subtotal: ${formatCurrency(order.subtotal)}
 Shipping Fee: ${formatCurrency(order.shipping_fee)}
 Discount: ${formatCurrency(order.discount)}
-Total: ${formatCurrency(order.total_payment)}
+Total: ${formatCurrency(order.total_amount)}
         
 Please settle the payment as soon as possible, thank you!
         `;
@@ -154,7 +154,7 @@ Please settle the payment as soon as possible, thank you!
 Subtotal: ${formatCurrency(order.subtotal)}
 Shipping Fee: ${formatCurrency(order.shipping_fee)}
 Discount: ${formatCurrency(order.discount)}
-Total Payment: ${formatCurrency(order.total_payment)}
+Total Payment: ${formatCurrency(order.total_amount)}
 
 Total Paid: ${formatCurrency(order.total_paid)}
 Remaining Balance: ${formatCurrency(order.remaining_balance)}

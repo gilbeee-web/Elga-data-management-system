@@ -11,6 +11,7 @@ use App\Services\OrderService;
 use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Validation\Rule;
 use Inertia\Inertia;
 use Illuminate\Validation\ValidationException;
 
@@ -56,7 +57,7 @@ class OrderController extends Controller
             });
         }
 
-        $orders = $query->latest()->paginate(10)->withQueryString();
+        $orders = $query->latest()->paginate(5)->withQueryString();
 
         return Inertia::render('Orders/Index', [
             'orders' => $orders,
@@ -245,15 +246,19 @@ class OrderController extends Controller
 
 
     public function savePayment(Order $order, Request $request){
-
-
         // dd($request->all());
 
         $validated = $request->validate([
+            'payment_id' => 'nullable|numeric|exists:payments,id',
             'payment_method' => 'required|string',
             'payment_amount' => 'required|numeric',
             'mop_name' => 'required|string',
-            'reference_number' => 'required|string|unique:payments,reference_number',
+            'reference_number' => [
+                'required',
+                'string',
+                Rule::unique('payments', 'reference_number')
+                    ->ignore($request->payment_id),
+            ],
             'proof_image' => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
             'remarks' => 'nullable|string'
         ], [
@@ -261,7 +266,11 @@ class OrderController extends Controller
         ]);
 
         try {
-            $this->orderService->savePayment($order, $validated);
+            $this->orderService->savePayment(
+                $order, 
+                $validated, 
+                $validated['payment_id'] ?? null
+            );
         } catch (ValidationException $e) {
             throw $e; // let Laravel/Inertia handle it as a validation error
         } catch (Exception $e) {

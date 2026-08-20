@@ -14,20 +14,17 @@ import ShipmentForm from "./Components/ShipmentForm";
 import { Ban, ChevronDown, ChevronLeft, CircleAlert, CircleCheck, CircleCheckBig, Copy, Trash2 } from "lucide-react";
 
 
-export default function Edit({order, status, customer, orderReferences, shipmentInfo, payments, orderSummary, user}){
+export default function Edit({order, order_type, status, customer, orderReferences, shipmentInfo, payments, orderSummary, user}){
 
-    // console.log("Customers: ", customer);
+    console.log("Order Type: ", order_type);
 
-    // console.log("Order References: ", orderReferences);
-
-    // console.log("Shipping info: ", shipmentInfo);
-    // console.log("Remaining balance: ", order.remaining_balance);
-
+    const isWalkinOrder = order_type === 'walkin';
     const isLocked = ['shipped', 'cancelled'].includes(order.order_status);
 
     const [selectedCustomer, setSelectedCustomer] = useState(customer);
 
     const tabs = ['customer', 'order', 'shipping', 'payment', 'shipment'];
+ 
 
     const [activeTab, setActiveTab] = useState("customer");
 
@@ -43,7 +40,7 @@ export default function Edit({order, status, customer, orderReferences, shipment
 
         if (selectedTab === 'order' && !hasCustomer) {
             message = "Please complete the Customer Info tab first.";
-        } else if (selectedTab === 'shipping') {
+        } else if (selectedTab === 'shipping' && !isWalkinOrder) {
             if (!hasCustomer) {
                 message = "Please complete the Customer Info tab first.";
             } else if (!hasOrderItems) {
@@ -54,7 +51,8 @@ export default function Edit({order, status, customer, orderReferences, shipment
                 message = "Please complete the Customer Info tab first.";
             } else if (!hasOrderItems) {
                 message = "Please add at least one order item first.";
-            } else if (!hasShipping) {
+            } else if (!hasShipping && !isWalkinOrder) {
+                console.log("hey");
                 message = "Please set the shipping fee first.";
             }
         } else if (selectedTab === 'shipment') {
@@ -62,7 +60,8 @@ export default function Edit({order, status, customer, orderReferences, shipment
                 message = "Please complete the Customer Info tab first.";
             } else if (!hasOrderItems) {
                 message = "Please add at least one order item first.";
-            } else if (!hasShipping) {
+            } else if (!hasShipping && !isWalkinOrder) {
+                console.log("hey2");
                 message = "Please set the shipping fee first.";
             } else if (!hasPayments && order.remaining_balance > 0) {
                 message = "Please settle the payment first.";
@@ -375,32 +374,36 @@ Thank you!`;
                     
                 </button>
 
-                <button 
-                    className="text-start cursor-pointer relative"
-                    onClick={() => handleTab(tabs[2])}
-                >
-                    <span
-                        className={`text-2xl font-bold ${
-                            activeTab === tabs[2] 
-                            ? "border-b-3 border-green-600"
-                            : "text-gray-400"
-                        }`}
-                    >
-                        Shipping
-                    </span>
+                {
+                    order_type === 'shipment' && (
+                        <button 
+                            className="text-start cursor-pointer relative"
+                            onClick={() => handleTab(tabs[2])}
+                        >
+                            <span
+                                className={`text-2xl font-bold ${
+                                    activeTab === tabs[2] 
+                                    ? "border-b-3 border-green-600"
+                                    : "text-gray-400"
+                                }`}
+                            >
+                                Shipping
+                            </span>
 
-                    <span className="absolute top-0">
-                        {
-                            shipmentInfo ? (
-                                <CircleCheckBig strokeWidth={2} size={20} color="green" />
-                            ) : (
-                                <CircleAlert strokeWidth={2} size={20} color="red"/>
-                            )
-                        }
-                    </span>
-                    
-                </button>
-
+                            <span className="absolute top-0">
+                                {
+                                    shipmentInfo ? (
+                                        <CircleCheckBig strokeWidth={2} size={20} color="green" />
+                                    ) : (
+                                        <CircleAlert strokeWidth={2} size={20} color="red"/>
+                                    )
+                                }
+                            </span>
+                            
+                        </button>
+                    )
+                }    
+                
                 <button 
                     className="text-start cursor-pointer relative"
                     onClick={() => handleTab(tabs[3])}
@@ -453,6 +456,7 @@ Thank you!`;
                             customer={selectedCustomer}
                             getSaveCustomers={handleGetSaveCustomers}
                             readOnly={isLocked}
+                            order_type={order_type}
                         />
                     )
                 }
@@ -474,12 +478,13 @@ Thank you!`;
                             order={order} 
                             orderReferences={orderReferences}
                             readOnly={isLocked}
+                            order_type={order_type}
                         />
                     )
                 }
 
                 {
-                    activeTab === "shipping" && (
+                    !isWalkinOrder && activeTab === "shipping" && (
                         <ShippingForm 
                             changeTab={(tab) => setActiveTab(tab)}
                             shippingInfo={shipmentInfo}
@@ -498,6 +503,7 @@ Thank you!`;
                             orderSummary={orderSummary}
                             payments={payments}
                             readOnly={isLocked}
+                            order_type={order_type}
                         />
                     )
                 }
@@ -513,6 +519,7 @@ Thank you!`;
                             orderSummary={orderSummary}
                             payments={payments}
                             readOnly={isLocked}
+                            order_type={order_type}
                         /> 
                     )
                 }
@@ -527,7 +534,12 @@ Thank you!`;
                         <div className="flex flex-col gap-y-1">
                             <h1 className="text-sm font-semibold">Customer name:</h1>
                             <div className="border px-3 py-1 rounded-md text-center bg-[#F5F5F5] capitalize">
-                                <span>{orderSummary.receiver_name ?? "--"}</span>
+                                <span>
+                                    {
+                                        isWalkinOrder ? `${orderSummary.sender_name ?? "--"} / ${orderSummary.receiver_name ?? "--"}` 
+                                        : orderSummary.receiver_name ?? "--"
+                                    }
+                                </span>
                             </div>
                         </div>
 
@@ -547,14 +559,19 @@ Thank you!`;
                             </div>
                         </div>
 
-                        <div className="mt-3 w-full flex justify-center">
-                            <div className="flex flex-col gap-y-1">
-                                <h1 className="text-sm font-semibold">Shipping fee:</h1>
-                                <div className="border px-3 py-1 min-w-25 max-w-30 rounded-md text-center bg-[#F5F5F5]">
-                                    <span>{formatCurrency(orderSummary.shipping_fee)}</span>
+                        {
+                            !isWalkinOrder && (
+                                <div className="mt-3 w-full flex justify-center">
+                                    <div className="flex flex-col gap-y-1">
+                                        <h1 className="text-sm font-semibold">Shipping fee:</h1>
+                                        <div className="border px-3 py-1 min-w-25 max-w-30 rounded-md text-center bg-[#F5F5F5]">
+                                            <span>{formatCurrency(orderSummary.shipping_fee)}</span>
+                                        </div>
+                                    </div>
                                 </div>
-                            </div>
-                        </div>
+                            )
+                        }
+                        
 
                     </div>
 

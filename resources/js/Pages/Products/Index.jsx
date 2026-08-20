@@ -64,7 +64,7 @@ export default function Dashboard ({products, user}){
         
     }
 
-    const tabs = ['all', 'clothes', 'bags', 'footwear', 'perfume', 'skincare'];
+    const tabs = ['all', 'clothes', 'bag', 'footwear', 'perfume', 'skincare'];
 
     const [activeTab, setActiveTab] = useState(tabs[0]);
     const [currentSearch, setCurrentSearch] = useState("");
@@ -275,7 +275,7 @@ export default function Dashboard ({products, user}){
                     </div>
                 ) :
                 (
-                    <div className="grid grid-cols-4 gap-x-10 mt-10">
+                    <div className="grid grid-cols-4 gap-x-10 gap-y-5 mt-10">
 
                         {products.data.length > 0 ? (
                             products.data.map((product) => (
@@ -292,7 +292,7 @@ export default function Dashboard ({products, user}){
                                             Sold: {product.variants_sum_sold}
                                         </div>
 
-                                        <div className="relative group overflow-hidden rounded-t-xl min-h-50 w-full">
+                                        <div className="relative group overflow-hidden rounded-t-lg min-h-50 w-full">
                                             {
                                                 product.image ? (
                                                     <div>
@@ -332,13 +332,15 @@ export default function Dashboard ({products, user}){
                                         </div>
 
                                         <div className="px-3 py-2">
-                                            {product.variants_min_price === product.variants_max_price ? (
-                                                <span className="font-semibold text-green-500">{formatCurrency(product.variants_min_price)}</span>
+                                            {Number(product.variants_min_price) === Number(product.variants_max_price) ? (
+                                                <span className="font-semibold text-green-500">
+                                                    {formatCurrency(Number(product.variants_min_price))}
+                                                </span>
                                             ) : (
-                                                <span className="font-semibold">
-                                                    {
-                                                        formatCurrency(product.variants_min_price) - formatCurrency(product.variants_max_price)
-                                                    }
+                                                <span className="font-semibold text-green-500">
+                                                    {formatCurrency(Number(product.variants_min_price))}
+                                                    {" - "}
+                                                    {formatCurrency(Number(product.variants_max_price))}
                                                 </span>
                                             )}
                                         </div>

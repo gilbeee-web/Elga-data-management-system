@@ -114,6 +114,7 @@ class OrderController extends Controller
             }
 
             $orderReferences[] = [
+                'id' => $ref->id,
                 'order_number' => $ref->order_number,
                 'items' => $items
             ];
@@ -128,11 +129,13 @@ class OrderController extends Controller
 
         return Inertia::render('Orders/Edit', [
             'order' => $order->fresh(), 
+            'order_type' => $order->order_type,
             'customer' => $customer,
             'orderReferences' => $orderReferences,
             'shipmentInfo' => $shipmentInfo,
             'payments' => $payments,
             'orderSummary' => [
+                'sender_name' => $order->sender_name,
                 'receiver_name' => $order->receiver_name,
                 'subtotal' => $order->subtotal,
                 'shipping_fee' => $order->shipment?->total_shipping_fee,
@@ -145,9 +148,10 @@ class OrderController extends Controller
         ]);
     }
 
-    public function saveDraft(){
+    public function saveDraft(Request $request){
 
         $order = Order::create([
+            'order_type' => $request->order_type,
             'subtotal' => 0,
             'discount' => 0,
             'total_amount' => 0,
@@ -171,8 +175,17 @@ class OrderController extends Controller
             'customer_id' => 'nullable|integer|exists:customers,id',
             'sender_name' => 'required|string',
             'receiver_name' => 'required|string',
-            'contact_number' => 'required|max:11',
-            'address' => 'required|string',
+            'contact_number' => [
+                Rule::requiredIf($order->order_type !== 'walkin'),
+                'nullable',
+                'string',
+                'max:11',
+            ],
+            'address' => [
+                Rule::requiredIf($order->order_type !== 'walkin'),
+                'nullable',
+                'string',
+            ],
             'is_save_customer' => 'nullable|boolean'
         ]);
 
@@ -250,20 +263,47 @@ class OrderController extends Controller
 
         $validated = $request->validate([
             'payment_id' => 'nullable|numeric|exists:payments,id',
+
             'payment_method' => 'required|string',
+
             'payment_amount' => 'required|numeric',
-            'mop_name' => 'required|string',
-            'reference_number' => [
-                'required',
+
+            'mop_name' => [
+                'nullable',
                 'string',
+                Rule::requiredIf(
+                    !in_array($request->payment_method, ['cash', 'card_payment'])
+                ),
+            ],
+
+            'reference_number' => [
+                'nullable',
+                'string',
+
+                Rule::requiredIf(
+                    !in_array($request->payment_method, ['cash', 'card_payment'])
+                ),
+
                 Rule::unique('payments', 'reference_number')
                     ->ignore($request->payment_id),
             ],
+
             'proof_image' => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
-            'remarks' => 'nullable|string'
+
+            'remarks' => 'nullable|string',
         ], [
-            'reference_number.unique' => 'This reference number already exists.'
+            'reference_number.unique' =>
+                'This reference number already exists.',
+
+            'mop_name.required' =>
+                'MOP name is required for this payment method.',
+
+            'reference_number.required' =>
+                'Reference number is required for this payment method.',
         ]);
+
+        // dd($validated);
+
 
         try {
             $this->orderService->savePayment(
@@ -272,7 +312,7 @@ class OrderController extends Controller
                 $validated['payment_id'] ?? null
             );
         } catch (ValidationException $e) {
-            throw $e; // let Laravel/Inertia handle it as a validation error
+            dd($e); // let Laravel/Inertia handle it as a validation error
         } catch (Exception $e) {
             return redirect()->back()->with('error', 'Error in adding payment.');
         }
@@ -294,6 +334,7 @@ class OrderController extends Controller
     }
 
 
+    //shipped the order for shipment order
     public function shippedOrder(Order $order, Request $request){
 
         $validated = $request->validate([
@@ -309,6 +350,19 @@ class OrderController extends Controller
 
         return redirect()->route('order.index');
         
+    }
+
+    //complete order for walkin orders
+    public function completeOrder(Order $order){
+        
+        try{
+            $this->orderService->completeOrder($order);
+        }catch(Exception $e){
+            dd("Something went wrong: ", $e);
+            return redirect()->back()->with(['error', 'Error in mark as shipped the order.']);
+        }
+
+        return redirect()->route('order.index');
     }
 
 

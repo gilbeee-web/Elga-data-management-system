@@ -6,7 +6,7 @@ import { formatCurrency } from "../../../Utils/formatCurrency";
 import Swal from "sweetalert2";
 import { CircleX, Eye, ImagePlus, Trash2 } from "lucide-react";
 
-export default function PaymentFormModal({order, onClose, payment, onSubmitPayment}){
+export default function PaymentFormModal({order, order_type, onClose, payment, onSubmitPayment}){
 
     console.log("Order data(payment form): ", order);
     console.log("Payment data (payment form): ", payment);
@@ -20,6 +20,8 @@ export default function PaymentFormModal({order, onClose, payment, onSubmitPayme
         remarks: "",
         proof_image: null,
     });
+
+    const isWalkin = order_type === 'walkin';
 
     const [previewImage, setPreviewImage] = useState(null);
     const [isEditing, setIsEditing] = useState(false);
@@ -180,7 +182,15 @@ export default function PaymentFormModal({order, onClose, payment, onSubmitPayme
                                 }
                                 onFocus={() => setIsEditing(true)}
                                 onBlur={() => setIsEditing(false)}
-                                onChange={(e) => setData("payment_amount", e.target.value)}
+                                onChange={(e) => {
+                                    const value = Number(e.target.value);
+
+                                    setData(
+                                        "payment_amount",
+                                        Number.isNaN(value) ? 0 : value
+                                    );
+                                }}
+                                // onChange={(e) => setData("payment_amount", e.target.value)}
                             />
 
                             {errors.payment_amount && (
@@ -202,10 +212,15 @@ export default function PaymentFormModal({order, onClose, payment, onSubmitPayme
                                 onChange={(e) => setData("payment_method",e.target.value)}
                             >
                                 <option value="" disabled hidden>Select Payment Method</option>
-                                <option value="cash">Cash</option>
+                                {isWalkin && (
+                                    <>
+                                        <option value="cash">Cash</option>
+                                        <option value="card_payment">Card Payment</option>
+                                    </>
+                                )}
                                 <option value="gcash">GCash</option>
                                 <option value="bank_transfer">Bank transfer</option>
-                                <option value="card_payment">Card Payment</option>
+                                
                             </select>
 
                             {errors.payment_method && (
@@ -215,29 +230,36 @@ export default function PaymentFormModal({order, onClose, payment, onSubmitPayme
                             )}
                         </div>
                     </div>
+                    {
+                        data.payment_method !== 'cash' && data.payment_method !== 'card_payment' && (
+                            <>
+                                <TextInput 
+                                    label={"MOP Name:"}
+                                    type="text"
+                                    className="min-w-80"
+                                    placeholder="eg. Railey C"
+                                    value={data.mop_name}
+                                    onChange={(e) => setData("mop_name",e.target.value)}
+                                    required={true}
+                                    error={errors.mop_name}
+                                />
+                                
+                                <TextInput 
+                                    label={"Reference Number:"}
+                                    type="text"
+                                    placeholder="eg. gcash or gotyme"
+                                    className="min-w-80"
+                                    value={data.reference_number}
+                                    onChange={(e) => setData("reference_number", e.target.value)}
+                                    required={true}
+                                    error={errors.reference_number}
+                                />
 
-                    <TextInput 
-                        label={"MOP Name:"}
-                        type="text"
-                        className="min-w-80"
-                        placeholder="eg. Railey C"
-                        value={data.mop_name}
-                        onChange={(e) => setData("mop_name",e.target.value)}
-                        required={true}
-                        error={errors.mop_name}
-                    />
+                            
+                            </>
+                        )
+                    }
                     
-                    <TextInput 
-                        label={"Reference Number:"}
-                        type="text"
-                        placeholder="eg. gcash or gotyme"
-                        className="min-w-80"
-                        value={data.reference_number}
-                        onChange={(e) => setData("reference_number", e.target.value)}
-                        required={true}
-                        error={errors.reference_number}
-                    />
-
                     <div className="flex flex-col gap-y-1">
                         <label className="font-semibold">Proof of Payment:</label>
 

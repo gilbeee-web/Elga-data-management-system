@@ -7,7 +7,7 @@ import { formatCurrency } from "../../../Utils/formatCurrency";
 import Swal from "sweetalert2";
 import { ShoppingBag, Trash2 } from "lucide-react";
 
-export default function OrderForm({order, changeTab, orderReferences: initialOrderReferences, readOnly}){
+export default function OrderForm({order, order_type, changeTab, orderReferences: initialOrderReferences, readOnly}){
 
 
     console.log("Order Form (order references init): ", initialOrderReferences);
@@ -15,6 +15,7 @@ export default function OrderForm({order, changeTab, orderReferences: initialOrd
     const {data, setData, post, proccessing, errors} = useForm({
         orderReferences: [
             {
+                id: null,
                 order_number: "",
                 items: []
             }
@@ -272,11 +273,13 @@ export default function OrderForm({order, changeTab, orderReferences: initialOrd
     };
 
     const grandTotals = getGrandTotals();
-
+    const isWalkinOrder = order_type === 'walkin';
 
     const saveOrderItems = (e) => {
 
         e.preventDefault();
+
+        let tab = "shipping";
 
         console.log("Submitting...");
         
@@ -293,7 +296,11 @@ export default function OrderForm({order, changeTab, orderReferences: initialOrd
                     timerProgressBar: true,
                 });
 
-                changeTab("shipping");
+                if(isWalkinOrder){
+                    tab = "payment";
+                }
+
+                changeTab(tab);
             },
             onError: (errors) => {
                 Swal.fire({

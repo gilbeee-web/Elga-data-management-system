@@ -7,7 +7,7 @@ import { router } from "@inertiajs/react";
 import { route } from "ziggy-js";
 import { CircleX, Eye } from "lucide-react";
 
-export default function Payment({order, orderSummary, payments, changeTab, readOnly}){
+export default function Payment({order, order_type, orderSummary, payments, changeTab, readOnly}){
 
     console.log("Payments: ", payments);
 
@@ -206,7 +206,14 @@ export default function Payment({order, orderSummary, payments, changeTab, readO
                                                         <h1 className="text-md font-semibold">{payment.mop_name}</h1>
                                                     </div>
                                                     <h1 className="text-sm font-semibold">
-                                                        <span className="text-gray-500">Ref No:</span> {payment.reference_number}
+                                                        {
+                                                            payment.reference_number ? (
+                                                               <div><span className="text-gray-500">Ref No:</span> {payment.reference_number}</div> 
+                                                            ) : (
+                                                                <span className="text-gray-500 capitalize">{payment.payment_method}</span>
+                                                            )
+                                                        }
+                                                        
                                                     </h1>
                                                 </div>
                                             </div>
@@ -314,6 +321,7 @@ export default function Payment({order, orderSummary, payments, changeTab, readO
                         setOpenPaymentForm(false);
                     }}
                     order={order}
+                    order_type={order_type}
                     payment={selectedPayment}
                     onSubmitPayment={(isFullyPaid) => {
 

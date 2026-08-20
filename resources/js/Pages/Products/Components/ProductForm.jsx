@@ -4,7 +4,8 @@ import Layout from "../../../Layouts/AppLayout";
 import { router, useForm } from "@inertiajs/react";
 import { formatCurrency } from "../../../Utils/formatCurrency";
 import Swal from "sweetalert2";
-import { ChevronLeft, CirclePlus, CircleX, ImagePlus } from "lucide-react";
+import { ChevronLeft, CirclePlus, CircleX, Eye, ImagePlus } from "lucide-react";
+import { route } from "ziggy-js";
 
 export default function ProductForm({mode, product}){
 
@@ -32,6 +33,25 @@ export default function ProductForm({mode, product}){
 
         setPreviewImage(URL.createObjectURL(file));
     };
+
+
+    const [showImagePreview, setShowImagePreview] = useState(null);
+
+    useEffect(() => {
+        if (!previewImage) return;
+
+        const handleKeyDown = (e) => {
+            if (e.key === 'Escape') {
+                setShowImagePreview(false);
+            }
+        };
+
+        window.addEventListener('keydown', handleKeyDown);
+
+        return () => {
+            window.removeEventListener('keydown', handleKeyDown);
+        };
+    }, [showImagePreview]);
 
 
     const [editingPrice, setEditingPrice] = useState(null);
@@ -68,6 +88,7 @@ export default function ProductForm({mode, product}){
         setData("variants",updated);
     };
 
+    const [isSaving, setIsSaving] = useState(false);
 
     const saveProduct = (e) => {
         e.preventDefault();
@@ -76,6 +97,8 @@ export default function ProductForm({mode, product}){
             alert("Please add at least one product variant");
             return;
         }
+
+        setIsSaving(true);
 
         if (product && mode === "edit") {
             transform((data) => ({ ...data, _method: 'put' }));
@@ -108,7 +131,7 @@ export default function ProductForm({mode, product}){
                     });
 
                 } ,
-                onFinish: () => console.log("finished"),
+                onFinish: () => setIsSaving(false),
             });
         } else {
             post(route("product.store"), {
@@ -132,7 +155,8 @@ export default function ProductForm({mode, product}){
                         text: Object.values(errors)[0],
                     });
                     console.log("Errors: ", errors);
-                }
+                }, 
+                onFinish: () => setIsSaving(false)
             });
         }
     };
@@ -161,7 +185,6 @@ export default function ProductForm({mode, product}){
         <div className="flex gap-x-2 items-center">
             <button className="cursor-pointer" onClick={() => router.visit(route('product.index'))}>
                 <ChevronLeft strokeWidth={2} size={30}/>
-               
             </button>
 
             {
@@ -181,7 +204,7 @@ export default function ProductForm({mode, product}){
             <div className="mt-3 bg-white rounded-md p-5 w-[70%]">
 
                 <div className="mb-5">
-                    <h1 className="text-lg font-bold border-b-3 inline-block border-red-500">Product Information</h1>
+                    <h1 className="text-lg font-bold">Product Information</h1>
                 </div>
 
                 <div className="flex gap-x-20 items-center">
@@ -193,6 +216,7 @@ export default function ProductForm({mode, product}){
                         onChange={(e) => setData("name", e.target.value)}
                         error={errors.name}
                         placeholder="eg. clothes"
+                        className="w-100"
                     />
 
                     
@@ -222,37 +246,52 @@ export default function ProductForm({mode, product}){
                     </div>
                 
                 </div>
-                
-                <div className="mt-5 flex flex-col">
-                    <label>Product Image:</label>
 
-                    <label htmlFor="product_image" className="mt-2 cursor-pointer inline-block w-fit">
+                <div className="mt-5 flex flex-col gap-y-1">
+                    <label className="font-semibold">Product Image:</label>
 
-                        {previewImage ? (
-
+                    {previewImage ? (
+                        <div className="mt-5 relative px-2 py-1 border border-gray-400 rounded-md w-fit group">
                             <img
                                 src={previewImage}
                                 alt="Preview"
-                                className="w-auto h-30 rounded-md border"
+                                className="w-auto h-30 rounded-md border cursor-pointer"
+                                onClick={() => setShowImagePreview(true)}
                             />
 
-                        ) : (
+                            <div 
+                                className="absolute h-full inset-0 flex items-center justify-center bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity duration-200 cursor-pointer rounded-md"
+                                onClick={() => setShowImagePreview(true)}
+                            >
+                                <Eye size={28} color={"#FFF"}/>
+                            </div>
 
-                            <div className="border-2 border-dashed w-70 h-35 rounded-md flex items-center justify-center hover:bg-gray-200">
+                            <div className="absolute -right-2 -top-3">
+                                <button 
+                                    type="button"
+                                    className="text-xl cursor-pointer"
+                                    onClick={() => {
+                                        setPreviewImage(null);
+                                        setData("image", null);
+                                    }}
+                                >
+                                    <CircleX strokeWidth={3} color="red" size={20}/>
+                                </button>
+                            </div>
+                        </div>
+                    ) : (
+                        <label htmlFor="product_image" className="cursor-pointer inline-block w-fit">
+                            <div className="border-2 border-dashed w-60 h-25 rounded-md flex items-center justify-center hover:bg-gray-200">
                                 <div className="flex flex-col items-center">
-                                    <ImagePlus size={40} strokeWidth={2}/>
-
+                                    <ImagePlus size={30}/>
                                     <span>Upload Image</span>
-
                                     <span className="text-xs text-gray-500">
                                         Allowed format: JPG, JPEG, PNG
                                     </span>
                                 </div>
                             </div>
-
-                        )}
-
-                    </label>
+                        </label>
+                    )}
 
                     <input
                         id="product_image"
@@ -268,13 +307,31 @@ export default function ProductForm({mode, product}){
                         </span>
                     )}
                 </div>
-
             </div>
+
+            {showImagePreview && (
+                <div 
+                    className="fixed inset-0 bg-[rgb(0,0,0,0.5)] z-99 flex items-center justify-center"
+                    onClick={() => setShowImagePreview(null)}
+                >
+
+                    <button className="absolute top-4 right-4 text-white text-3xl cursor-pointer hover:text-gray-300" onClick={() => setShowImagePreview(null)}>
+                        &times;
+                    </button>
+                    
+                    <img 
+                        src={previewImage}
+                        alt="Full preview"
+                        className="max-w-full max-h-full object-contain rounded-lg"
+                        onClick={(e) => e.stopPropagation()}
+                    />
+                </div>
+            )}
 
             <div className="mt-3 bg-white rounded-md p-5 w-[70%]">
 
                 <div className="mb-5">
-                    <h1 className="text-lg font-bold border-b-3 inline-block border-red-500">
+                    <h1 className="text-lg font-bold">
                         Product Variants
                     </h1>
                 </div>
@@ -325,9 +382,18 @@ export default function ProductForm({mode, product}){
                                 placeholder="0.00"
                                 onFocus={() => setEditingPrice(index)}
                                 onBlur={() => setEditingPrice(null)}
-                                onChange={(e) =>
-                                    updateVariant(index, "price", Number(e.target.value))
-                                }
+                                onChange={(e) => {
+                                    const value = Number(e.target.value);
+
+                                    updateVariant(
+                                        index,
+                                        "price",
+                                        Number.isNaN(value) ? 0 : value
+                                    );
+                                }}
+                                // onChange={(e) =>
+                                //     updateVariant(index, "price", Number(e.target.value))
+                                // }
                             />
 
                             {
@@ -370,10 +436,12 @@ export default function ProductForm({mode, product}){
                 </button>
 
                 <button 
-                    className="bg-green-500 px-3 py-2 rounded-md text-white cursor-pointer hover:bg-green-400"
+                    className={` px-3 py-2 rounded-md text-white cursor-pointer ${
+                        isSaving ? "bg-green-400" : "bg-green-500 hover:bg-green-400"
+                    }`}
                     type="submit"
                 >
-                    Save
+                    {isSaving ? "Saving..." : "Save"}
                 </button>
             </div>
         </form>

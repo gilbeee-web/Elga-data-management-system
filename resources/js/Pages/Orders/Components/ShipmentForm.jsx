@@ -4,10 +4,10 @@ import { formatCurrency } from "../../../Utils/formatCurrency";
 import Swal from "sweetalert2";
 import { HandCoins, Package, SquarePen, Truck, User } from "lucide-react";
 
-export default function ShipmentForm({order, customer, orderReferences, shippingInfo, orderSummary, payments, changeTab, readOnly}){
+export default function ShipmentForm({order, order_type, customer, orderReferences, shippingInfo, orderSummary, payments, changeTab, readOnly}){
 
     
-   
+   const isWalkin = order_type === 'walkin';
 
     const {data, setData, processing, errors, post} = useForm({
         sf_payment_reference: ""
@@ -48,31 +48,38 @@ export default function ShipmentForm({order, customer, orderReferences, shipping
             return;
         }
 
-        let isCompleted = false;
-        let message = "";
-
         if (result.isConfirmed) {
 
-            if (!hasCustomerData) {
-                return showShipmentValidationError("Please check the customer data if completed.");
-            }
+            if(!isWalkin){
+                if (!hasCustomerData) {
+                    return showShipmentValidationError("Please check the customer data if completed.");
+                }
 
-            if (orderReferences.length <= 0) {
-                return showShipmentValidationError("Please input some order items.");
-            }
+                if (orderReferences.length <= 0) {
+                    return showShipmentValidationError("Please input some order items.");
+                }
 
-            if (!shippingInfo) {
-                return showShipmentValidationError("Please fill up the shipping form first.");
-            }
+                if (!shippingInfo) {
+                    return showShipmentValidationError("Please fill up the shipping form first.");
+                }
 
-            if (order.remaining_balance > 0) {
-                return showShipmentValidationError("Please settle the remaining balance first.");
+                if (order.remaining_balance > 0) {
+                    return showShipmentValidationError("Please settle the remaining balance first.");
+                }
             }
-
+            
             console.log("Save Shipment");
 
+            let actionRoute = "";
+
+            if(isWalkin){
+                actionRoute = "order.completeOrder";
+            }else{
+                actionRoute = "order.shippedOrder";
+            }
+            
             post(
-                route("order.shippedOrder", order.id),
+                route(actionRoute, order.id),
                 {
                     onSuccess: () => {
                         Swal.fire({
@@ -172,11 +179,20 @@ export default function ShipmentForm({order, customer, orderReferences, shipping
 
 
                     <div className="mt-2">
-                        <ul className="flex gap-x-3 items-center">
-                            <li className="font-semibold text-gray-500">{customer.receiver_name ?? "--"}</li>
-                            <li className="font-semibold text-gray-500"><span className="text-black">|</span> {customer.contact_number ?? "--"}</li>
-                            <li className="font-semibold text-gray-500"><span className="text-black">|</span> {customer.address ?? "--"}</li>
-                        </ul>
+                        {
+                            isWalkin ? (
+                                <h1 className="font-semibold text-gray-500">
+                                    {customer.sender_name ?? "--"} / {customer.receiver_name ?? "--"}
+                                </h1>
+                            ) : (
+                                <ul className="flex gap-x-3 items-center">
+                                    <li className="font-semibold text-gray-500">{customer.receiver_name ?? "--"}</li>
+                                    <li className="font-semibold text-gray-500"><span className="text-black">|</span> {customer.contact_number ?? "--"}</li>
+                                    <li className="font-semibold text-gray-500"><span className="text-black">|</span> {customer.address ?? "--"}</li>
+                                </ul>
+                            )
+                        }
+                        
                     </div>
                     
                 </div>
@@ -246,51 +262,57 @@ export default function ShipmentForm({order, customer, orderReferences, shipping
                     </div>
                 </div>
 
-                <div className="mt-5 w-full border-2 border-gray-300 shadow-sm rounded-lg p-3">
+                {
+                    !isWalkin && (
+                        <div className="mt-5 w-full border-2 border-gray-300 shadow-sm rounded-lg p-3">
 
-                    <div className="flex justify-between">
+                            <div className="flex justify-between">
 
-                        <div className="flex items-center gap-2">
-                            <Truck size={20}/>
-                            <h1 className="font-semibold text-base">Shipping</h1>
-                        </div>
-                        
-                        {
-                            !readOnly && (
-                                <div>
-                                    <button 
-                                        className="cursor-pointer"
-                                        onClick={() => changeTab("shipping")}
-                                    >
-                                        <SquarePen size={20} />
-                                    </button>
+                                <div className="flex items-center gap-2">
+                                    <Truck size={20}/>
+                                    <h1 className="font-semibold text-base">Shipping</h1>
                                 </div>
-                            )
-                        }
-                        
-                    </div>
-                    
+                                
+                                {
+                                    !readOnly && (
+                                        <div>
+                                            <button 
+                                                className="cursor-pointer"
+                                                onClick={() => changeTab("shipping")}
+                                            >
+                                                <SquarePen size={20} />
+                                            </button>
+                                        </div>
+                                    )
+                                }
+                                
+                            </div>
+                            
 
 
-                    <div className="mt-2">
-                        <ul className="flex gap-x-3 items-center">
-                            <li className="font-semibold text-gray-500 capitalize">{shippingInfo?.container_size ?? "--"} {shippingInfo?.container_type ?? "--"}</li>
-                            <li className="font-semibold text-gray-500"><span className="text-black">|</span> Fee {formatCurrency(shippingInfo?.total_shipping_fee ?? 0)}</li>
-                            <li className="font-semibold text-gray-500"><span className="text-black">|</span> {shippingInfo?.tracking_number ?? "--"}</li>
-                        </ul>
-                    </div>
+                            <div className="mt-2">
+                                <ul className="flex gap-x-3 items-center">
+                                    <li className="font-semibold text-gray-500 capitalize">{shippingInfo?.container_size ?? "--"} {shippingInfo?.container_type ?? "--"}</li>
+                                    <li className="font-semibold text-gray-500"><span className="text-black">|</span> Fee {formatCurrency(shippingInfo?.total_shipping_fee ?? 0)}</li>
+                                    <li className="font-semibold text-gray-500"><span className="text-black">|</span> {shippingInfo?.tracking_number ?? "--"}</li>
+                                </ul>
+                            </div>
 
-                    <div className="mt-3">
-                        <TextInput 
-                            label={"SF Payment Reference:"}
-                            placeholder="eg. GoTyme reference"
-                            value={data.sf_payment_reference}
-                            onChange={(e) => setData("sf_payment_reference", e.target.value)}
-                            error={errors.sf_payment_reference}
-                        />
-                    </div>
-                    
-                </div>
+                            <div className="mt-3">
+                                <TextInput 
+                                    label={"SF Payment Reference:"}
+                                    placeholder="eg. GoTyme reference"
+                                    value={data.sf_payment_reference}
+                                    onChange={(e) => setData("sf_payment_reference", e.target.value)}
+                                    error={errors.sf_payment_reference}
+                                />
+                            </div>
+                            
+                        </div>
+                    ) 
+                }
+
+                
 
 
                 <div className="mt-5 w-full border-2 border-gray-200 shadow-sm rounded-lg p-4">

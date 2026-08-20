@@ -9,6 +9,7 @@ class Order extends Model
     //
     protected $fillable = [
         'transaction_number',
+        'order_type',
         'sender_name',
         'receiver_name',
         'contact_number',
@@ -19,7 +20,8 @@ class Order extends Model
         'payment_status',
         'order_status',
         'remaining_balance',
-        'remarks'
+        'remarks',
+        'completed_at'
     ];
 
     public function items()

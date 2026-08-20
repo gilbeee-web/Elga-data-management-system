@@ -12,6 +12,8 @@ export default function Index ({orders, user}){
 
     console.log("Orders: ", orders);
 
+    const [isSelectingOrderType, setIsSelectingOrderType] = useState(false);
+
     const tabs = ['all', 'draft', 'shipping', 'payment', 'processing', 'shipped', 'cancelled'];
 
     const [activeTab, setActiveTab] = useState(tabs[0]);
@@ -74,6 +76,15 @@ export default function Index ({orders, user}){
         awaiting_shipping_fee: "Awaiting Shipping Fee"
     };
 
+    const handleCreateOrder = (order_type) => {
+
+        router.post(route('order.saveDraft'), {
+            order_type: order_type
+        });
+
+    }
+
+
 
 
     return <>
@@ -84,12 +95,35 @@ export default function Index ({orders, user}){
                     Order List
                 </h1>
 
-                <button 
-                    className="rounded-md text-md bg-blue-500 px-3 py-2 text-white cursor-pointer hover:bg-blue-400 font-semibold"
-                    onClick={() => router.post(route('order.saveDraft'))}
-                >
-                    + Create order
-                </button>
+                <div className="relative">
+                    <button 
+                        className="rounded-md text-md bg-blue-500 px-3 py-2 text-white cursor-pointer hover:bg-blue-400 font-semibold"
+                        onClick={() => setIsSelectingOrderType(!isSelectingOrderType)}
+                    >
+                        + Create order
+                    </button>
+
+                    {
+                        isSelectingOrderType && (
+                            <div className="absolute right-0 top-full mt-2 bg-white rounded-md shadow-lg border border-gray-200 py-1 w-40 z-20">
+                                <button 
+                                    onClick={() => handleCreateOrder("walkin")}
+                                    className="w-full text-left px-3 py-2 text-sm font-semibold hover:bg-gray-100 cursor-pointer"
+                                >
+                                    Walk-in
+                                </button>
+                                <button 
+                                    onClick={() => handleCreateOrder("shipment")}
+                                    className="w-full text-left px-3 py-2 text-sm font-semibold hover:bg-gray-100 cursor-pointer"
+                                >
+                                    Shipment
+                                </button>
+                            </div>
+                        )
+                    }
+                    
+                </div>
+                
             </div>
 
             {/* Navigation */}
@@ -237,6 +271,7 @@ export default function Index ({orders, user}){
                     <thead className="text-gray-600 uppercase text-xs border-b border-gray-300">
                         <tr>
                             <th className="p-3">TRANSACTION NO. / ORDER NO.</th>
+                            <th className="p-3">ORDER TYPE</th>
                             <th className="p-3">CUSTOMER NAME</th>
                             <th className="p-3">
                                 {activeTab === "payment" ? "REMAINING BALANCE" : "TOTAL AMOUNT"}
@@ -279,6 +314,7 @@ export default function Index ({orders, user}){
                                             ))}
                                             
                                         </td>
+                                        <td className="p-3 capitalize">{order.order_type ?? "--"}</td>
                                         <td className="p-3">{order.sender_name ?? "--"}</td>
                                         <td className="p-3">
                                             {

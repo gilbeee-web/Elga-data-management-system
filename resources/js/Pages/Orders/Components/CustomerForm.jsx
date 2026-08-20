@@ -3,7 +3,7 @@ import TextInput from "../../../Components/TextInput";
 import { useEffect } from "react";
 import Swal from "sweetalert2";
 
-export default function CustomerForm({order, changeTab, customer, getSaveCustomers, readOnly}){
+export default function CustomerForm({order, order_type, changeTab, customer, getSaveCustomers, readOnly}){
 
     console.log("Read only: ", readOnly);
     
@@ -22,6 +22,8 @@ export default function CustomerForm({order, changeTab, customer, getSaveCustome
             [field]: value
         }));
     };
+
+    const isWalkinOrder = order_type === 'walkin';
 
 
     const saveCustomer = (e) => {
@@ -135,7 +137,7 @@ export default function CustomerForm({order, changeTab, customer, getSaveCustome
 
                     <TextInput 
                         name={"sender_name"}
-                        placeholder="Enter sender name..."
+                        placeholder="Enter customer name..."
                         type="text"
                         value={data.sender_name}
                         error={errors.sender_name}
@@ -169,7 +171,7 @@ export default function CustomerForm({order, changeTab, customer, getSaveCustome
                 <div className="mt-5 flex gap-x-3 items-start">
                     <div className="h-10 flex items-center">
                         <label htmlFor="receiver_name" className="text-md font-semibold">
-                            <span className="text-red-500 text-sm">*</span> Contact Number: 
+                            <span className="text-red-500 text-sm">{!isWalkinOrder ? "*" : ""}</span> Contact Number: 
                         </label>
                     </div>
 
@@ -189,7 +191,7 @@ export default function CustomerForm({order, changeTab, customer, getSaveCustome
 
                     <div className="h-10 flex items-center">
                         <label htmlFor="address" className="text-md font-semibold">
-                            <span className="text-red-500 text-sm">*</span> Address:
+                            <span className="text-red-500 text-sm">{!isWalkinOrder ? "*" : ""}</span> Address:
                         </label>
                     </div>
 

@@ -200,8 +200,18 @@ class OrderService{
             //only change the status of the order if it actually changes
             $oldStatus = $order->order_status;
             if ($oldStatus === 'draft') {
-                $order->update(['order_status' => 'awaiting_shipping_fee']);
-                $this->storeStatusHistory($order, $oldStatus, 'awaiting_shipping_fee');
+
+                if ($order->order_type === 'walkin') {
+                    $newStatus = 'awaiting_payment';
+                } else {
+                    $newStatus = 'awaiting_shipping_fee';
+                }
+
+                $order->update([
+                    'order_status' => $newStatus
+                ]);
+
+                $this->storeStatusHistory($order, $oldStatus, $newStatus);
             }
 
 
@@ -327,8 +337,8 @@ class OrderService{
                 'payment_amount' => $data['payment_amount'],
                 'payment_type' => $paymentType,
                 'payment_method' => $data['payment_method'],
-                'mop_name' => $data['mop_name'],
-                'reference_number' => $data['reference_number'],
+                'mop_name' => $data['mop_name'] ?? null,
+                'reference_number' => $data['reference_number'] ?? null,
                 'encoded_by' => 1,
                 'remarks' => $data['remarks'] ?? null,
                 'paid_at' => now(),
@@ -380,9 +390,18 @@ class OrderService{
             // not allowed to update the status to draft or awaiting sf or payment because the payment is just removed but the status is now in payment terms
             $newStatus = $oldStatus;
             if (in_array($oldStatus, ['processing', 'payment_confirmed'])) {
-                $newStatus = $updatedOrder->remaining_balance == 0
-                    ? 'processing'
-                    : 'payment_confirmed';
+
+                if($updatedOrder->remaining_balance === $updatedOrder->total_amount){
+                    $newStatus = "awaiting_payment";
+                }else if($updatedOrder->remaining_balance === 0){
+                    $newStatus = "processing";
+                }else{
+                    $newStatus = "payment_confirmed";
+                }
+
+                // $newStatus = $updatedOrder->remaining_balance == 0
+                //     ? 'processing'
+                //     : 'payment_confirmed';
             }
 
             //only update the order status if it actually changes
@@ -398,29 +417,59 @@ class OrderService{
 
     
 
-    public function saveShipment(Order $order, array $data){
+    public function saveShipment(Order $order, array $data)
+    {
+        return DB::transaction(function () use ($data, $order) {
 
-        return DB::transaction(function() use ($data, $order){
+            if ($order->order_type === 'shipment') {
 
-            // dd($data);
+                $shipment = Shipment::where('order_id', $order->id)
+                    ->firstOrFail();
 
-            $shipment = Shipment::where('order_id', $order->id)->firstOrFail();
+                $shipment->update([
+                    'sf_payment_reference' => $data['sf_payment_reference'] ?? null,
+                    'shipped_at' => now(),
+                ]);
 
-            $shipment->update([
-                'sf_payment_reference' => $data['sf_payment_reference'],
-                'shipped_at' => now(),
-            ]);
+                $oldStatus = $order->order_status;
+
+                $order->update([
+                    'completed_at' => now(),
+                    'order_status' => 'shipped',
+                ]);
+
+                $this->storeStatusHistory(
+                    $order,
+                    $oldStatus,
+                    'shipped'
+                );
+
+                return $shipment;
+            }
+
+            return null;
+        });
+    }
+
+    public function completeOrder(Order $order)
+    {   
+        return DB::transaction(function () use ($order) {
 
             $oldStatus = $order->order_status;
+
             $order->update([
-                'order_status' => "shipped"
+                'order_status' => 'shipped',
+                'completed_at' => now(),
             ]);
 
-            $this->storeStatusHistory($order,$oldStatus,'shipped');
+            $this->storeStatusHistory(
+                $order,
+                $oldStatus,
+                'shipped'
+            );
 
-            return $shipment;
+            return $order;
         });
-
     }
 
 

@@ -61,7 +61,7 @@ export default function ProductModal({product, onClose, editProduct, deleteProdu
 
 
 
-                <table className="mt-5 w-full text-sm text-left shadow-md rounded-lg">
+                <table className="mt-5 w-full text-sm text-left shadow-sm rounded-lg">
 
                     <thead className="text-gray-400 text-md border-b border-gray-300">
                         <tr className="bg-gray-100">

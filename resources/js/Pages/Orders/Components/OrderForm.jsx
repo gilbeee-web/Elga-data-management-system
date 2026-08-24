@@ -7,7 +7,7 @@ import { formatCurrency } from "../../../Utils/formatCurrency";
 import Swal from "sweetalert2";
 import { ShoppingBag, Trash2 } from "lucide-react";
 
-export default function OrderForm({order, order_type, changeTab, orderReferences: initialOrderReferences, readOnly}){
+export default function OrderForm({order, order_type, changeTab, orderReferences: initialOrderReferences, readOnly, isSaving}){
 
 
     console.log("Order Form (order references init): ", initialOrderReferences);
@@ -279,6 +279,8 @@ export default function OrderForm({order, order_type, changeTab, orderReferences
 
         e.preventDefault();
 
+        isSaving(true);
+
         let tab = "shipping";
 
         console.log("Submitting...");
@@ -311,6 +313,7 @@ export default function OrderForm({order, order_type, changeTab, orderReferences
 
                 console.log("Errors: ", errors)
             },
+            onFinish: () => isSaving(false)
         });
     }
 

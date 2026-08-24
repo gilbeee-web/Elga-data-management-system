@@ -86,7 +86,7 @@ class ReportController extends Controller
             'totalSfCollected' => $totalSfCollected
         ];
 
-        $transactions = $transactionsQuery->paginate(10)->withQueryString(); //keep filtering across the pagination
+        $transactions = $transactionsQuery->paginate(5)->withQueryString(); //keep filtering across the pagination
 
 
         return Inertia::render('Reports', [

@@ -31,33 +31,28 @@ class UserController extends Controller
 
         // dd($request->all());
 
-        try{
+        $validated = $request->validate([
+            'name' => 'required|string',
+            'email' => 'required|string',
+            'role' => 'required|string',
+            'profile_pic' => 'nullable|image|mimes:jpg,jpeg,png|max:2048'
+        ]);
 
-            $validated = $request->validate([
-                'name' => 'string|required',
-                'email' => 'string|required',
-                'role' => 'string|required',
-                'profile_pic' => 'nullable|image|mimes:jpg,jpeg,png|max:2048'
-            ]);
+        
+        $validated['password'] = Hash::make($validated['password']);
 
-            
-            $validated['password'] = Hash::make($validated['password']);
-
-            if ($request->hasFile('profile_pic')) {
-                $validated['profile_pic'] = $request->file('profile_pic')->store('profile_pics', 'public');
-            }
-
-            $user = User::create($validated);
-
-            return redirect()->route('user.index')->with([
-                'message' => 'User added successfully!',
-                'user' => $user
-            ]);
-
-        }catch(Exception $e){
-            dd($e);
-            return redirect()->back()->with('error', 'Something went wrong: ' . $e);
+        if ($request->hasFile('profile_pic')) {
+            $validated['profile_pic'] = $request->file('profile_pic')->store('profile_pics', 'public');
         }
+
+        $user = User::create($validated);
+
+        return redirect()->route('user.index')->with([
+            'message' => 'User added successfully!',
+            'user' => $user
+        ]);
+
+        
 
     }
 

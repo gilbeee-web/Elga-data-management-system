@@ -119,7 +119,7 @@ export default function Index(){
                                         </div>
 
                                         <div className="flex flex-col">
-                                            <label htmlFor="email" className="font-semibold">Email:</label>
+                                            <label htmlFor="password" className="font-semibold">Password:</label>
                                             <div className="flex items-center gap-2 bg-white border border-gray-400 rounded-lg px-3 py-2">
                                                 
                                                 <KeyRound strokeWidth={1} size={20} color="gray"/>
@@ -133,28 +133,7 @@ export default function Index(){
                                                 />
                                             </div>
                                         </div>
-                            
-                                        {/* <TextInput 
-                                            label="Email:"
-                                            className="min-w-60"
-                                            type="email"
-                                            placeholder="Enter your email"
-                                            value={data.email}
-                                            onChange={(e) => setData("email",e.target.value)}
-                                            
-                                        />
-
-
-                                        <TextInput 
-                                            label="Password:"
-                                            type="password"
-                                            className="min-w-60"
-                                            placeholder="Enter your password"
-                                            value={data.password}
-                                            onChange={(e) => setData("password",e.target.value)}
-                                        
-                                        /> */}
-
+                        
                                         <div className="flex gap-x-5 justify-between items-center">
 
                                             <div className="flex items-center">

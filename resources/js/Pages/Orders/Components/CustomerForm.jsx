@@ -3,7 +3,7 @@ import TextInput from "../../../Components/TextInput";
 import { useEffect } from "react";
 import Swal from "sweetalert2";
 
-export default function CustomerForm({order, order_type, changeTab, customer, getSaveCustomers, readOnly}){
+export default function CustomerForm({order, order_type, changeTab, customer, getSaveCustomers, readOnly, isSaving}){
 
     console.log("Read only: ", readOnly);
     
@@ -30,6 +30,9 @@ export default function CustomerForm({order, order_type, changeTab, customer, ge
 
         e.preventDefault();
 
+        isSaving(true);
+
+
         console.log("Submitting...");
         
         post(route("order.customer.save", order.id), {
@@ -55,6 +58,7 @@ export default function CustomerForm({order, order_type, changeTab, customer, ge
                 });
                 console.log("Errors: ", errors)
             },
+            onFinish: () => isSaving(false)
         });
     
 

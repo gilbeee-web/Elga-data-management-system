@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import Swal from "sweetalert2";
 import { Copy } from "lucide-react";
 
-export default function ShippingForm({shippingInfo, order, changeTab, customer, readOnly}){
+export default function ShippingForm({shippingInfo, order, changeTab, customer, readOnly, isSaving}){
 
     const {data, setData, post, processing, errors} = useForm({
         container_type: "",
@@ -24,6 +24,7 @@ export default function ShippingForm({shippingInfo, order, changeTab, customer, 
     const saveShippingInfo = (e) => {
         
         e.preventDefault();
+        isSaving(true);
 
         if(isFormEmpty){
             Swal.fire({
@@ -31,7 +32,7 @@ export default function ShippingForm({shippingInfo, order, changeTab, customer, 
                 title: "Save failed",
                 text: "Please fill up the shipping form.",
             });
-
+            isSaving(false);
             return;
         }
 
@@ -60,6 +61,7 @@ export default function ShippingForm({shippingInfo, order, changeTab, customer, 
 
                 console.log("Errors: ", errors)
             },
+            onFinish: () => isSaving(false)
         });
 
     }
@@ -138,12 +140,13 @@ COMPLETE ADDRESS: ${customer.address}`;
 
                     <div className="flex flex-col gap-y-5">
 
-                        
+                        <div className="flex gap-x-3 items-start">
 
-                        <div className="flex gap-x-3 items-center">
                             <label htmlFor="container_type" className="text-lg font-semibold">
                                 <span className="text-sm text-red-500">*</span> Package type:
                             </label>
+
+
                             <div className="flex flex-col">
                                 <select 
                                     id="container_type"
@@ -171,7 +174,7 @@ COMPLETE ADDRESS: ${customer.address}`;
                             
                         
                         
-                        <div className="flex gap-x-3 items-center">
+                        <div className="flex gap-x-3 items-start">
                             <label htmlFor="" className="text-lg font-semibold"><span className="text-sm text-red-500">*</span> Package size:</label>
                             <div className="flex flex-col">
                                 <select 
@@ -198,7 +201,7 @@ COMPLETE ADDRESS: ${customer.address}`;
                             </div>
                         </div>
 
-                        <div className="flex gap-x-3 items-center">
+                        <div className="flex gap-x-3 items-start">
                             <label htmlFor="" className="text-lg font-semibold"><span className="text-sm text-red-500">*</span> Shipping fee:</label>
                             <div className="flex flex-col"> 
 
@@ -242,7 +245,7 @@ COMPLETE ADDRESS: ${customer.address}`;
                             
                         </div>
                                                                       
-                        <div className="flex gap-x-3 items-center">
+                        <div className="flex gap-x-3 items-start">
                             <label htmlFor="" className="text-lg font-semibold"><span className="text-sm text-red-500">*</span> Package fee:</label>
                             <div className="flex flex-col">
                                 <input 
@@ -283,7 +286,7 @@ COMPLETE ADDRESS: ${customer.address}`;
                                 
                         </div>
 
-                        <div className="flex items-center">
+                        <div className="flex items-start">
                             <label htmlFor="" className="min-w-40 text-lg font-semibold"><span className="text-sm text-red-500">*</span> Tracking number:</label>
                             <div className="flex flex-col">
                                 <input 

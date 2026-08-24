@@ -41,6 +41,8 @@ Route::middleware('auth')->group(function(){
             Route::delete('/{order}', 'destroyOrder')->name('order.destroy');
             Route::delete('/{order}/{payment_id}', 'destroyPayment')->name('order.destroyPayment');
             Route::patch('/{order}', 'cancelOrder')->name('order.cancel');
+            Route::patch('/{order}', 'switchOrderType')->name('order.switchOrderType');
+            Route::get('/{variant}', 'getVariantOrderHistory')->name('order.getVariantOrderHistory');
         });
     });
 });

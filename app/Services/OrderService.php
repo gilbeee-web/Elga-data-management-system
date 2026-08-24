@@ -421,7 +421,7 @@ class OrderService{
     {
         return DB::transaction(function () use ($data, $order) {
 
-            if ($order->order_type === 'shipment') {
+            if ($order->order_type === 'shipment' && $order->status !== 'shipped') {
 
                 $shipment = Shipment::where('order_id', $order->id)
                     ->firstOrFail();
@@ -430,6 +430,16 @@ class OrderService{
                     'sf_payment_reference' => $data['sf_payment_reference'] ?? null,
                     'shipped_at' => now(),
                 ]);
+
+
+                $orderItems = OrderItem::with("product_variant")->where("order_id", $order->id)->get();
+
+                // dd($orderItems);
+                //increment the sold of the order item
+                foreach($orderItems as $item){
+                    $item->product_variant->increment('sold', $item->qty);
+                }
+
 
                 $oldStatus = $order->order_status;
 
@@ -454,6 +464,14 @@ class OrderService{
     public function completeOrder(Order $order)
     {   
         return DB::transaction(function () use ($order) {
+
+            $orderItems = OrderItem::with("product_variant")->where("order_id", $order->id)->get();
+
+            //increment the sold of the order item
+            foreach($orderItems as $item){
+                $item->product_variant->increment('sold', $item->qty);
+                // $item->product_variant->decrement('stock', $item->qty); if mag-add ako ng stocks or inventory management
+            }
 
             $oldStatus = $order->order_status;
 

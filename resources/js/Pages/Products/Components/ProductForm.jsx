@@ -93,8 +93,20 @@ export default function ProductForm({mode, product}){
     const saveProduct = (e) => {
         e.preventDefault();
 
-        if (data.variants[0].variant_name === "" || data.variants[0].price === null || data.variants[0].product_code === "") {
-            alert("Please add at least one product variant");
+        if(data.name === "" || data.category === ""){
+            Swal.fire({
+                icon: "error",
+                title: "Error saving the product",
+                text: "Please fill up the required field."
+            });
+
+            return;
+        }else if(data.variants[0].variant_name === "" || data.variants[0].price === null || data.variants[0].product_code === "") {
+            Swal.fire({
+                icon: "error",
+                title: "Error saving the product",
+                text: "Please add at least one product variant."
+            })
             return;
         }
 
@@ -171,7 +183,7 @@ export default function ProductForm({mode, product}){
                 variants: product.variants
             });
 
-            if(!previewImage){
+            if(!previewImage && product.image){
                 setPreviewImage(`/storage/${product.image}`);
             }
         }
@@ -215,6 +227,7 @@ export default function ProductForm({mode, product}){
                         value={data.name}
                         onChange={(e) => setData("name", e.target.value)}
                         error={errors.name}
+                        required={true}
                         placeholder="eg. clothes"
                         className="w-100"
                     />
@@ -223,7 +236,7 @@ export default function ProductForm({mode, product}){
                     
 
                     <div className="flex flex-col">
-                        <label htmlFor="category" className="font-semibold">Product category:</label>
+                        <label htmlFor="category" className="font-semibold">Product category: <span className="text-red-500">*</span></label>
                         <select 
                             name="category"
                             value={data.category} 
@@ -445,11 +458,6 @@ export default function ProductForm({mode, product}){
                 </button>
             </div>
         </form>
-
-        
-
-
-
 
     
     </>

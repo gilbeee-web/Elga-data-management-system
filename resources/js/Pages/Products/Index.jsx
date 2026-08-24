@@ -124,6 +124,22 @@ export default function Dashboard ({products, user}){
         };
     }, [previewImage]);
 
+
+    useEffect(() => {
+
+        const handleKeyDown = (e) => {
+            if (e.key === 'Escape') {
+                setProductInfo(null);
+            }
+        };
+
+        window.addEventListener('keydown', handleKeyDown);
+
+        return () => {
+            window.removeEventListener('keydown', handleKeyDown);
+        };
+    }, [productInfo]);
+
     return <>
         <Layout title={"Products"} user={user}>
             

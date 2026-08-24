@@ -169,11 +169,12 @@ export default function UserForm({user, onClose, mode}){
                                         placeholder="Enter name"
                                         value={data.name}
                                         onChange={(e) => setData("name", e.target.value)}
+                                        required={true}
                                         error={errors.name}
                                     />
 
                                     <div className="flex flex-col">
-                                        <label htmlFor="role">Role:</label>
+                                        <label htmlFor="role">Role: <span className="text-red-500">*</span></label>
                                         <select 
                                             name="role"
                                             value={data.role} 
@@ -201,6 +202,7 @@ export default function UserForm({user, onClose, mode}){
                                                     value={data.email}
                                                     onChange={(e) => setData("email", e.target.value)}
                                                     error={errors.email}
+                                                    required={true}
                                                 />
 
                                                 <TextInput 
@@ -210,6 +212,7 @@ export default function UserForm({user, onClose, mode}){
                                                     value={data.password}
                                                     onChange={(e) => setData("password", e.target.value)}
                                                     error={errors.password}
+                                                    required={true}
                                                 />
                                             </div>
                                             

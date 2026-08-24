@@ -5,7 +5,9 @@ namespace App\Http\Controllers;
 use App\Http\Requests\Orders\StoreOrderRequest;
 use App\Models\Customer;
 use App\Models\Order;
+use App\Models\OrderItem;
 use App\Models\Payment;
+use App\Models\ProductVariant;
 use App\Models\Shipment;
 use App\Services\OrderService;
 use Exception;
@@ -235,13 +237,20 @@ class OrderController extends Controller
 
         // dd($request->all());
 
+        $shipment = Shipment::where('order_id', $order->id)->first();
+
         $validated = $request->validate([
             'order_id' => 'nullable|integer|exists:orders,id',
             'container_type' => 'required|string',
             'container_size' => 'required|string',
             'raw_shipping_fee' => 'required|numeric',
             'container_fee' => 'required|numeric',
-            'tracking_number' => 'required|string|unique:shipments,tracking_number'
+            'tracking_number' => [
+                'required',
+                'string',
+                Rule::unique('shipments', 'tracking_number')
+                    ->ignore($shipment?->id),
+            ],
         ],[
             'tracking_number.unique' => 'This tracking number already exists.'
         ]);
@@ -390,6 +399,44 @@ class OrderController extends Controller
         return redirect()->route('order.index')->with('success', 'Order cancelled.');
     }
 
+
+    public function getVariantOrderHistory(ProductVariant $variant){
+        
+        // dd($variant);
+
+        $orderHistory = OrderItem::join('orders', 'orders.id', '=', 'order_items.order_id')
+            ->where('order_items.product_variant_id', $variant->id)
+            ->select(
+                'order_items.id as order_item_id',
+                'order_items.product_variant_id',
+                'order_items.qty as item_qty',
+                'order_items.price as item_price',
+                'orders.transaction_number',
+                'orders.receiver_name',
+                'orders.sender_name',
+                'orders.completed_at'
+            )
+            ->orderByDesc('order_items.created_at')
+            ->get();
+
+        return response()->json($orderHistory);
+    }
+
+    public function switchOrderType(Order $order, Request $request){
+
+        $validated = $request->validate([
+            'order_type' => ['required', 'string', 'in:shipment,walkin'],
+        ]);
+
+        $order->update([
+            'order_type' => $validated['order_type'],
+        ]);
+
+        return redirect()->back()->with(
+            'success',
+            'Switched to ' . $order->order_type
+        );
+    }
 
 
 

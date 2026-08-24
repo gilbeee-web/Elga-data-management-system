@@ -37,8 +37,13 @@ export default function PaymentFormModal({order, order_type, onClose, payment, o
         setPreviewImage(URL.createObjectURL(file));
     };
 
+
+    const [isSaving, setIsSaving] = useState(false);
+
     const savePayment = (e) => {
         e.preventDefault();
+
+        setIsSaving(true);
 
         post(route('order.savePayment', order.id), {
 
@@ -67,6 +72,7 @@ export default function PaymentFormModal({order, order_type, onClose, payment, o
 
                 console.log("Errors: ", errors)
             },
+            onFinish: () => setIsSaving(false)
         });
     }
 
@@ -143,7 +149,7 @@ export default function PaymentFormModal({order, order_type, onClose, payment, o
 
         <div className="fixed inset-0 bg-[rgb(0,0,0,0.5)] z-99 flex justify-center items-center">
             
-            <div className="w-full bg-white sm:max-w-md md:max-w-xl lg:max-w-md rounded-md shadow p-3 pt-3 overflow-y-auto min-h-[50vh]">
+            <div className="w-full bg-white sm:max-w-xs md:max-w-sm lg:max-w-md rounded-md shadow p-3 pt-3 overflow-y-auto min-h-[50vh]">
 
                 {/* Header */}
 
@@ -364,10 +370,12 @@ export default function PaymentFormModal({order, order_type, onClose, payment, o
                         </button>
 
                         <button 
-                            className="bg-green-500 text-white rounded-md px-3 py-2 cursor-pointer"
+                            className={`text-white rounded-md px-3 py-2 cursor-pointer ${
+                                isSaving ? "bg-green-400" : "bg-green-500 hover:bg-green-400"
+                            }`}
                             type="submit"
                         >
-                            Submit
+                            {isSaving ? "Submitting..." : "Submit"}
                         </button>
                     </div>
 

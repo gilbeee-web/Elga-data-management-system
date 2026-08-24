@@ -52,9 +52,9 @@ export default function UserCredentialForm({user, back, updateCredentialSuccess}
 
             
             <TextInput 
-                label={"New email:"}
+                label={"Email:"}
                 type="text"
-                placeholder="Enter new email"
+                placeholder="Enter email"
                 className="w-[80%]"
                 value={data.new_email}
                 onChange={(e) => setData("new_email", e.target.value)}

@@ -339,7 +339,7 @@ export default function Index ({orders, user}){
                             ) :
                             (
                                 <tr className="text-center">
-                                    <td colSpan={5} className="text-xl font-bold p-4">No orders yet.</td>
+                                    <td colSpan={5} className="text-xl font-bold p-4">No orders found.</td>
                                 </tr>
                             )
                         }

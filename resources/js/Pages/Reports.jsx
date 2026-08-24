@@ -38,7 +38,7 @@ export default function Reports({filters, summaryCards, transactions, user}){
 
         <Layout title={"Reports"} user={user}>
 
-            <h1 className="font-bold text-2xl">Sales Report</h1>
+            <h1 className="font-bold text-xl">Sales Report</h1>
 
             <div className="w-full mt-5 flex justify-between items-center">
 

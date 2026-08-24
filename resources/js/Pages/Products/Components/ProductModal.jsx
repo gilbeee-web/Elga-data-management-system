@@ -1,9 +1,42 @@
-import { SquarePen, Trash2 } from "lucide-react";
+import { ShoppingBag, SquarePen, Trash2 } from "lucide-react";
 import { formatCurrency } from "../../../Utils/formatCurrency";
+import { route } from "ziggy-js";
+import { useState } from "react";
+import OrderHistoryTable from "./OrderHistoryTable";
 
 export default function ProductModal({product, onClose, editProduct, deleteProduct}){
 
     console.log("Product variants: ", product.variants);
+
+    const [orderHistory, setOrderHistory] = useState(null);
+
+    const fetchOrderHistory = async (variant_id) => {
+
+        console.log("Variant ID: ", variant_id);
+
+        try {
+            
+            const response = await fetch(route('order.getVariantOrderHistory', variant_id));
+
+            if(!response){
+                alert("No response");
+                return;
+            }
+
+            const result = await response.json();
+
+            if(result){
+                setOrderHistory(result);
+            }
+
+            console.log("Result: ", result);
+
+        } catch (error) {
+            console.log("error: ", error);
+        }
+
+    }
+
 
     return <>
 
@@ -25,12 +58,21 @@ export default function ProductModal({product, onClose, editProduct, deleteProdu
 
                     <div className="flex gap-x-5 items-center mt-3 px-5">
 
-                        <div>
-                            <img 
-                                src={`/storage/${product.image}`} 
-                                alt={product.name}  
-                                className="object-contain w-30 h-auto rounded-md"
-                            />
+                        <div className="border border-gray-200 rounded-md flex-shrink-0 h-25 w-25 overflow-hidden bg-[#F7F7F4]">
+                            {
+                                product.image ? (
+                                    <img
+                                        src={`/storage/${product.image}`}
+                                        alt={product.name}
+                                        className="h-full w-full object-cover object-center"
+                                    />
+                                ) : (
+                                    <div className="h-25 w-full flex justify-center items-center bg-black/10">
+                                        <ShoppingBag size={40} color="gray"/>
+                                    </div>
+                                )
+                            }
+                            
                         </div>
 
                         <div>
@@ -60,46 +102,69 @@ export default function ProductModal({product, onClose, editProduct, deleteProdu
                 
 
 
+                <div className="w-full mt-8">
+                    {
+                        !orderHistory ? (
+                            <div className="max-h-80 overflow-y-auto rounded-lg border border-gray-300 shadow-sm">
+                                <table className="w-full text-sm text-left border-collapse bg-white">
+                                    
+                                    <thead className="sticky top-0 z-10 bg-white text-gray-600 uppercase text-xs border-b border-gray-300">
+                                        <tr>
+                                            <th className="p-3">Variants</th>
+                                            <th className="p-3">Variant code</th>
+                                            <th className="p-3">Price</th>
+                                            <th className="p-3">Sold</th>
+                                        </tr>
+                                    </thead>
 
-                <table className="mt-5 w-full text-sm text-left shadow-sm rounded-lg">
+                                    <tbody>
+                                        {product.variants && product.variants.length > 0 ? (
+                                            product.variants.map((variant) => (
+                                                <tr
+                                                    key={variant.id}
+                                                    className="border-b border-gray-300 hover:bg-gray-200 cursor-pointer"
+                                                    onClick={() => fetchOrderHistory(variant.id)}
+                                                >
+                                                    <td className="p-3 font-semibold">
+                                                        {variant.variant_name}
+                                                    </td>
 
-                    <thead className="text-gray-400 text-md border-b border-gray-300">
-                        <tr className="bg-gray-100">
-                            <th className="p-3">Variants</th>
-                            <th className="p-3">Variant code</th>
-                            <th className="p-3">Price</th>
-                            <th className="p-3">Sold</th>
-                        </tr>
-                    </thead>
-                    
-                    <tbody>
-                       {
-                        product.variants && product.variants.length > 0 ? (
-                            product.variants.map((variant) => (
-                                <tr key={variant.id} className="border-b border-gray-300">
-                                    <td className="p-3 uppercase text-gray-600 font-semibold">{variant.variant_name}</td>
-                                    <td className="p-3 uppercase text-gray-600 font-semibold">{variant.product_code}</td>
-                                    <td className="p-3 uppercase text-gray-600 font-semibold">{formatCurrency(variant.price)}</td>
-                                    <td className="p-3 uppercase text-gray-600 font-semibold">{variant.sold}</td>
-                                </tr>
-                            ))
+                                                    <td className="p-3 font-semibold">
+                                                        {variant.product_code}
+                                                    </td>
+
+                                                    <td className="p-3 font-semibold">
+                                                        {formatCurrency(variant.price)}
+                                                    </td>
+
+                                                    <td className="p-3 font-semibold">
+                                                        {variant.sold}
+                                                    </td>
+                                                </tr>
+                                            ))
+                                        ) : (
+                                            <tr>
+                                                <td
+                                                    colSpan={4}
+                                                    className="p-5 text-center font-bold text-lg"
+                                                >
+                                                    No product variants yet.
+                                                </td>
+                                            </tr>
+                                        )}
+                                    </tbody>
+
+                                </table>
+                            </div>
                         ) : (
-                            
-                            <tr>
-                                <td colSpan={4} className="text-center font-bold text-lg">
-                                    No product variants yet.
-                                </td>
-                            </tr>
-                            
-
+                            <OrderHistoryTable 
+                                orderHistory={orderHistory} 
+                                onClose={() => setOrderHistory(null)}
+                            />
                         )
-                       }
-                    </tbody>
-
-                </table>
-
-
-
+                    }
+                    
+                </div>
             </div>
 
 

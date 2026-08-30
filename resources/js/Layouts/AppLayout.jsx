@@ -5,7 +5,7 @@ import Navbar from "@/Components/Navbar";
 import Sidebar from "@/Components/Sidebar";
 import FlashMessage from "../Components/FlashMessage";
 
-export default function AppLayout({children, title, user}){
+export default function AppLayout({children, user, shops}){
 
     return (
 
@@ -14,12 +14,12 @@ export default function AppLayout({children, title, user}){
             <div className="flex h-screen">
                 
                 
-                <Sidebar user={user} />
+                <Sidebar user={user} displayShops={shops}/>
 
                 
-                <div className="flex-1 flex flex-col bg-[#DFDFDF]">
+                <div className="flex-1 flex flex-col bg-gray-100">
 
-                    <Navbar title={title} user={user} />
+                    {/* <Navbar title={title} user={user} /> */}
                     
                     <main className="py-3 px-6 overflow-y-auto flex-1">
                         {children}

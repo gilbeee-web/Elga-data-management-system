@@ -2,6 +2,7 @@
 
 namespace App\Http\Middleware;
 
+use App\Models\Shop;
 use Illuminate\Http\Request;
 use Inertia\Middleware;
 
@@ -35,12 +36,18 @@ class HandleInertiaRequests extends Middleware
      */
     public function share(Request $request): array
     {
+
+        $shopId = session('shop_id');
+        $defaultShop = Shop::first();
+
         return [
             ...parent::share($request),
             'flash' => fn () => [
                 'success' => $request->session()->get('success'),
                 'error' => $request->session()->get('error'),
             ],  
+            'displayShops' => Shop::where('is_active', true)->get(),
+            'currentShop' => $shopId ? Shop::find($shopId) : $defaultShop,
         ];
     }
 }

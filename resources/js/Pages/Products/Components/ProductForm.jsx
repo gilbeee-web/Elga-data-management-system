@@ -325,10 +325,10 @@ export default function ProductForm({mode, product}){
             {showImagePreview && (
                 <div 
                     className="fixed inset-0 bg-[rgb(0,0,0,0.5)] z-99 flex items-center justify-center"
-                    onClick={() => setShowImagePreview(null)}
+                    onClick={() => setShowImagePreview(false)}
                 >
 
-                    <button className="absolute top-4 right-4 text-white text-3xl cursor-pointer hover:text-gray-300" onClick={() => setShowImagePreview(null)}>
+                    <button className="absolute top-4 right-4 text-white text-3xl cursor-pointer hover:text-gray-300" onClick={() => setShowImagePreview(false)}>
                         &times;
                     </button>
                     

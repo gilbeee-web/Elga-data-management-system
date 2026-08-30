@@ -111,7 +111,7 @@ export default function UserForm({user, onClose, mode}){
                                 className="text-start cursor-pointer mt-5"
                                 onClick={() => setIsEditCredentials(true)}
                             >
-                                <span className="text-green-500 hover:text-green-400 hover:underline">User Credentials</span>
+                                <span className="text-blue-500 hover:text-blue-400 hover:underline">User Credentials</span>
                             </button>
                         </div>
                     )

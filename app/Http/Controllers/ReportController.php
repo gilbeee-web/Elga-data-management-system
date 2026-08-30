@@ -6,6 +6,7 @@ use App\Exports\SalesReportExport;
 use App\Models\Order;
 use App\Models\Payment;
 use App\Models\Shipment;
+use App\Models\Shop;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Carbon\Carbon;
 use Exception;
@@ -100,7 +101,7 @@ class ReportController extends Controller
                 'dateFrom' => $request->dateFrom,
                 'dateTo' => $request->dateTo,
             ],
-            'user' => Auth::user()
+            'user' => Auth::user(),
         ]);
 
     }

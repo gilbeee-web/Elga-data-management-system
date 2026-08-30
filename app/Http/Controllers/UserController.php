@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Shop;
 use App\Models\User;
 use Exception;
 use Illuminate\Http\Request;
@@ -23,7 +24,8 @@ class UserController extends Controller
 
         return Inertia::render('Users/Index', [
             'users' => $users,
-            'current_user' => $current_user
+            'current_user' => $current_user,
+            'shops' => Shop::all()
         ]);
     }
 
@@ -153,6 +155,14 @@ class UserController extends Controller
             throw ValidationException::withMessages([
                 'email' => 'Incorrect email or password.',
             ]);
+        }
+
+        if (!session()->has('shop_id')) {
+            $shop = Shop::first();
+
+            if ($shop) {
+                session()->put('shop_id', $shop->id);
+            }
         }
 
         $request->session()->regenerate();

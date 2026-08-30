@@ -6,7 +6,7 @@ export default function SummaryCard({ cardName, value, icon: Icon, isCurrency, c
             <div className='w-full h-full'>
                 <div className="flex gap-x-3 items-center">
 
-                    <div className='rounded-full p-3 bg-white border border-gray-300 shadow-sm'>
+                    <div className='rounded-full p-3 bg-white border border-gray-100 shadow-sm'>
                         <Icon className="w-8 h-8 text-gray-700" strokeWidth={1.5} />
                     </div>
 

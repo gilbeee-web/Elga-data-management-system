@@ -251,7 +251,7 @@ export default function Index ({orders, user}){
                 <div className="w-full flex justify-end relative">
                     <input 
                         type="text" 
-                        className="min-w-xs rounded-md border border-gray-400 bg-white px-2 py-1 focus:outline-none focus:ring-1 focus:ring-[#DF9BAA]"
+                        className="min-w-xs rounded-md border border-gray-400 bg-white px-2 py-1 focus:outline-none focus:ring-1 focus:ring-gray-400"
                         placeholder="Search order..."
                         value={currentSearch}
                         onChange={(e) => setCurrentSearch(e.target.value)}
@@ -262,12 +262,12 @@ export default function Index ({orders, user}){
                         }}
                     />
 
-                    <button className="absolute top-0 right-0 h-full px-4 bg-[#DF9BAA] rounded-r-md flex items-center justify-center">
-                        <Search size={20} color={"#FFFF"} strokeWidth={3} />
+                    <button className="absolute top-0 right-0 h-full border-l border-gray-400 px-4 rounded-r-md flex items-center justify-center">
+                        <Search size={20} strokeWidth={2} />
                     </button>
                 </div>
                 
-                <table className="mt-5 w-full text-sm text-left border-collapse bg-white shadow-md rounded-lg">
+                <table className="mt-5 w-full text-sm text-left border-collapse bg-white shadow-sm rounded-lg">
                     <thead className="text-gray-600 uppercase text-xs border-b border-gray-300">
                         <tr>
                             <th className="p-3">TRANSACTION NO. / ORDER NO.</th>
@@ -286,7 +286,7 @@ export default function Index ({orders, user}){
                         {
                             isFetchingData ? 
                             <tr>
-                                <td colSpan={5} className="py-12">
+                                <td colSpan={6} className="py-12">
                                     <div className="flex flex-col items-center justify-center gap-3">
                                         <div className="animate-spin h-10 w-10 border-4 border-gray-300 border-t-blue-600 rounded-full" />
                                         <span className="text-sm text-gray-500 font-medium">Loading orders...</span>
@@ -339,7 +339,7 @@ export default function Index ({orders, user}){
                             ) :
                             (
                                 <tr className="text-center">
-                                    <td colSpan={5} className="text-xl font-bold p-4">No orders found.</td>
+                                    <td colSpan={6} className="text-xl font-bold p-4">No orders found.</td>
                                 </tr>
                             )
                         }

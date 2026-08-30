@@ -8,6 +8,7 @@ class Order extends Model
 {
     //
     protected $fillable = [
+        'shop_id',
         'transaction_number',
         'order_type',
         'sender_name',
@@ -23,6 +24,11 @@ class Order extends Model
         'remarks',
         'completed_at'
     ];
+
+    public function shop(){
+        $this->belongsTo(Shop::class);
+    }
+
 
     public function items()
     {

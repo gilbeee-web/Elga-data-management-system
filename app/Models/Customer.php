@@ -8,10 +8,16 @@ class Customer extends Model
 {
     //
 
-    protected $fillable = ['sender_name', 'receiver_name','contact_number','address'];
+    protected $fillable = ['shop_id', 'sender_name', 'receiver_name','contact_number','address'];
+
+    public function shop(){
+        $this->belongsTo(Shop::class);
+    }
 
     public function order(){
         return $this->hasMany(Order::class);
     }
+
+    
 
 }

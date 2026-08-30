@@ -13,8 +13,8 @@ export default function NavLink({
             className={
                 'flex gap-x-2 items-center text-md p-3 font-semibold leading-5 transition duration-150 ease-in-out focus:outline-none ' +
                 (active
-                    ? 'bg-[#DF9BAA] text-white focus:border-indigo-700'
-                    : 'border-transparent hover:bg-[#DF9BAA] hover:text-white focus:border-gray-300 focus:text-gray-700 ') +
+                    ? 'font-bold'
+                    : 'text-gray-500 hover:bg-gray-50 hover:text-gray-900') +
                 className
             }
         >

@@ -39,7 +39,7 @@ export default function Dashboard ({
 
 
     return <>
-        <Layout title={"Dashboard"} user={user}>
+        <Layout user={user}>
             
             <div className="h-full w-[95%]">
 
@@ -157,7 +157,9 @@ export default function Dashboard ({
                                     ))
                                 ):
                                 (
-                                    <td className="p-3" colSpan={5}>No recent orders found.</td>
+                                    <tr>
+                                        <td className="p-3 text-center font-semibold" colSpan={5}>No recent orders found.</td>
+                                    </tr>
                                 )
                             }
                         </tbody>

@@ -36,7 +36,7 @@ export default function Reports({filters, summaryCards, transactions, user}){
 
     return <>
 
-        <Layout title={"Reports"} user={user}>
+        <Layout user={user}>
 
             <h1 className="font-bold text-xl">Sales Report</h1>
 
@@ -182,7 +182,7 @@ export default function Reports({filters, summaryCards, transactions, user}){
                                 ))
                             ):
                             (
-                                <td className="p-3" colSpan={7}>No transactions found.</td>
+                                <td className="p-3 text-center font-semibold" colSpan={7}>No transactions found.</td>
                             )
                         }
 

@@ -8,9 +8,14 @@ class OrderReference extends Model
 {
     //
     protected $fillable = [
+        'shop_id',
         'order_id',
         'order_number'
     ];
+
+    public function shop(){
+        $this->belongsTo(Shop::class);
+    }
 
     public function order()
     {

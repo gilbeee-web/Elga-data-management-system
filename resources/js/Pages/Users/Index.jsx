@@ -29,12 +29,12 @@ export default function Index({users, current_user}){
 
             <div className="flex justify-between items-center">
                 <h1 className="text-2xl font-bold">
-                    List of users
+                    User List
                 </h1>
 
                 <button 
                     type="button"
-                    className="flex gap-x-2 items-center rounded-md text-md bg-blue-500 px-3 py-2 text-white cursor-pointer hover:bg-blue-400"
+                    className="flex gap-x-2 items-center rounded-md text-md font-semibold bg-blue-500 px-3 py-2 text-white cursor-pointer hover:bg-blue-400"
                     onClick={() => {
                         setOpenUserForm(true);
                         setMode("create");
@@ -142,63 +142,6 @@ export default function Index({users, current_user}){
 
 
             </div>
-
-
-
-
-            {/* <div className="mt-5 rounded-md bg-white p-5 h-125">
-                {
-                    users.length > 0 && (
-                        users.map((user) => (
-                            <div className="mt-5 shadow-sm border border-gray-400 rounded-lg min-w-sm max-w-lg p-3 bg-white" key={user.id}>
-                                <div className="flex justify-between items-center">
-
-                                    <div className="flex gap-x-3 items-center">
-
-                                        <img 
-                                            src={user.profile_pic ? `/storage/${user.profile_pic}` : "/images/logo/default-profile.jpg"} 
-                                            alt=""
-                                            className="object-contain rounded-full w-15 h-15" 
-                                        />
-
-                                        <div className="flex flex-col">
-                                            <h1 className="text-lg font-bold">{user.username}</h1>
-                                            <h2 className="text-sm text-gray-400 font-semibold">
-                                                {
-                                                    user.role === "super_admin" ? "Super Admin" : "Admin" 
-                                                }
-                                            </h2>
-                                        </div>
-                                
-                                    </div>
-
-                                    <div className="flex gap-x-5 items-center">
-                                        <button 
-                                            className="rounded-md text-md bg-green-500 px-3 py-2 text-white cursor-pointer hover:bg-green-400"
-                                            onClick={() => editUser(user)}
-                                        >
-                                            Edit
-                                        </button>
-
-                                        <button 
-                                            className="rounded-md text-md bg-red-500 px-3 py-2 text-white cursor-pointer hover:bg-red-400"
-                                            onClick={() => setOpenUserForm(true)}
-                                        >
-                                            Remove
-                                        </button>
-                                    </div>
-                                    
-
-                                </div>
-                            </div>
-                        ))
-                    )
-                }
-            </div> */}
-
-            
-
-
             
 
             { openUserForm && (

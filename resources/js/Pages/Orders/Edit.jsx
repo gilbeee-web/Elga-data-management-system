@@ -54,10 +54,12 @@ export default function Edit({order, order_type, status, customer, orderReferenc
                 message = "Please complete the Customer Info tab first.";
             } else if (!hasOrderItems) {
                 message = "Please add at least one order item first.";
-            } else if (!hasShipping && !isWalkinOrder) {
-                console.log("hey");
-                message = "Please set the shipping fee first.";
-            }
+            } 
+            
+            // else if (!hasShipping && !isWalkinOrder) {
+            //     console.log("hey");
+            //     message = "Please set the shipping fee first.";
+            // }
         } else if (selectedTab === 'shipment') {
             if (!hasCustomer) {
                 message = "Please complete the Customer Info tab first.";

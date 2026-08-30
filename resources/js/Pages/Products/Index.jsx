@@ -141,7 +141,7 @@ export default function Dashboard ({products, user}){
     }, [productInfo]);
 
     return <>
-        <Layout title={"Products"} user={user}>
+        <Layout user={user}>
             
             
             <div className="w-full flex justify-between items-center">

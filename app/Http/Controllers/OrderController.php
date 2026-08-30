@@ -9,6 +9,7 @@ use App\Models\OrderItem;
 use App\Models\Payment;
 use App\Models\ProductVariant;
 use App\Models\Shipment;
+use App\Models\Shop;
 use App\Services\OrderService;
 use Exception;
 use Illuminate\Http\Request;
@@ -64,7 +65,8 @@ class OrderController extends Controller
         return Inertia::render('Orders/Index', [
             'orders' => $orders,
             'filters' => $request->only(['filter_status', 'search']),
-            'user' => Auth::user()
+            'user' => Auth::user(),
+            'shops' => Shop::all()
         ]);
     }   
 

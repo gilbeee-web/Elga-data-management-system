@@ -55,7 +55,7 @@ export default function Index(){
         <div className="relative w-full min-h-screen">
             <div 
                 className="absolute inset-0 bg-cover bg-center bg-no-repeat brightness-50"
-                style={{ backgroundImage: "url('/images/elga-bg.jpg')" }}
+                style={{ backgroundImage: "url('/images/sample-bg.jpg')" }}
             />
 
             <div className="relative w-full min-h-screen flex justify-center items-center rounded-lg">
@@ -67,7 +67,7 @@ export default function Index(){
                         <div className="w-full h-full bg-[#DF9BAA] rounded-l-lg border-gray-400 p-5">
 
                             <div className="w-full h-full flex flex-col justify-center items-center text-center text-white font-bold">
-                                <h1 className="text-6xl">Elga</h1>
+                                <h1 className="text-6xl">Index</h1>
                                 <p className="text-xl">Order Management System</p>
                             </div>
 

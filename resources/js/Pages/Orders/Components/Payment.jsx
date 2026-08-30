@@ -94,6 +94,24 @@ export default function Payment({order, order_type, orderSummary, payments, chan
 
     console.log("Preview Image: ", previewImage);
 
+    const isWalkin = order.order_type === 'walkin';
+
+    const handleSubmitPayment = (isFullyPaid) => {
+        console.log("Submitted payment successfully");
+
+        //if shipment order check first if the shipping fee is set before proceeding to the ship and review
+        // if not proceed to the incomplete tab
+        if(orderSummary.shipping_fee <= 0 && !isWalkin){
+            changeTab("shipping");
+        }else if(isFullyPaid) {
+            console.log("isFully paid");
+            changeTab("shipment");
+        }
+
+        setSelectedPayment(null);
+        setOpenPaymentForm(false);
+    }
+
     return <>
 
         <div className="rounded-md bg-white p-5 h-125 flex flex-col">
@@ -323,18 +341,7 @@ export default function Payment({order, order_type, orderSummary, payments, chan
                     order={order}
                     order_type={order_type}
                     payment={selectedPayment}
-                    onSubmitPayment={(isFullyPaid) => {
-
-                        console.log("Submitted payment successfully");
-
-                        if (isFullyPaid) {
-                            console.log("isFully paid");
-                            changeTab("shipment");
-                        }
-
-                        setSelectedPayment(null);
-                        setOpenPaymentForm(false);
-                    }}
+                    onSubmitPayment={handleSubmitPayment}
                 />
             )
             

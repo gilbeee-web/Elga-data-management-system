@@ -6,6 +6,7 @@ use App\Http\Controllers\LoginController;
 use App\Http\Controllers\OrderController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\ReportController;
+use App\Http\Controllers\ShopController;
 use App\Http\Controllers\UserController;
 use App\Models\Customer;
 use Illuminate\Support\Facades\Route;
@@ -96,4 +97,17 @@ Route::middleware('auth')->group(function(){
     });
 });
 
+
+Route::middleware('auth')->group(function(){
+    Route::prefix('/shops')->group(function(){
+        Route::controller(ShopController::class)->group(function(){
+            Route::get('/', 'getShops')->name('shop.getShops');
+            Route::get('/edit', 'edit')->name('shop.edit');
+            Route::post('/', 'store')->name('shop.store');
+            Route::post('/switch/{shop}', 'switchShop')->name('shop.switch');
+            Route::put('/{shop}', 'update')->name('shop.update');
+            Route::delete('/{shop}', 'destroy')->name('shop.destroy');
+        });
+    });
+});
 

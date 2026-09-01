@@ -26,12 +26,6 @@ class StoreOrderRequest extends FormRequest
         $rules = [
             'orderReferences' => ['required', 'array', 'min:1'],
 
-            'orderReferences.*.order_number' => [
-                'required',
-                'string',
-                'max:255',
-            ],
-
             'orderReferences.*.items' => [
                 'required',
                 'array',
@@ -76,6 +70,9 @@ class StoreOrderRequest extends FormRequest
                 'string',
                 'max:255',
                 Rule::unique('order_references', 'order_number')
+                    ->where(function ($query) {
+                        return $query->where('shop_id', session('shop_id'));
+                    })
                     ->ignore($reference['id'] ?? null),
             ];
         }

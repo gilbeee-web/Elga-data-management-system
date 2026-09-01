@@ -114,7 +114,7 @@ export default function Payment({order, order_type, orderSummary, payments, chan
 
     return <>
 
-        <div className="rounded-md bg-white p-5 h-125 flex flex-col">
+        <div className="rounded-md bg-white border border-gray-300 shadow-sm p-5 h-125 flex flex-col">
 
             <h1 className="text-xl font-bold">Payment Information</h1>
 
@@ -250,7 +250,7 @@ export default function Payment({order, order_type, orderSummary, payments, chan
                                                 </div>
 
                                                 <div className="w-full mt-5 max-w-40 h-full flex items-end">
-                                                    <h1 className="text-xs">{payment.remarks}</h1>
+                                                    <h1 className="text-xs text-gray-400">Encoded by: <span className="font-semibold text-black">{payment.encoder.name}</span> </h1>
                                                 </div>
 
                                             </div>
@@ -286,47 +286,133 @@ export default function Payment({order, order_type, orderSummary, payments, chan
                 )}
 
               
-                <div className="w-[80%] border max-h-95 rounded-lg p-3">
-                    <h1 className="text-lg font-bold">Payment Summary:</h1>
+                <div className="w-[80%] rounded-xl border border-gray-200 bg-white shadow-sm overflow-hidden">
 
-                    <div className="mt-5 flex flex-col gap-y-5 items-center justify-center">
-                        <div className="flex flex-col gap-y-1">
-                            <h1 className="text-sm font-semibold">Grand Total:</h1>
-                            <div className="border px-3 py-1 min-w-50 max-w-70 rounded-md text-center bg-[#F5F5F5]">
-                                <span className="text-xl text-gray-500 font-bold">{formatCurrency(orderSummary.total_amount)}</span>
+                    {/* Header */}
+                    <div className="px-5 py-4 border-b border-gray-200">
+                        <h1 className="text-lg font-bold text-gray-800">
+                            Payment Summary
+                        </h1>
+
+                        <p className="text-xs text-gray-400 mt-0.5">
+                            Order payment information
+                        </p>
+                    </div>
+
+
+                    <div className="p-5">
+
+                        {/* Grand Total */}
+                        <div className="bg-gray-50 border border-gray-100 rounded-lg p-4 flex justify-between items-center">
+                            <div>
+                                <p className="text-xs font-semibold uppercase tracking-wide text-gray-400">
+                                    Grand Total
+                                </p>
+
+                                <p className="text-2xl font-bold text-gray-800 mt-1">
+                                    {formatCurrency(orderSummary.total_amount)}
+                                </p>
                             </div>
                         </div>
 
-                        <div className="flex flex-col gap-y-1">
-                            <h1 className="text-sm font-semibold">Total Paid:</h1>
-                            <div className="border px-3 py-1 min-w-50 max-w-70 rounded-md text-center bg-[#F5F5F5]">
-                                <span className="text-xl text-green-500 font-bold">{formatCurrency(orderSummary.total_paid)}</span>
-                            </div>
-                        </div>
 
-                        <div className="flex flex-col gap-y-1">
-                            <h1 className="text-sm font-semibold">Remaining Balance:</h1>
-                            <div className="border px-3 py-1 min-w-50 max-w-70 rounded-md text-center bg-[#F5F5F5]">
-                                <span className="text-xl text-red-500 font-bold">{formatCurrency(orderSummary.remaining_balance)}</span>
-                            </div>
-                        </div>
+                        {/* Payment Breakdown */}
+                        <div className="mt-5 space-y-4">
 
-                        {
-                            orderSummary.total_paid > orderSummary.total_amount && (
-                                <div className="flex flex-col gap-y-1">
-                                    <h1 className="text-sm font-semibold">Overpayment:</h1>
-                                    <div className="border px-3 py-1 min-w-50 max-w-70 rounded-md text-center bg-[#F5F5F5]">
-                                        <span className="text-xl text-red-500 font-bold">
-                                            {formatCurrency(orderSummary.total_paid - orderSummary.total_amount)}
+                            {/* Total Paid */}
+                            <div className="flex justify-between items-center">
+                                <span className="text-sm text-gray-500">
+                                    Total Paid
+                                </span>
+
+                                <span className="font-semibold text-green-600">
+                                    {formatCurrency(orderSummary.total_paid ?? 0)}
+                                </span>
+                            </div>
+
+
+                            {/* Remaining Balance */}
+                            <div className="flex justify-between items-center">
+                                <span className="text-sm text-gray-500">
+                                    Remaining Balance
+                                </span>
+
+                                <span className={`font-bold ${
+                                    Number(orderSummary.remaining_balance) > 0
+                                        ? "text-red-500"
+                                        : "text-green-600"
+                                }`}>
+                                    {formatCurrency(orderSummary.remaining_balance ?? 0)}
+                                </span>
+                            </div>
+
+
+                            {/* Overpayment */}
+                            {Number(orderSummary.total_paid) > Number(orderSummary.total_amount) && (
+                                <>
+                                    <div className="border-t border-dashed border-gray-300" />
+
+                                    <div className="flex justify-between items-center">
+                                        <span className="text-sm font-semibold text-gray-600">
+                                            Overpayment
+                                        </span>
+
+                                        <span className="font-bold text-blue-600">
+                                            {formatCurrency(
+                                                Number(orderSummary.total_paid) -
+                                                Number(orderSummary.total_amount)
+                                            )}
                                         </span>
                                     </div>
-                                </div>
-                            )
-                        }
+                                </>
+                            )}
 
-                        
+                        </div>
+
+
+                        {/* Payment Status */}
+                        <div className="mt-5 pt-4 border-t border-gray-200">
+
+                            {Number(orderSummary.total_paid) > Number(orderSummary.total_amount) ? (
+                                <div className="flex items-center justify-between bg-blue-50 border border-blue-100 rounded-lg px-4 py-3">
+                                    <span className="text-sm font-semibold text-blue-700">
+                                        Payment Status
+                                    </span>
+
+                                    <span className="text-xs font-bold uppercase tracking-wide text-blue-600">
+                                        Overpaid
+                                    </span>
+                                </div>
+
+                            ) : Number(orderSummary.remaining_balance) > 0 ? (
+                                <div className="flex items-center justify-between bg-red-50 border border-red-100 rounded-lg px-4 py-3">
+                                    <span className="text-sm font-semibold text-red-700">
+                                        Payment Status
+                                    </span>
+
+                                    <span className="text-xs font-bold uppercase tracking-wide text-red-600">
+                                        Balance Due
+                                    </span>
+                                </div>
+
+                            ) : (
+                                <div className="flex items-center justify-between bg-green-50 border border-green-100 rounded-lg px-4 py-3">
+                                    <span className="text-sm font-semibold text-green-700">
+                                        Payment Status
+                                    </span>
+
+                                    <span className="text-xs font-bold uppercase tracking-wide text-green-600">
+                                        Fully Paid
+                                    </span>
+                                </div>
+                            )}
+
+                        </div>
+
                     </div>
+
                 </div>
+
 
             </div>
         </div>

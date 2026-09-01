@@ -155,7 +155,7 @@ export default function Dashboard ({products, user}){
                     onClick={() => router.visit(route("product.create"))}
                 >
                     <CirclePlus size={15} />
-                    <span>Add product</span>
+                    <span className="font-semibold">Add product</span>
                 </button>
 
             </div>
@@ -276,109 +276,126 @@ export default function Dashboard ({products, user}){
                         }}
                     />
 
-                    <button className="absolute top-0 right-0 h-full px-4 bg-[#DF9BAA] rounded-r-md flex items-center justify-center">
-                        <Search size={20} color={"#FFFF"}/>
+                    <button className="absolute top-0 right-0 h-full border-l border-gray-400 px-4 rounded-r-md flex items-center justify-center">
+                        <Search size={20} strokeWidth={2} />
                     </button>
                 </div>
 
             </div>
             
-            {
-                isFetchingData ? (
-                    <div className="mt-10 w-full flex flex-col items-center justify-center gap-3">
+            <div className="relative mt-10">
+                <div className="grid grid-cols-4 gap-x-10 gap-y-5 mt-10">
+
+                    {products.data.length > 0 ? (
+                        products.data.map((product) => (
+                            <div key={product.id}>
+                                
+                                <div 
+                                    className="bg-green-50 border-2 border-[#DF9BAA] rounded-xl shadow relative cursor-pointer transition-transform duration-200 hover:scale-105 h-full flex flex-col"
+                                    onClick={() => viewProduct(product.id)}
+                                >
+                                    
+                                    <div 
+                                        className="absolute top-2 right-2 bg-[#E0DD94] text-[#949556] text-xs px-3 py-1 font-bold rounded-full"
+                                    >
+                                        Sold: {product.variants_sum_sold}
+                                    </div>
+
+                                    <div className="relative group overflow-hidden rounded-t-lg h-50 w-full">
+                                        {
+                                            product.image ? (
+                                                <div className="h-full w-full">
+                                                    <img 
+                                                        src={`/storage/${product.image}`}
+                                                        alt="Product Image" 
+                                                        className="w-full h-full object-cover object-center"
+                                                    />
+
+                                                    <div 
+                                                        className="absolute inset-0 bg-black/40 flex flex-col items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-200"
+                                                        onClick={(e) => {
+                                                            e.stopPropagation(); // prevent triggering viewProduct
+                                                            setPreviewImage(product.image ? `/storage/${product.image}` : 'images/default_product.png');
+                                                        }}
+                                                    >
+                                                        
+                                                        <Eye size={40} color={"#FFFF"}/>
+                                                        
+                                                    </div>
+                                                </div>
+            
+                                                
+                                            ) : (
+                                                <div className="h-full w-full flex justify-center items-center bg-black/20">
+                                                    <ShoppingBag size={100} color="gray"/>
+                                                </div>
+                                            )
+                                        }
+                                        
+                                        
+                                    </div>
+
+                                    <div className="px-3 py-2 flex-1">
+                                        <h1 className="font-semibold text-lg line-clamp-2">{ product.name }</h1>
+                                        <p className="text-sm text-gray-500 capitalize font-semibold">{product.category}</p>
+                                    </div>
+
+                                    <div className="px-3 py-2">
+                                        {Number(product.variants_min_price) === Number(product.variants_max_price) ? (
+                                            <span className="font-semibold text-green-500">
+                                                {formatCurrency(Number(product.variants_min_price))}
+                                            </span>
+                                        ) : (
+                                            <span className="font-semibold text-green-500">
+                                                {formatCurrency(Number(product.variants_min_price))}
+                                                {" - "}
+                                                {formatCurrency(Number(product.variants_max_price))}
+                                            </span>
+                                        )}
+                                    </div>
+
+                                </div>
+                            </div>
+                        ))
+                    ) : (
+                        <div
+                            className="border-2 border-dashed h-65 bg-white rounded-md cursor-pointer hover:bg-gray-100"
+                            onClick={() => router.visit(route("product.create"))}
+                        >
+                            <div className="flex gap-x-2 h-full items-center justify-center">
+                                <CirclePlus  />
+                                <h1 className="font-semibold text-lg">Add Product</h1>
+                            </div>
+                        </div>
+                    )}
+                    
+                </div>
+
+                {isFetchingData && (
+                    <div className="absolute inset-0 bg-gray-100/70 backdrop-blur-[1px] flex flex-col items-center justify-center z-20">
+                        <div className="animate-spin h-10 w-10 border-4 border-gray-300 border-t-blue-600 rounded-full" />
+
+                        <span className="text-sm text-gray-500 font-medium mt-3">
+                            Loading more...
+                        </span>
+                    </div>
+                )}
+            </div>
+            
+
+            {/* {
+                isFetchingData && (
+                    <div className="w-full h-full flex flex-col items-center justify-center gap-3">
                         <div className="animate-spin h-10 w-10 border-4 border-gray-300 border-t-blue-600 rounded-full" />
                         <span className="text-sm text-gray-500 font-medium">Loading more...</span>
                     </div>
-                ) :
-                (
-                    <div className="grid grid-cols-4 gap-x-10 gap-y-5 mt-10">
-
-                        {products.data.length > 0 ? (
-                            products.data.map((product) => (
-                                <div key={product.id}>
-                                    
-                                    <div 
-                                        className="bg-green-50 border-2 border-[#DF9BAA] rounded-xl shadow relative cursor-pointer transition-transform duration-200 hover:scale-105"
-                                        onClick={() => viewProduct(product.id)}
-                                    >
-                                        
-                                        <div 
-                                            className="absolute top-2 right-2 bg-[#E0DD94] text-[#949556] text-xs px-3 py-1 font-bold rounded-full"
-                                        >
-                                            Sold: {product.variants_sum_sold}
-                                        </div>
-
-                                        <div className="relative group overflow-hidden rounded-t-lg min-h-50 w-full">
-                                            {
-                                                product.image ? (
-                                                    <div>
-                                                        <img 
-                                                            src={`/storage/${product.image}`}
-                                                            alt="Product Image" 
-                                                            className="w-full h-50 object-cover object-center"
-                                                        />
-
-                                                        <div 
-                                                            className="absolute inset-0 bg-black/40 flex flex-col items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-200"
-                                                            onClick={(e) => {
-                                                                e.stopPropagation(); // prevent triggering viewProduct
-                                                                setPreviewImage(product.image ? `/storage/${product.image}` : 'images/default_product.png');
-                                                            }}
-                                                        >
-                                                            
-                                                            <Eye size={40} color={"#FFFF"}/>
-                                                            
-                                                        </div>
-                                                    </div>
-                
-                                                    
-                                                ) : (
-                                                    <div className="h-50 w-full flex justify-center items-center bg-black/20">
-                                                        <ShoppingBag size={100} color="gray"/>
-                                                    </div>
-                                                )
-                                            }
-                                            
-                                            
-                                        </div>
-        
-                                        <div className="px-3 py-2">
-                                            <h1 className="font-semibold text-lg">{ product.name }</h1>
-                                            <p className="text-sm text-gray-500 capitalize font-semibold">{product.category}</p>
-                                        </div>
-
-                                        <div className="px-3 py-2">
-                                            {Number(product.variants_min_price) === Number(product.variants_max_price) ? (
-                                                <span className="font-semibold text-green-500">
-                                                    {formatCurrency(Number(product.variants_min_price))}
-                                                </span>
-                                            ) : (
-                                                <span className="font-semibold text-green-500">
-                                                    {formatCurrency(Number(product.variants_min_price))}
-                                                    {" - "}
-                                                    {formatCurrency(Number(product.variants_max_price))}
-                                                </span>
-                                            )}
-                                        </div>
-
-                                    </div>
-                                </div>
-                            ))
-                        ) : (
-                            <div
-                                className="border-2 border-dashed h-65 bg-white rounded-md cursor-pointer hover:bg-gray-100"
-                                onClick={() => router.visit(route("product.create"))}
-                            >
-                                <div className="flex gap-x-2 h-full items-center justify-center">
-                                    <CirclePlus  />
-                                    <h1 className="font-semibold text-lg">Add Product</h1>
-                                </div>
-                            </div>
-                        )}
-                        
-                    </div>
                 )
-            }
+            } */}
+            
+            
+            
+            
+               
 
             
 

@@ -6,6 +6,7 @@ use App\Http\Requests\Orders\StoreOrderRequest;
 use App\Models\Customer;
 use App\Models\Order;
 use App\Models\OrderItem;
+use App\Models\OrderStatusHistory;
 use App\Models\Payment;
 use App\Models\ProductVariant;
 use App\Models\Shipment;
@@ -32,8 +33,9 @@ class OrderController extends Controller
 
 
     public function index(Request $request)
-    {
-        $query = Order::with('references');
+    {  
+        $shopId = session('shop_id');
+        $query = Order::with('references')->where('shop_id', $shopId);
 
         if ($request->filled('filter_status') && $request->filter_status !== 'all') {
 
@@ -129,7 +131,7 @@ class OrderController extends Controller
 
         $totalPaid = Payment::where('order_id', $order->id)->sum('payment_amount');
     
-        $payments = Payment::where('order_id', $order->id)->get();
+        $payments = Payment::with('encoder')->where('order_id', $order->id)->get();
 
         return Inertia::render('Orders/Edit', [
             'order' => $order->fresh(), 
@@ -146,7 +148,8 @@ class OrderController extends Controller
                 'discount' => $order->discount,
                 'total_paid' => $totalPaid,
                 'total_amount' => $order->total_amount,
-                'remaining_balance' => $order->remaining_balance
+                'remaining_balance' => $order->remaining_balance,
+                'remarks' => $order->remarks
             ],
             'user' => Auth::user()
         ]);
@@ -154,26 +157,50 @@ class OrderController extends Controller
 
     public function saveDraft(Request $request){
 
-        $order = Order::create([
-            'order_type' => $request->order_type,
-            'subtotal' => 0,
-            'discount' => 0,
-            'total_amount' => 0,
-            'payment_status' => "unpaid",
-            'order_status' => "draft"
+        $validated = $request->validate([
+            'order_type' => 'required|string'
         ]);
-
-        $order->update([
-            'transaction_number' => 'TXN-' . str_pad($order->id, 6, '0', STR_PAD_LEFT),
-        ]);
+        
+        try{            
+            $order = $this->orderService->saveDraft($validated);
+        }catch(Exception $e){
+            return redirect()->back()->with(['error' => 'Something went wrong: ' . $e]);
+        }
 
         return redirect()->route('order.edit', $order);
     }
 
+    // public function saveDraft(Request $request){
+
+    //     $shopId = session('shop_id');
+
+    //     $lastOrder = Order::where('shop_id', $shopId)->latest('id')->first();
+
+    //     if ($lastOrder) {
+    //         $nextNumber = ((int) str_replace('TXN-', '', $lastOrder->transaction_number)) + 1;
+    //     } else {
+    //         $nextNumber = 1;
+    //     }
+
+    //     $transactionNumber = 'TXN-' . str_pad($nextNumber, 6, '0', STR_PAD_LEFT);
+
+    //     $order = Order::create([
+    //         'shop_id' => session('shop_id'),
+    //         'transaction_number' => $transactionNumber,
+    //         'order_type' => $request->order_type,
+    //         'subtotal' => 0,
+    //         'discount' => 0,
+    //         'total_amount' => 0,
+    //         'payment_status' => "unpaid",
+    //         'order_status' => "draft"
+    //     ]);
+
+
+    //     return redirect()->route('order.edit', $order);
+    // }
+
 
     public function saveCustomer(Order $order, Request $request){
-
-        // dd($request->all());
 
         $validated = $request->validate([
             'customer_id' => 'nullable|integer|exists:customers,id',
@@ -349,7 +376,8 @@ class OrderController extends Controller
     public function shippedOrder(Order $order, Request $request){
 
         $validated = $request->validate([
-            'sf_payment_reference' => 'string|nullable'
+            'sf_payment_reference' => 'string|nullable',
+            'remarks' => 'string|nullable',
         ]);
 
         try{
@@ -438,6 +466,16 @@ class OrderController extends Controller
             'success',
             'Switched to ' . $order->order_type
         );
+    }
+
+    public function getOrderStatusHistory(Order $order){
+
+        $orderStatusHistory = OrderStatusHistory::with('changer')->where('order_id', $order->id)->get();
+
+        // dd($orderStatusHistory);
+
+        return response()->json($orderStatusHistory);
+
     }
 
 

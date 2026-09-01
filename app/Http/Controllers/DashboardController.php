@@ -26,14 +26,27 @@ class DashboardController extends Controller
             default => [now()->startOfDay(), now()->endOfDay()],
         };
 
-        $totalSales = Payment::whereBetween('paid_at', $range)->sum('payment_amount');
-        $totalOrders = Order::whereBetween('created_at', $range)->count();
-        $pendingOrders = Order::whereIn('order_status', [
+        $totalSales = Payment::join('orders', 'orders.id', '=', 'payments.order_id')
+            ->where('orders.shop_id', session('shop_id'))
+            ->whereBetween('paid_at', $range)->sum('payment_amount');
+
+
+        $totalOrders = Order::where('shop_id', session('shop_id'))->whereBetween('created_at', $range)->count();
+
+
+        $pendingOrders = Order::where('shop_id', session('shop_id'))->whereIn('order_status', [
             'processing', 'awaiting_payment', 'payment_confirmed'
         ])->count();
 
-        $totalSfCollected = Shipment::whereBetween('shipped_at', $range)->sum('raw_shipping_fee');
-        $recentOrders = Order::with('references')->latest()->take(5)->get();
+        $totalSfCollected = Shipment::join('orders', 'shipments.order_id', '=', 'orders.id')
+            ->where('orders.shop_id', session('shop_id'))
+            ->whereBetween('shipments.shipped_at', $range)
+            ->sum('shipments.raw_shipping_fee');
+
+
+        $recentOrders = Order::with('references')
+            ->where('orders.shop_id', session('shop_id'))
+            ->latest()->take(5)->get();
 
 
         // ----- Sales Trend Chart -----
@@ -49,14 +62,17 @@ class DashboardController extends Controller
             default   => '%Y-%m-%d',
         };
 
-        $salesTrend = Payment::selectRaw("DATE_FORMAT(paid_at, '{$trendFormat}') as period, SUM(payment_amount) as total")
+        $salesTrend = Payment::join('orders', 'orders.id', '=', 'payments.order_id')
+            ->selectRaw("DATE_FORMAT(paid_at, '{$trendFormat}') as period, SUM(payment_amount) as total")
             ->where('paid_at', '>=', now()->subDays($trendDays))
+            ->where('orders.shop_id', session('shop_id'))
             ->groupBy('period')
             ->orderBy('period')
             ->get();
 
         // ----- Order Status Breakdown -----
-        $orderStatusBreakdown = Order::selectRaw('order_status, COUNT(*) as total')
+        $orderStatusBreakdown = Order::where('shop_id', session('shop_id'))
+            ->selectRaw('order_status, COUNT(*) as total')
             ->groupBy('order_status')
             ->get();
 

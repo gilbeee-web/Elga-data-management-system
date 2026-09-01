@@ -126,7 +126,7 @@ export default function Sidebar({user}){
                         toast: true,
                         position: "top-end",
                         icon: "success",
-                        title: `Successfully switch to ${shop.name}`,
+                        title: `Successfully switched to ${shop.name}`,
                         showConfirmButton: false,
                         timer: 2000,
                         timerProgressBar: true,

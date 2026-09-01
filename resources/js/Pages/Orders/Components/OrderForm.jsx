@@ -161,6 +161,8 @@ export default function OrderForm({order, order_type, changeTab, orderReferences
             items: targetItems,
         };
 
+        
+
         console.log("Updated Items: ", updated);
 
         setData("orderReferences", updated);
@@ -337,7 +339,7 @@ export default function OrderForm({order, order_type, changeTab, orderReferences
     return <>
 
         <form onSubmit={saveOrderItems} className="flex flex-col gap-y-3">  
-            <div className="rounded-md bg-white h-115 overflow-y-auto flex flex-col">
+            <div className="rounded-md bg-white border border-gray-200 shadow-sm h-115 overflow-y-auto flex flex-col">
 
                 <div className="flex-1">
                     {/* Tab Header  */}
@@ -504,16 +506,23 @@ export default function OrderForm({order, order_type, changeTab, orderReferences
                                                                         </div>
                                                                     </div>
 
-                                                                    {/* Editable: white bg, visible border */}
+                                                                    
                                                                     <div className="flex flex-col items-center">
                                                                         <label className="text-xs text-gray-400 mb-1">Qty</label>
                                                                         <input
                                                                             type="number"
                                                                             min={1}
                                                                             value={item.qty}
-                                                                            onChange={(e) =>
-                                                                                handleItemChange(orderIndex, itemIndex, "qty", Number(e.target.value))
-                                                                            }
+                                                                            onChange={(e) => {
+                                                                                const value = Number(e.target.value);
+
+                                                                                handleItemChange(
+                                                                                    orderIndex,
+                                                                                    itemIndex,
+                                                                                    "qty",
+                                                                                    Number.isNaN(value) ? 0 : value
+                                                                                );
+                                                                            }}
                                                                             disabled={readOnly}
                                                                             className={`py-1.5 border w-16 rounded-md text-center text-sm bg-white  ${
                                                                                 readOnly ? "bg-gray-100 border-gray-300 text-gray-500"
@@ -528,9 +537,16 @@ export default function OrderForm({order, order_type, changeTab, orderReferences
                                                                         <input
                                                                             type="text"
                                                                             value={Number(item.discount ?? 0)}
-                                                                            onChange={(e) =>
-                                                                                handleItemChange(orderIndex, itemIndex, "discount", Number(e.target.value))
-                                                                            }
+                                                                            onChange={(e) => {
+                                                                                const value = Number(e.target.value);
+
+                                                                                handleItemChange(
+                                                                                    orderIndex,
+                                                                                    itemIndex,
+                                                                                    "discount",
+                                                                                    Number.isNaN(value) ? 0 : value
+                                                                                );
+                                                                            }}
                                                                             disabled={readOnly}
                                                                             className={`py-1.5 border w-16 rounded-md text-center text-sm bg-white  ${
                                                                                 readOnly ? "bg-gray-100 border-gray-300 text-gray-500"

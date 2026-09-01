@@ -93,7 +93,7 @@ export default function CustomerForm({order, order_type, changeTab, customer, ge
     return <>
 
         <form onSubmit={saveCustomer}>
-            <div className="relative rounded-md bg-white p-5 h-125">
+            <div className="relative border border-gray-300 shadow-sm rounded-md bg-white p-5 h-125">
                 
                 <div className="flex justify-between items-center">
                     <div className="flex gap-x-10 items-center">

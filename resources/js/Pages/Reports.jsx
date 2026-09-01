@@ -166,7 +166,7 @@ export default function Reports({filters, summaryCards, transactions, user}){
                                         <td className="p-3">{transaction.order.sender_name ?? "--"}</td>
                                         <td className="p-3 capitalize">{
                                             transaction.payment_type === 'down_payment' ? 
-                                            "Down Payment" : transaction.payment_type
+                                            "Down Payment" : `${transaction.payment_type} Payment`
                                         }</td>
                                         <td className="p-3">{formatCurrency(transaction.payment_amount ?? 0)}</td>
                                         <td className="p-3">

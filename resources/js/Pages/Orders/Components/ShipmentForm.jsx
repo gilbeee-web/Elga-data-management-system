@@ -3,6 +3,7 @@ import TextInput from "../../../Components/TextInput";
 import { formatCurrency } from "../../../Utils/formatCurrency";
 import Swal from "sweetalert2";
 import { HandCoins, Package, SquarePen, Truck, User } from "lucide-react";
+import { route } from "ziggy-js";
 
 export default function ShipmentForm({order, order_type, customer, orderReferences, shippingInfo, orderSummary, payments, changeTab, readOnly}){
 
@@ -10,7 +11,8 @@ export default function ShipmentForm({order, order_type, customer, orderReferenc
    const isWalkin = order_type === 'walkin';
 
     const {data, setData, processing, errors, post} = useForm({
-        sf_payment_reference: ""
+        sf_payment_reference: "",
+        remarks: ""
     });
 
 
@@ -152,7 +154,7 @@ export default function ShipmentForm({order, order_type, customer, orderReferenc
                 <h1 className="text-xl font-bold">Review Transaction</h1>
 
 
-                <div className="mt-5 w-full border-2 border-gray-300 shadow-sm rounded-lg p-3">
+                <div className="mt-5 w-full border border-gray-300 rounded-lg p-3">
 
                     <div className="flex justify-between">
 
@@ -198,7 +200,7 @@ export default function ShipmentForm({order, order_type, customer, orderReferenc
                 </div>
 
 
-                <div className="mt-5 w-full border border-gray-200 shadow-sm rounded-lg p-4">
+                <div className="mt-5 w-full border border-gray-300 rounded-lg p-4">
                     <div className="flex justify-between items-center mb-3">
                         <div className="flex items-center gap-2">
                             <Package size={20}/>
@@ -264,7 +266,7 @@ export default function ShipmentForm({order, order_type, customer, orderReferenc
 
                 {
                     !isWalkin && (
-                        <div className="mt-5 w-full border-2 border-gray-300 shadow-sm rounded-lg p-3">
+                        <div className="mt-5 w-full border border-gray-300 rounded-lg p-3">
 
                             <div className="flex justify-between">
 
@@ -315,7 +317,7 @@ export default function ShipmentForm({order, order_type, customer, orderReferenc
                 
 
 
-                <div className="mt-5 w-full border-2 border-gray-200 shadow-sm rounded-lg p-4">
+                <div className="mt-5 w-full border border-gray-300 rounded-lg p-4">
                     <div className="flex justify-between items-center mb-3">
                         <div className="flex items-center gap-2">
                             <HandCoins size={20}/>
@@ -384,8 +386,30 @@ export default function ShipmentForm({order, order_type, customer, orderReferenc
                     </div>
                 </div>
                 
+                
+                
                 {
-                    !readOnly && (
+                    !readOnly ? <>
+
+                        <div className="mt-5">
+                            <div className="flex flex-col gap-y-1">
+                                <label htmlFor="remarks" className="font-semibold">Remarks:</label>
+                                <textarea 
+                                    value={data.remarks}
+                                    onChange={(e) => setData("remarks",e.target.value)} 
+                                    className="border border-gray-400 p-3 rounded-md"
+                                >
+
+                                </textarea>
+
+                                {errors.remarks && (
+                                    <p className="text-red-500 text-sm mt-1">
+                                        {errors.remarks}
+                                    </p>
+                                )}
+                            </div>      
+                        </div>
+
                         <div className="mt-5 flex justify-end">
                             <button 
                                 className="flex gap-x-2 bg-green-500 hover:bg-green-400 p-2 rounded-md items-center cursor-pointer text-white font-bold"
@@ -394,6 +418,11 @@ export default function ShipmentForm({order, order_type, customer, orderReferenc
                                 <Truck size={20}/>
                                 Shipped
                             </button>
+                        </div>
+                    </> 
+                    : (
+                        <div className="w-full px-5 py-2 bg-white border border-gray-400 shadow-sm">
+                            <p>{orderSummary.remarks}</p>
                         </div>
                     )
                 }

@@ -14,16 +14,20 @@ class ProductController extends Controller
     //
 
     protected $productService;
+    protected $shopId;
 
     public function __construct(ProductService $productService)
     {
         $this->productService = $productService;
+        $this->shopId = session('shop_id');
     }
 
 
     public function index(Request $request){
 
-        $query = Product::query()->where('is_active', true);
+        $query = Product::query()
+            ->where('shop_id', $this->shopId)
+            ->where('is_active', true);
 
         if($request->category && $request->category !== 'all'){
             $query->where('category', $request->category);
@@ -54,6 +58,7 @@ class ProductController extends Controller
             ->withMax('variants', 'price')
             ->withSum('variants', 'sold')
             ->where('is_active', true)
+            ->where('shop_id', $this->shopId)
             ->get();
 
 
@@ -76,8 +81,6 @@ class ProductController extends Controller
 
 
         $product->load('variants');
-
-        // $product = Product::with('variants')->where('id', $id);
 
         return response()->json(['product' => $product]);
     }
@@ -114,8 +117,6 @@ class ProductController extends Controller
             'variants.*.price' => 'required|numeric|min:0',
         ]);
         
-        // dd($validated_products);
-
         
         $this->productService->store($validated_products);
         

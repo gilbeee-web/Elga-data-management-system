@@ -11,15 +11,17 @@ import { formatCurrency } from "../../Utils/formatCurrency";
 import Swal from "sweetalert2";
 import Payment from "./Components/Payment";
 import ShipmentForm from "./Components/ShipmentForm";
-import { Ban, ChevronDown, ChevronLeft, CircleAlert, CircleCheck, CircleCheckBig, Copy, Trash2 } from "lucide-react";
+import { Ban, ChevronDown, ChevronLeft, CircleAlert, CircleCheck, CircleCheckBig, Clock, Copy, Trash2 } from "lucide-react";
 import OrderStatusDropdown from "../../Components/OrderStatusDropdown";
 import OrderTypeDropdown from "../../Components/OrderTypeDropdown";
 import SaveLoading from "../../Components/SaveLoading";
+import OrderStatusHistory from "./Components/OrderStatusHistory";
 
 
 export default function Edit({order, order_type, status, customer, orderReferences, shipmentInfo, payments, orderSummary, user}){
 
     console.log("Order Type: ", order_type);
+    console.log("Payments: ", payments);
 
     const isWalkinOrder = order_type === 'walkin';
     const isLocked = ['shipped', 'cancelled'].includes(order.order_status);
@@ -195,7 +197,40 @@ Thank you!`;
         value => value !== null && value !== ""
     );
 
-    
+    const [showOrderHistory, setShowOrderHistory] = useState(false);
+    const [orderStatusHistory, setOrderStatusHistory] = useState(null);
+
+    const handleShowOrderHistory = async() => {
+        console.log("Clicked order history");
+
+        try{
+
+            if(order){
+                const response = await fetch(route('order.getOrderStatusHistory', order.id));
+
+                if(!response){
+                    alert("Something went wrong");
+                }
+
+                const result = await response.json();
+
+                console.log("Order history result: ", result);
+
+                if(result){
+                    setOrderStatusHistory(result);
+                }
+
+                setShowOrderHistory(true);
+            }else{
+                alert("Something went wrong");
+            }
+            
+
+        }catch(error){
+            console.log("Error: ", error);
+        }
+    }
+
     const [isSaving, setIsSaving] = useState(false);
     
     const handleIsSaving = (status) => {
@@ -204,7 +239,7 @@ Thank you!`;
 
     return <>
 
-        <Layout title={"Orders"} user={user}>
+        <div className="min-h-screen w-full py-3 px-10 bg-gray-100">
             
             <div className="flex justify-between items-center">
 
@@ -219,11 +254,13 @@ Thank you!`;
 
                 <div className="flex gap-x-5 items-center">
 
-                    <OrderTypeDropdown 
-                        order={order} 
-                        hasShipmentInfo={shipmentInfo}
-                    />
-
+                    {payments.length === 0 && !(isWalkinOrder === false && shipmentInfo) && (
+                        <OrderTypeDropdown
+                            order={order}
+                            hasShipmentInfo={shipmentInfo}
+                        />
+                    )}
+                        
                     <OrderStatusDropdown order={order} />
 
                 </div>
@@ -232,132 +269,145 @@ Thank you!`;
                 
             </div>
 
-            <div className="mt-3 w-[75%] grid grid-cols-5 gap-3 pl-5">
+            <div className="w-full mt-8 flex justify-between items-center">
+                <div className="w-[75%] grid grid-cols-5 gap-3 pl-5">
 
-                <button 
-                    className="text-start cursor-pointer relative"
-                    onClick={() => handleTab(tabs[0])}
-                >
-                    <span
-                        className={`text-2xl font-bold ${
-                            activeTab === tabs[0] 
-                            ? "border-b-3 border-green-600"
-                            : "text-gray-400"
-                        }`}
+                    <button 
+                        className="text-start cursor-pointer relative"
+                        onClick={() => handleTab(tabs[0])}
                     >
-                        Customer
-                    </span>
-
-                    
-                    <span className="absolute top-0">
-                        {
-                            hasCustomerData ? (
-                                <CircleCheckBig strokeWidth={2} size={20} color="green" />
-                            ) : (
-                                <CircleAlert strokeWidth={2} size={20} color="red"/>
-                            )
-                        }
-                    </span>
-                </button>
-
-                <button 
-                    className="text-start cursor-pointer relative"
-                    onClick={() => handleTab(tabs[1])}
-                >
-                    <span
-                        className={`text-2xl font-bold ${
-                            activeTab === tabs[1] 
-                            ? "border-b-3 border-green-600"
-                            : "text-gray-400"
-                        }`}
-                    >
-                        Order Items
-                    </span>
-
-                    <span className="absolute top-0">
-                        {
-                            orderReferences.length > 0 ? (
-                                <CircleCheckBig strokeWidth={2} size={20} color="green" />
-                            ) : (
-                                <CircleAlert strokeWidth={2} size={20} color="red"/>
-                            )
-                        }
-                    </span>
-                    
-                </button>
-
-                {
-                    order_type === 'shipment' && (
-                        <button 
-                            className="text-start cursor-pointer relative"
-                            onClick={() => handleTab(tabs[2])}
+                        <span
+                            className={`text-2xl font-bold ${
+                                activeTab === tabs[0] 
+                                ? "border-b-3 border-green-600"
+                                : "text-gray-400"
+                            }`}
                         >
-                            <span
-                                className={`text-2xl font-bold ${
-                                    activeTab === tabs[2] 
-                                    ? "border-b-3 border-green-600"
-                                    : "text-gray-400"
-                                }`}
+                            Customer
+                        </span>
+
+                        
+                        <span className="absolute top-0">
+                            {
+                                hasCustomerData ? (
+                                    <CircleCheckBig strokeWidth={2} size={20} color="green" />
+                                ) : (
+                                    <CircleAlert strokeWidth={2} size={20} color="red"/>
+                                )
+                            }
+                        </span>
+                    </button>
+
+                    <button 
+                        className="text-start cursor-pointer relative"
+                        onClick={() => handleTab(tabs[1])}
+                    >
+                        <span
+                            className={`text-2xl font-bold ${
+                                activeTab === tabs[1] 
+                                ? "border-b-3 border-green-600"
+                                : "text-gray-400"
+                            }`}
+                        >
+                            Order Items
+                        </span>
+
+                        <span className="absolute top-0">
+                            {
+                                orderReferences.length > 0 ? (
+                                    <CircleCheckBig strokeWidth={2} size={20} color="green" />
+                                ) : (
+                                    <CircleAlert strokeWidth={2} size={20} color="red"/>
+                                )
+                            }
+                        </span>
+                        
+                    </button>
+
+                    {
+                        order_type === 'shipment' && (
+                            <button 
+                                className="text-start cursor-pointer relative"
+                                onClick={() => handleTab(tabs[2])}
                             >
-                                Shipping
-                            </span>
+                                <span
+                                    className={`text-2xl font-bold ${
+                                        activeTab === tabs[2] 
+                                        ? "border-b-3 border-green-600"
+                                        : "text-gray-400"
+                                    }`}
+                                >
+                                    Shipping
+                                </span>
 
-                            <span className="absolute top-0">
-                                {
-                                    shipmentInfo ? (
-                                        <CircleCheckBig strokeWidth={2} size={20} color="green" />
-                                    ) : (
-                                        <CircleAlert strokeWidth={2} size={20} color="red"/>
-                                    )
-                                }
-                            </span>
-                            
-                        </button>
-                    )
-                }    
-                
-                <button 
-                    className="text-start cursor-pointer relative"
-                    onClick={() => handleTab(tabs[3])}
-                >
-                    <span
-                        className={`text-2xl font-bold ${
-                            activeTab === tabs[3] 
-                            ? "border-b-3 border-green-600"
-                            : "text-gray-400"
-                        }`}
-                    >
-                        Payment
-                    </span>
-
-                    <span className="absolute top-0">
-                        {
-                            order.total_amount > 0 && order.remaining_balance <= 0 ? (
-                                <CircleCheckBig strokeWidth={2} size={20} color="green" />
-                            ) : (
-                                <CircleAlert strokeWidth={2} size={20} color="red"/>
-                            )
-                        }
-                    </span>
+                                <span className="absolute top-0">
+                                    {
+                                        shipmentInfo ? (
+                                            <CircleCheckBig strokeWidth={2} size={20} color="green" />
+                                        ) : (
+                                            <CircleAlert strokeWidth={2} size={20} color="red"/>
+                                        )
+                                    }
+                                </span>
+                                
+                            </button>
+                        )
+                    }    
                     
-                </button>
-
-                <button 
-                    className="w-full text-start cursor-pointer"
-                    onClick={() => handleTab(tabs[4])}
-                >
-                    <span
-                        className={`w-full text-2xl font-bold ${
-                            activeTab === tabs[4] 
-                            ? "border-b-3 border-green-600"
-                            : "text-gray-400"
-                        }`}
+                    <button 
+                        className="text-start cursor-pointer relative"
+                        onClick={() => handleTab(tabs[3])}
                     >
-                        {isLocked ? "Summary" : "Review & Ship"}
-                    </span>
-                </button>
+                        <span
+                            className={`text-2xl font-bold ${
+                                activeTab === tabs[3] 
+                                ? "border-b-3 border-green-600"
+                                : "text-gray-400"
+                            }`}
+                        >
+                            Payment
+                        </span>
+
+                        <span className="absolute top-0">
+                            {
+                                order.total_amount > 0 && order.remaining_balance <= 0 ? (
+                                    <CircleCheckBig strokeWidth={2} size={20} color="green" />
+                                ) : (
+                                    <CircleAlert strokeWidth={2} size={20} color="red"/>
+                                )
+                            }
+                        </span>
+                        
+                    </button>
+
+                    <button 
+                        className="w-full text-start cursor-pointer"
+                        onClick={() => handleTab(tabs[4])}
+                    >
+                        <span
+                            className={`w-full text-2xl font-bold ${
+                                activeTab === tabs[4] 
+                                ? "border-b-3 border-green-600"
+                                : "text-gray-400"
+                            }`}
+                        >
+                            {isLocked ? "Summary" : "Review & Ship"}
+                        </span>
+                    </button>
+                </div>
+
+                <div className="">
+                    <button 
+                        className="flex gap-x-2 items-center px-3 py-2 bg-blue-500 hover:bg-blue-400 rounded-md text-white font-semibold cursor-pointer"
+                        onClick={handleShowOrderHistory}
+                    >
+                        <Clock size={20}/>
+                        View History
+                    </button>
+                </div>
 
             </div>
+            
 
             <div className="mt-5 grid grid-cols-[75%_25%] gap-4">
                 {
@@ -440,111 +490,163 @@ Thank you!`;
                 }
                 
 
-                <div className="rounded-md bg-white p-5 relative">
-                    
-                    <h1 className="mt-5 text-xl font-bold text-center border-b-2 border-gray-400 pb-1">Order Summary</h1>
-                    
-                    <div className="mt-5 border-b-2 border-gray-400 pb-5">
+            
+                <div className="rounded-xl border border-gray-200 shadow-sm bg-white overflow-hidden">
 
-                        <div className="flex flex-col gap-y-1">
-                            <h1 className="text-sm font-semibold">Customer name:</h1>
-                            <div className="border px-3 py-1 rounded-md text-center bg-[#F5F5F5] capitalize">
-                                <span>
-                                    {
-                                        isWalkinOrder ? `${orderSummary.sender_name ?? "--"} / ${orderSummary.receiver_name ?? "--"}` 
-                                        : orderSummary.receiver_name ?? "--"
-                                    }
-                                </span>
-                            </div>
+                    {/* Header */}
+                    <div className="px-5 py-4 border-b border-gray-200 flex items-center justify-between">
+                        <div>
+                            <h1 className="text-lg font-bold text-gray-800">
+                                Order Summary
+                            </h1>
+                            <p className="text-xs text-gray-400 mt-0.5">
+                                Review order and payment details
+                            </p>
                         </div>
 
-                        <div className="mt-3 flex justify-between items-center">
-                            <div className="flex flex-col gap-y-1">
-                                <h1 className="text-sm font-semibold">Subtotal:</h1>
-                                <div className="border px-3 py-1 min-w-25 max-w-30 rounded-md text-center bg-[#F5F5F5]">
-                                    <span>{formatCurrency(orderSummary.subtotal)}</span>
-                                </div>
-                            </div>
-
-                            <div className="flex flex-col gap-y-1">
-                                <h1 className="text-sm font-semibold">Discount:</h1>
-                                <div className="border px-3 py-1 min-w-25 max-w-30 rounded-md text-center bg-[#F5F5F5]">
-                                    <span>{formatCurrency(orderSummary.discount)}</span>
-                                </div>
-                            </div>
-                        </div>
-
-                        {
-                            !isWalkinOrder && (
-                                <div className="mt-3 w-full flex justify-center">
-                                    <div className="flex flex-col gap-y-1">
-                                        <h1 className="text-sm font-semibold">Shipping fee:</h1>
-                                        <div className="border px-3 py-1 min-w-25 max-w-30 rounded-md text-center bg-[#F5F5F5]">
-                                            <span>{formatCurrency(orderSummary.shipping_fee)}</span>
-                                        </div>
-                                    </div>
-                                </div>
-                            )
-                        }
-                        
-
-                    </div>
-
-
-                    <div className="mt-5 w-full flex flex-col gap-y-3 justify-center">
-
-                        <div className="mt-3 flex justify-between items-center">
-                            <div className="flex flex-col gap-y-1">
-                                <h1 className="text-sm font-semibold">Grand Total:</h1>
-                                <div className="border px-3 py-1 min-w-25 max-w-30 rounded-md text-center bg-[#F5F5F5]">
-                                    <span>{formatCurrency(orderSummary.total_amount)}</span>
-                                </div>
-                            </div>
-
-                            <div className="flex flex-col gap-y-1">
-                                <h1 className="text-sm font-semibold">Paid:</h1>
-                                <div className="border px-3 py-1 min-w-25 max-w-30 rounded-md text-center bg-[#F5F5F5]">
-                                    <span>{formatCurrency(orderSummary.total_paid ?? 0)}</span>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div className="w-full flex justify-center">
-                            <div className="flex flex-col gap-y-1">
-                                <h1 className="text-sm font-semibold">Remaining balance:</h1>
-                                <div className="border px-3 py-1 min-w-25 max-w-30 rounded-md text-center bg-[#F5F5F5]">
-                                    <span>{formatCurrency(orderSummary.remaining_balance)}</span>
-                                </div>
-                            </div>
-                        </div>
-
-                    </div>
-
-
-                    <div className="absolute top-3 left-3">
-                        <button 
-                            className="border px-2 py-1 rounded-md hover:bg-gray-200 cursor-pointer"
+                        <button
+                            type="button"
+                            className="p-2 rounded-lg border border-gray-200 text-gray-500 hover:bg-gray-100 hover:text-gray-700 transition cursor-pointer"
                             onClick={copyOrderSummary}
+                            title="Copy order summary"
                         >
-                            <Copy strokeWidth={2} size={20} />
+                            <Copy size={18} strokeWidth={2} />
                         </button>
                     </div>
-                    
 
+
+                    <div className="p-5">
+
+                        {/* Customer */}
+                        <div className="mb-5">
+                            <h2 className="text-xs font-semibold uppercase tracking-wide text-gray-400 mb-2">
+                                Customer
+                            </h2>
+
+                            <div className="bg-gray-100 rounded-lg px-4 py-3 border border-gray-100">
+                                <p className="font-semibold text-gray-800 capitalize">
+                                    {
+                                        isWalkinOrder
+                                            ? `${orderSummary.sender_name ?? "--"} / ${orderSummary.receiver_name ?? "--"}`
+                                            : orderSummary.receiver_name ?? "--"
+                                    }
+                                </p>
+                            </div>
+                        </div>
+
+
+                        {/* Order Breakdown */}
+                        <div className="space-y-3">
+
+                            <h2 className="text-xs font-semibold uppercase tracking-wide text-gray-400">
+                                Order Details
+                            </h2>
+
+                            <div className="flex justify-between items-center text-sm">
+                                <span className="text-gray-500">
+                                    Subtotal
+                                </span>
+
+                                <span className="font-medium text-gray-800">
+                                    {formatCurrency(orderSummary.subtotal)}
+                                </span>
+                            </div>
+
+                            <div className="flex justify-between items-center text-sm">
+                                <span className="text-gray-500">
+                                    Discount
+                                </span>
+
+                                <span className="font-medium text-red-500">
+                                    - {formatCurrency(orderSummary.discount)}
+                                </span>
+                            </div>
+
+                            {!isWalkinOrder && (
+                                <div className="flex justify-between items-center text-sm">
+                                    <span className="text-gray-500">
+                                        Shipping fee
+                                    </span>
+
+                                    <span className="font-medium text-gray-800">
+                                        {formatCurrency(orderSummary.shipping_fee)}
+                                    </span>
+                                </div>
+                            )}
+
+                        </div>
+
+
+                        {/* Total */}
+                        <div className="my-5 border-t border-dashed border-gray-300" />
+
+                        <div className="flex justify-between items-center">
+                            <span className="font-semibold text-gray-700">
+                                Grand Total
+                            </span>
+
+                            <span className="text-xl font-bold text-green-600">
+                                {formatCurrency(orderSummary.total_amount)}
+                            </span>
+                        </div>
+
+
+                        {/* Payment */}
+                        <div className="mt-5 bg-gray-50 rounded-lg p-4 space-y-3">
+
+                            <div className="flex justify-between items-center">
+                                <span className="text-sm text-gray-500">
+                                    Paid
+                                </span>
+
+                                <span className="font-semibold text-gray-800">
+                                    {formatCurrency(orderSummary.total_paid ?? 0)}
+                                </span>
+                            </div>
+
+                            <div className="border-t border-gray-200" />
+
+                            <div className="flex justify-between items-center">
+                                <span className="text-sm font-semibold text-gray-600">
+                                    Remaining Balance
+                                </span>
+
+                                <span className={`text-lg font-bold ${
+                                    Number(orderSummary.remaining_balance) > 0
+                                        ? "text-red-500"
+                                        : "text-green-600"
+                                }`}>
+                                    {formatCurrency(orderSummary.remaining_balance)}
+                                </span>
+                            </div>
+
+                        </div>
+
+                    </div>
                 </div>
+
             </div>
+
+            {
+                showOrderHistory && (
+                    <OrderStatusHistory 
+                        onClose={() =>  setShowOrderHistory(false)}
+                        statusHistory={orderStatusHistory}
+                    />
+                )
+            }
 
             {
                 isSaving && (
                     <div className="w-full h-screen">
-                        <SaveLoading />
+                        <SaveLoading  />
                     </div>
                     
                 )
             }
 
 
-        </Layout>
+        </div>
         
 
 

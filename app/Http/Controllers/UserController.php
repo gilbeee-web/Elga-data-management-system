@@ -17,11 +17,24 @@ class UserController extends Controller
     //
 
 
-    public function index(){
+    public function index(Request $request){
         
-        $users = User::all();
-        $current_user = Auth::user();
+        $userQuery = User::query();
 
+        if ($request->filled('search')) {
+            $userQuery->where(function ($query) use ($request) {
+                $query->where('email', 'like', '%' . $request->search . '%')
+                    ->orWhere('name', 'like', '%' . $request->search . '%');
+            });
+        }
+
+        if ($request->filled('role')) {
+            $userQuery->where('role', $request->role);
+        }
+
+        $users = $userQuery->get();
+        $current_user = Auth::user();
+        
         return Inertia::render('Users/Index', [
             'users' => $users,
             'current_user' => $current_user,
@@ -36,6 +49,8 @@ class UserController extends Controller
         $validated = $request->validate([
             'name' => 'required|string',
             'email' => 'required|string',
+            'password' => 'required|string',
+            
             'role' => 'required|string',
             'profile_pic' => 'nullable|image|mimes:jpg,jpeg,png|max:2048'
         ]);

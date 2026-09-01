@@ -6,6 +6,7 @@ import { formatCurrency } from "../../../Utils/formatCurrency";
 import Swal from "sweetalert2";
 import { ChevronLeft, CirclePlus, CircleX, Eye, ImagePlus } from "lucide-react";
 import { route } from "ziggy-js";
+import SaveLoading from "../../../Components/SaveLoading";
 
 export default function ProductForm({mode, product}){
 
@@ -454,10 +455,16 @@ export default function ProductForm({mode, product}){
                     }`}
                     type="submit"
                 >
-                    {isSaving ? "Saving..." : "Save"}
+                    Save
                 </button>
             </div>
         </form>
+
+        {
+            isSaving && (
+                <SaveLoading />
+            )
+        }
 
     
     </>

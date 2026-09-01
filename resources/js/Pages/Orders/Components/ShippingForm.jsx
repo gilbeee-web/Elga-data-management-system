@@ -142,7 +142,7 @@ COMPLETE ADDRESS: ${customer.address}`;
 
                         <div className="flex gap-x-3 items-start">
 
-                            <label htmlFor="container_type" className="text-lg font-semibold">
+                            <label htmlFor="container_type" className="font-semibold">
                                 <span className="text-sm text-red-500">*</span> Package type:
                             </label>
 
@@ -175,7 +175,7 @@ COMPLETE ADDRESS: ${customer.address}`;
                         
                         
                         <div className="flex gap-x-3 items-start">
-                            <label htmlFor="" className="text-lg font-semibold"><span className="text-sm text-red-500">*</span> Package size:</label>
+                            <label htmlFor="" className="font-semibold"><span className="text-sm text-red-500">*</span> Package size:</label>
                             <div className="flex flex-col">
                                 <select 
                                     value={data.container_size}
@@ -202,7 +202,7 @@ COMPLETE ADDRESS: ${customer.address}`;
                         </div>
 
                         <div className="flex gap-x-3 items-start">
-                            <label htmlFor="" className="text-lg font-semibold"><span className="text-sm text-red-500">*</span> Shipping fee:</label>
+                            <label htmlFor="" className="font-semibold"><span className="text-sm text-red-500">*</span> Shipping fee:</label>
                             <div className="flex flex-col"> 
 
                                 <input 
@@ -246,7 +246,7 @@ COMPLETE ADDRESS: ${customer.address}`;
                         </div>
                                                                       
                         <div className="flex gap-x-3 items-start">
-                            <label htmlFor="" className="text-lg font-semibold"><span className="text-sm text-red-500">*</span> Package fee:</label>
+                            <label htmlFor="" className="font-semibold"><span className="text-sm text-red-500">*</span> Package fee:</label>
                             <div className="flex flex-col">
                                 <input 
                                     type="text" 
@@ -287,7 +287,7 @@ COMPLETE ADDRESS: ${customer.address}`;
                         </div>
 
                         <div className="flex items-start">
-                            <label htmlFor="" className="min-w-40 text-lg font-semibold"><span className="text-sm text-red-500">*</span> Tracking number:</label>
+                            <label htmlFor="" className="min-w-40 font-semibold"><span className="text-sm text-red-500">*</span> Tracking number:</label>
                             <div className="flex flex-col">
                                 <input 
                                     type="text" 
@@ -312,47 +312,85 @@ COMPLETE ADDRESS: ${customer.address}`;
                     </div>
 
 
-                    <div className="border p-5 rounded-lg w-[80%]">
-                        
-                        <div className="flex gap-x-3 items-center">
-                            <button 
+                    <div className="w-[80%] rounded-xl border border-gray-200 bg-white shadow-sm overflow-hidden">
+
+                        {/* Header */}
+                        <div className="px-5 py-4 border-b border-gray-200 flex items-center justify-between">
+
+                            <div>
+                                <h1 className="text-lg font-bold text-gray-800">
+                                    Delivery Details
+                                </h1>
+
+                                <p className="text-xs text-gray-400 mt-0.5">
+                                    Customer shipping information
+                                </p>
+                            </div>
+
+                            <button
                                 type="button"
-                                className="border px-2 py-1 rounded-md hover:bg-gray-200 cursor-pointer"
+                                className="p-2 rounded-lg border border-gray-200 text-gray-500 hover:bg-gray-100 hover:text-gray-700 transition cursor-pointer"
                                 onClick={copyCustomerInfo}
+                                title="Copy delivery details"
                             >
-                                <Copy size={20}/>
+                                <Copy size={18} />
                             </button>
 
-                            <h1 className="font-bold text-xl">Delivery Details</h1>
                         </div>
 
-                        <div className="mt-5 w-full flex flex-col gap-y-5 justify-center items-center">
 
-                            <div className="flex flex-col gap-y-1">
-                                <h1 className="text-sm font-semibold">Receiver Name:</h1>
-                                <div className="border px-3 py-1 min-w-70 rounded-md text-center bg-[#F5F5F5]">
-                                    <span className="font-semibold">{customer.receiver_name ?? "--"}</span>
-                                </div>
-                            </div>
+                        {/* Details */}
+                        <div className="p-5">
 
-                            <div className="flex flex-col gap-y-1">
-                                <h1 className="text-sm font-semibold">Contact Number:</h1>
-                                <div className="border px-3 py-1 min-w-70 rounded-md text-center bg-[#F5F5F5]">
-                                    <span className="font-semibold">{customer.contact_number ?? "--"}</span>
-                                </div>
-                            </div>
+                            <div className="grid grid-cols-2 gap-5">
 
-                            <div className="flex flex-col gap-y-1">
-                                <h1 className="text-sm font-semibold">Address:</h1>
-                                <div className="border px-3 py-1 min-w-70 max-w-80 rounded-md text-center bg-[#F5F5F5]">
-                                    <span className="font-semibold">{customer.address ?? "--"}</span>
+                                {/* Receiver */}
+                                <div>
+                                    <p className="text-xs font-semibold uppercase tracking-wide text-gray-400 mb-1">
+                                        Receiver Name
+                                    </p>
+
+                                    <div className="bg-gray-100 border border-gray-100 rounded-lg px-4 py-3">
+                                        <p className="font-semibold text-gray-800 capitalize">
+                                            {customer.receiver_name ?? "--"}
+                                        </p>
+                                    </div>
                                 </div>
+
+
+                                {/* Contact Number */}
+                                <div>
+                                    <p className="text-xs font-semibold uppercase tracking-wide text-gray-400 mb-1">
+                                        Contact Number
+                                    </p>
+
+                                    <div className="bg-gray-100 border border-gray-100 rounded-lg px-4 py-3">
+                                        <p className="font-semibold text-gray-800">
+                                            {customer.contact_number ?? "--"}
+                                        </p>
+                                    </div>
+                                </div>
+
+
+                                {/* Address */}
+                                <div className="col-span-2">
+                                    <p className="text-xs font-semibold uppercase tracking-wide text-gray-400 mb-1">
+                                        Delivery Address
+                                    </p>
+
+                                    <div className="bg-gray-100 border border-gray-100 rounded-lg px-4 py-3">
+                                        <p className="font-semibold text-gray-800">
+                                            {customer.address ?? "--"}
+                                        </p>
+                                    </div>
+                                </div>
+
                             </div>
 
                         </div>
 
-                        
                     </div>
+
 
 
                 </div>

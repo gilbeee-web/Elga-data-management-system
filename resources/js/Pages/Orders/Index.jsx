@@ -88,7 +88,7 @@ export default function Index ({orders, user}){
 
 
     return <>
-        <Layout title={"Orders"} user={user}>
+        <Layout user={user}>
             
             <div className="flex justify-between items-center">
                 <h1 className="font-bold text-2xl">
@@ -280,6 +280,7 @@ export default function Index ({orders, user}){
                             <th className="p-3">
                                 {activeTab === "shipped" ? "DATE SHIPPED" : "DATE CREATED"}
                             </th>
+                            <th className="p-3">REMARKS</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -334,6 +335,7 @@ export default function Index ({orders, user}){
                                         </td>
 
                                         <td className="p-3">{formatDateTime(order.created_at)}</td>
+                                        <td className="p-3">{order.remarks ?? "--"}</td>
                                     </tr>
                                 ))
                             ) :

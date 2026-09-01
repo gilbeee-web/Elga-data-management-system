@@ -7,6 +7,14 @@ use Illuminate\Support\Facades\Storage;
 
 class ProductService{
 
+
+    protected $shopId;
+
+    public function __construct()
+    {   
+        $this->shopId = session('shop_id');
+    }
+
     public function store(array $data){
 
         return DB::transaction(function() use ($data){
@@ -28,6 +36,7 @@ class ProductService{
             }
 
             $product = Product::create([
+                'shop_id' => $this->shopId,
                 'name' => $data['name'],
                 'category' => $data['category'],
                 'image' => $imagePath

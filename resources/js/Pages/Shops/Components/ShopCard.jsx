@@ -26,7 +26,7 @@ export default function ShopCard({shop, onClickAction}){
 
     return(
         <div 
-            className="border border-gray-400 rounded-xl p-3 flex justify-between items-center shadow-md bg-white"
+            className="border border-gray-400 rounded-xl p-3 flex justify-between items-center shadow-sm bg-white"
         >
             <div className="flex gap-x-2 items-center">
                 
@@ -58,7 +58,7 @@ export default function ShopCard({shop, onClickAction}){
                 </button>
                 {
                     openShopOptions && (
-                        <div className="absolute right-0 top-full mt-2 bg-white rounded-md shadow-lg border border-gray-200 py-1 w-40 z-20">
+                        <div className="absolute right-0 top-full mt-2 bg-white rounded-md shadow-sm border border-gray-200 py-1 w-40 z-20">
                             <button 
                                 className="w-full flex gap-x-2 items-center text-left px-3 py-2 text-sm font-semibold hover:bg-gray-100 cursor-pointer"
                                 onClick={() => onClickAction("edit", shop)}

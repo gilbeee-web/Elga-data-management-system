@@ -14,7 +14,7 @@ export default function UserForm({user, onClose, mode}){
 
     const {data, setData, post, transform, errors} = useForm({
         name: "",
-        role: "",
+        role: "super_admin",
         profile_pic: null,
 
         ...(!isEdit && {
@@ -36,7 +36,13 @@ export default function UserForm({user, onClose, mode}){
         setProfilePic(URL.createObjectURL(file));
     };
 
+
+    const [isSaving, setIsSaving] = useState(false);
+
     const saveUser = (user_id) => {
+
+        setIsSaving(true);
+
         if (mode === 'edit' && user_id) {
             transform((data) => ({ ...data, _method: 'put' }));
 
@@ -47,7 +53,8 @@ export default function UserForm({user, onClose, mode}){
                 },
                 onError: (errors) => {
                     console.log("Errors: ", errors);
-                }
+                },
+                onFinish: () => setIsSaving(false)
             });
         } else {
             post(route('user.store'), {
@@ -56,7 +63,8 @@ export default function UserForm({user, onClose, mode}){
                 },
                 onError: (errors) => {
                     console.log("Errors: ", errors);
-                }
+                },
+                onFinish: () => setIsSaving(false)
             });
         }
     }
@@ -228,9 +236,11 @@ export default function UserForm({user, onClose, mode}){
                             <div className="mt-10 w-full flex justify-end">
                                 <button
                                     type="submit" 
-                                    className="rounded-md text-md bg-green-500 px-3 py-2 text-white cursor-pointer hover:bg-green-400"
+                                    className={`rounded-md text-md px-3 py-2 text-white cursor-pointer ${
+                                        isSaving ? "bg-green-400" : "bg-green-500 hover:bg-green-400"
+                                    }`}
                                 >
-                                    Submit
+                                    {isSaving ? "Submitting..." : "Submit"}
                                 </button>
                             </div>
                             

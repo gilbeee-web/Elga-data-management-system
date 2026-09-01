@@ -30,7 +30,7 @@ Route::middleware('auth')->group(function(){
     Route::prefix('/orders')->group(function(){
         Route::controller(OrderController::class)->group(function(){
             Route::get('/', 'index')->name('order.index');
-            Route::get('/save-customers', 'getSaveCustomers')->name('order.getSaveCustomers');
+            Route::get('/customers', 'getSaveCustomers')->name('order.getSaveCustomers');
             Route::post('/draft', 'saveDraft')->name('order.saveDraft');
             Route::get('/{order}/edit', 'edit')->name('order.edit');
             Route::post('/{order}/customer', 'saveCustomer')->name('order.customer.save');
@@ -44,6 +44,7 @@ Route::middleware('auth')->group(function(){
             Route::patch('/{order}', 'cancelOrder')->name('order.cancel');
             Route::patch('/{order}', 'switchOrderType')->name('order.switchOrderType');
             Route::get('/{variant}', 'getVariantOrderHistory')->name('order.getVariantOrderHistory');
+            Route::get('/{order}/history', 'getOrderStatusHistory')->name('order.getOrderStatusHistory');
         });
     });
 });

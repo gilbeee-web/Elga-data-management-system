@@ -75,7 +75,7 @@ export default function ManageShop({onClose, shops, onShopsChange, isFetchingSho
                             </div>
 
 
-                            <div className="mt-5 flex flex-col gap-y-2">
+                            <div className="mt-5 flex flex-col gap-y-3">
                                 {
                                     isFetchingShopData ? (
                                         <div className="w-full flex items-center justify-center">

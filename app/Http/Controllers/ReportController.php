@@ -18,6 +18,12 @@ use Maatwebsite\Excel\Facades\Excel;
 class ReportController extends Controller
 {
     //
+    protected $shopId;
+    public function __construct()
+    {
+        $this->shopId = session('shop_id');
+    }
+
 
     public function index(Request $request){
 
@@ -46,26 +52,43 @@ class ReportController extends Controller
             ],
             default => null,
         };
-
+        
     
-        $salesQuery = Payment::query();
-        $shipmentQuery = Shipment::query();
+        $salesQuery = Payment::join(
+            'orders',
+            'orders.id',
+            '=',
+            'payments.order_id'
+        )->where('orders.shop_id', $this->shopId);
+
+        $shipmentQuery = Shipment::join(
+            'orders',
+            'orders.id',
+            '=',
+            'shipments.order_id'
+        )->where('orders.shop_id', $this->shopId);
 
         $allowedSorts = ['paid_at', 'payment_amount', 'payment_type', 'payment_method'];
         if (!in_array($sortBy, $allowedSorts)) {
             $sortBy = 'paid_at';
         }
 
-        $transactionsQuery = Payment::with('order.customer')->orderBy($sortBy, $sortDirection === 'asc' ? 'asc' : 'desc');
+        $transactionsQuery = Payment::with('order.customer')
+            ->join('orders','orders.id','=','payments.order_id')
+            ->where('orders.shop_id', $this->shopId)
+            ->orderBy(
+                'payments.' . $sortBy,
+                $sortDirection === 'asc' ? 'asc' : 'desc'
+            );
 
         if ($range) {
-            $salesQuery->whereBetween('paid_at', $range);
-            $shipmentQuery->whereBetween('shipped_at', $range);
-            $transactionsQuery->whereBetween('paid_at', $range);
+            $salesQuery->whereBetween('payments.paid_at', $range);
+            $shipmentQuery->whereBetween('shipments.shipped_at', $range);
+            $transactionsQuery->whereBetween('payments.paid_at', $range);
         }
 
-        $totalSales = $salesQuery->sum('payment_amount');
-        $totalSfCollected = $shipmentQuery->sum('raw_shipping_fee');
+        $totalSales = $salesQuery->sum('payments.payment_amount');
+        $totalSfCollected = $shipmentQuery->sum('shipments.raw_shipping_fee');
 
         if ($request->filled('search')) {
             $search = $request->search;
@@ -106,7 +129,6 @@ class ReportController extends Controller
 
     }
 
-
     public function exportPdf(Request $request){
 
         // dd($request->all());
@@ -139,7 +161,10 @@ class ReportController extends Controller
                 default => null,
             };
 
-            $transactionsQuery = Payment::with('order.customer')->orderBy($sortBy, $sortDirection);
+            $transactionsQuery = Payment::with('order.customer')
+                ->join('orders','orders.id','=','payments.order_id')
+                ->where('orders.shop_id', $this->shopId)
+                ->orderBy($sortBy, $sortDirection);
 
             if ($range) {
                 $transactionsQuery->whereBetween('paid_at', $range);
@@ -174,9 +199,6 @@ class ReportController extends Controller
         }catch(Exception $e){
             dd("Something went wrong: " . $e);
         }
-
-        
-
     }
 
     public function exportExcel(Request $request)
@@ -207,6 +229,8 @@ class ReportController extends Controller
         };
 
         $transactionsQuery = Payment::with('order.customer')
+            ->join('orders','orders.id','=','payments.order_id')
+            ->where('orders.shop_id', $this->shopId)
             ->orderBy($sortBy, $sortDirection);
 
         if ($range) {

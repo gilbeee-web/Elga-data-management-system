@@ -18,39 +18,12 @@ use Illuminate\Validation\ValidationException;
 
 class OrderService{
 
-    
-    public function saveCustomer(Order $order, array $data){
-        
-        return DB::transaction(function() use ($data, $order){
+    protected $shopId;
 
-            // dd($data);
-
-            
-            //if the checkbox is frequent customer then save to customers table
-            if(!empty($data['is_save_customer'])){ 
-                Customer::firstOrCreate([
-                    'sender_name' => $data['sender_name'],
-                    'receiver_name' => $data['receiver_name'],
-                    'contact_number' => $data['contact_number'],
-                    'address' => $data['address']
-                ]);
-            }
-            
-
-            //then update the snapshot of the customer info in orders table 
-            $order->update([
-                'sender_name' => $data['sender_name'],
-                'receiver_name' => $data['receiver_name'],
-                'contact_number' => $data['contact_number'],
-                'address' => $data['address']
-            ]);
-
-            return $order;
-        });
-
-    
+    public function __construct()
+    {   
+        $this->shopId = session('shop_id');
     }
-
 
     //compute the subtotal of the item
     protected function computeItem(array $item){
@@ -127,6 +100,71 @@ class OrderService{
     }
 
 
+    public function saveDraft(array $data){
+
+        $lastOrder = Order::where('shop_id', $this->shopId)->latest('id')->first();
+
+        if ($lastOrder) {
+            $nextNumber = ((int) str_replace('TXN-', '', $lastOrder->transaction_number)) + 1;
+        } else {
+            $nextNumber = 1;
+        }
+
+        $transactionNumber = 'TXN-' . str_pad($nextNumber, 6, '0', STR_PAD_LEFT);
+
+        $order = Order::create([
+            'shop_id' => $this->shopId,
+            'transaction_number' => $transactionNumber,
+            'order_type' => $data['order_type'],
+            'subtotal' => 0,
+            'discount' => 0,
+            'total_amount' => 0,
+            'payment_status' => "unpaid",
+            'order_status' => "draft"
+        ]);
+
+        $this->storeStatusHistory(
+            $order,
+            null,
+            'draft',
+            'Order created.'
+        );
+
+
+        return $order;
+    }
+
+    public function saveCustomer(Order $order, array $data){
+        
+        return DB::transaction(function() use ($data, $order){
+            
+            //if the checkbox is frequent customer then save to customers table
+            if(!empty($data['is_save_customer'])){ 
+                Customer::firstOrCreate([
+                    'shop_id' => $this->shopId,
+                    'sender_name' => $data['sender_name'],
+                    'receiver_name' => $data['receiver_name'],
+                    'contact_number' => $data['contact_number'],
+                    'address' => $data['address']
+                ]);
+            }
+            
+
+            //then update the snapshot of the customer info in orders table 
+            $order->update([
+                'sender_name' => $data['sender_name'],
+                'receiver_name' => $data['receiver_name'],
+                'contact_number' => $data['contact_number'],
+                'address' => $data['address']
+            ]);
+            
+            return $order;
+        });
+
+    
+    }
+
+
     public function saveOrderItem(Order $order, array $data){
 
         return DB::transaction(function() use ($data, $order){
@@ -147,6 +185,7 @@ class OrderService{
             foreach($data['orderReferences'] as $ref){
 
                 $orderReference = OrderReference::firstOrCreate([
+                    'shop_id' => $this->shopId,
                     'order_id' => $order->id,
                     'order_number' => $ref['order_number'],
                 ]);
@@ -211,7 +250,7 @@ class OrderService{
                     'order_status' => $newStatus
                 ]);
 
-                $this->storeStatusHistory($order, $oldStatus, $newStatus);
+                $this->storeStatusHistory($order, $oldStatus, $newStatus, "Customer and order item encoded.");
             }
 
 
@@ -259,7 +298,7 @@ class OrderService{
             //only update the order status if it not equal to previous status
             if ($newStatus !== $oldStatus) {
                 $order->update(['order_status' => $newStatus]);
-                $this->storeStatusHistory($order, $oldStatus, $newStatus);
+                $this->storeStatusHistory($order, $oldStatus, $newStatus, "Shipping fee encoded.");
             }
 
             // recompute the total based on the fresh or updated data
@@ -339,7 +378,7 @@ class OrderService{
                 'payment_method' => $data['payment_method'],
                 'mop_name' => $data['mop_name'] ?? null,
                 'reference_number' => $data['reference_number'] ?? null,
-                'encoded_by' => 1,
+                'encoded_by' => Auth::id(),
                 'remarks' => $data['remarks'] ?? null,
                 'paid_at' => now(),
             ];
@@ -429,6 +468,7 @@ class OrderService{
                 $shipment->update([
                     'sf_payment_reference' => $data['sf_payment_reference'] ?? null,
                     'shipped_at' => now(),
+                    'remarks' => $data['remarks'] ?? null
                 ]);
 
 

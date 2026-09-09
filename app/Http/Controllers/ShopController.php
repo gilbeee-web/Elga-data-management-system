@@ -83,6 +83,41 @@ class ShopController extends Controller
 
     }
 
+    public function handleShopStatus(Shop $shop){
+
+        $currentStatus = $shop->is_active;
+
+        $shop->update([
+            'is_active' => !$currentStatus
+        ]);
+
+        $action = $currentStatus ? 'Deactivated' : 'Activated';
+
+
+        //if current shop selected is deactivated then select other shop
+        if (!$shop->is_active && session('shop_id') == $shop->id) {
+
+            $nextShop = Shop::where('is_active', true)
+                ->where('id', '!=', $shop->id)
+                ->first();
+
+            if ($nextShop) {
+                session(['shop_id' => $nextShop->id]);
+            } else {
+                // No active shop available
+                session()->forget('shop_id');
+            }
+        }
+
+
+        return redirect()->back()->with([
+            'message' => $shop->name . " is successfully " . $action,
+            'shop' => $shop
+        ]);
+
+    }
+
+
 
     public function destroy(Shop $shop){
 

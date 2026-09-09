@@ -1,4 +1,4 @@
-import { Share } from 'lucide-react';
+import { FileText, Share, Sheet } from 'lucide-react';
 import { useState, useRef, useEffect } from 'react';
 
 export default function ExportButton({ filters }) {
@@ -66,15 +66,17 @@ export default function ExportButton({ filters }) {
                     </h1>
                     <button 
                         onClick={handleExportPdf}
-                        className="w-full text-left px-3 py-2 text-sm hover:bg-gray-100 cursor-pointer"
+                        className="w-full flex gap-x-3 items-center text-left px-3 py-2 text-sm hover:bg-gray-100 cursor-pointer"
                     >
-                        PDF
+                        <FileText size={15} />
+                        <span className='font-semibold'>PDF</span>
                     </button>
                     <button 
                         onClick={handleExportExcel}
-                        className="w-full text-left px-3 py-2 text-sm hover:bg-gray-100 cursor-pointer"
+                        className="w-full flex gap-x-3 items-center text-left px-3 py-2 text-sm hover:bg-gray-100 cursor-pointer"
                     >
-                        Excel
+                        <Sheet size={15} />
+                        <span className='font-semibold'>Excel</span>
                     </button>
                 </div>
             )}

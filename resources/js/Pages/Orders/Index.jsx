@@ -6,8 +6,10 @@ import { formatDateTime } from "../../Utils/formatDateTime";
 import { formatCurrency } from "../../Utils/formatCurrency";
 import TextInput from "../../Components/TextInput";
 import { CircleOff, HandCoins, PackageCheck, RotateCwFadingClock, Search, SquarePen, Truck } from "lucide-react";
+import Swal from "sweetalert2";
+import Pagination from "../../Components/Pagination";
 
-export default function Index ({orders, user}){
+export default function Index ({orders, user, products}){
 
 
     console.log("Orders: ", orders);
@@ -77,6 +79,16 @@ export default function Index ({orders, user}){
     };
 
     const handleCreateOrder = (order_type) => {
+    
+        if(products.length <= 0){
+            Swal.fire({
+                icon: "warning",
+                title: "No Products Available",
+                text: "There are no products available to add to this order. Please add a product first before creating an order."
+            });
+
+            return;
+        }
 
         router.post(route('order.saveDraft'), {
             order_type: order_type
@@ -341,43 +353,17 @@ export default function Index ({orders, user}){
                             ) :
                             (
                                 <tr className="text-center">
-                                    <td colSpan={6} className="text-xl font-bold p-4">No orders found.</td>
+                                    <td colSpan={7} className="font-semibold p-4">No orders found.</td>
                                 </tr>
                             )
                         }
                     </tbody>
                 </table>
 
-                {orders.data.length > 0 && (
-                    <div className="flex justify-between items-center mt-4 text-sm text-gray-600">
-                        <span>
-                            Showing {orders.from ?? 0}–{orders.to ?? 0} of {orders.total} orders
-                        </span>
-                        <div className="flex gap-1">
-                            {orders.links.map((link, i) => (
-                                <button
-                                    key={i}
-                                    disabled={!link.url}
-                                    onClick={() =>
-                                        link.url &&
-                                        router.get(
-                                            link.url,
-                                            {},
-                                            { preserveState: true, preserveScroll: true, only: ['orders'] }
-                                        )
-                                    }
-                                    className={`px-3 py-1 rounded ${
-                                        link.active
-                                            ? 'bg-blue-500 text-white'
-                                            : 'bg-gray-100 hover:bg-gray-200'
-                                    } ${!link.url ? 'opacity-40 cursor-not-allowed' : 'cursor-pointer'}`}
-                                    dangerouslySetInnerHTML={{ __html: link.label }}
-                                />
-                            ))}
-                        </div>
-                    </div>
-                )}
-
+                <Pagination
+                    data={orders}
+                    name="orders"
+                />
             </div>
 
 

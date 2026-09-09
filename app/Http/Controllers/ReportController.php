@@ -59,7 +59,9 @@ class ReportController extends Controller
             'orders.id',
             '=',
             'payments.order_id'
-        )->where('orders.shop_id', $this->shopId);
+        )
+        ->where('orders.order_status', 'shipped')
+        ->where('orders.shop_id', $this->shopId);
 
         $shipmentQuery = Shipment::join(
             'orders',
@@ -75,6 +77,7 @@ class ReportController extends Controller
 
         $transactionsQuery = Payment::with('order.customer')
             ->join('orders','orders.id','=','payments.order_id')
+            ->where('orders.order_status', 'shipped')
             ->where('orders.shop_id', $this->shopId)
             ->orderBy(
                 'payments.' . $sortBy,

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { formatCurrency } from "../../../Utils/formatCurrency";
 import { Search, ShoppingBag } from "lucide-react";
 
@@ -43,14 +43,28 @@ export default function ProductListModal({onClose, products, onAddProducts}){
     });
 
 
+    const [visibleCount, setVisibleCount] = useState(10);
+
     const filteredProducts = products.filter((product) => {
 
-        const matchSearch = product.name.toLowerCase().includes(filterValue.searchName.toLowerCase());
-        const matchCategory = filterValue.category === "" || product.category === filterValue.category;
+        const matchSearch = product.name
+            .toLowerCase()
+            .includes(filterValue.searchName.toLowerCase());
+
+        const matchCategory =
+            filterValue.category === "" ||
+            product.category?.toLowerCase() === filterValue.category.toLowerCase();
 
         return matchSearch && matchCategory;
-
     });
+
+    console.log("Filtered Products: ", filteredProducts);
+
+    const visibleProducts = filteredProducts.slice(0, visibleCount);
+
+    useEffect(() => {
+        setVisibleCount(10);
+    }, [filterValue.searchName, filterValue.category]);
 
 
 
@@ -58,7 +72,7 @@ export default function ProductListModal({onClose, products, onAddProducts}){
 
         <div className="fixed inset-0 bg-[rgb(0,0,0,0.5)] z-99 flex justify-center items-center">
             
-            <div className="w-full bg-white sm:max-w-md md:max-w-2xl lg:max-w-3xl rounded-md shadow p-5 pt-3 overflow-y-auto min-h-[50vh] max-h-[90vh]">
+            <div className="w-full bg-white sm:max-w-md md:max-w-2xl lg:max-w-3xl rounded-md shadow p-5 pt-3 min-h-[50vh] max-h-[90vh]">
 
                 {/* Header */}
 
@@ -94,22 +108,6 @@ export default function ProductListModal({onClose, products, onAddProducts}){
                         </div>
                     </div>
                     
-                    {/* <div className="flex flex-col">
-                        
-                        <input 
-                            value={filterValue.searchName}
-                            onChange={(e) =>
-                                setFilterValue((prev) => ({
-                                    ...prev,
-                                    searchName: e.target.value,
-                                }))
-                            }
-                            type="text" 
-                            className="min-w-120 border border-gray-400 rounded-md px-2 py-2 bg-white"
-                            placeholder="Enter product name..."
-                        />
-                    </div> */}
-
                     <div className="flex flex-col">
                         <label htmlFor="">Category:</label>
                         <select 
@@ -125,76 +123,89 @@ export default function ProductListModal({onClose, products, onAddProducts}){
                             <option value="">All</option>
                             <option value="bag">Bags</option>
                             <option value="clothes">Clothes</option>
-                            <option value="footwear">Footwear</option>
-                            <option value="perfume">Perfume</option>
+                            <option value="footwear">Footwears</option>
+                            <option value="wallet">Wallets</option>
+                            <option value="other">Others</option>
                         </select>
                     </div>
                 </div>
 
+                <div className="mt-8 max-h-[300px] overflow-y-auto">
+                    <div className="grid grid-cols-2 gap-x-10 gap-y-5 px-3">
+                        {
+                            visibleProducts.length > 0 ? (
+                                visibleProducts.map((product) => {
+                                    
+                                    const selected = isSelected(product.id);
+                                    return (
+                                        <div 
+                                            key={product.id} 
+                                            className={`bg-white shadow-md p-3 flex justify-between rounded-md border cursor-pointer transition-colors ${
+                                                selected
+                                                    ? "border-indigo-500 ring-2 ring-indigo-200 bg-indigo-50"
+                                                    : "border-gray-300"
+                                            }`}
+                                            onClick={() => toggleSelect(product)}
+                                        >
+                                            <div className="flex gap-x-5">
 
-                <div className="mt-8 grid grid-cols-2 gap-x-10 gap-y-5 px-3">
-                    {
-                        filteredProducts.length > 0 ? (
-                            filteredProducts.map((product) => {
-                                
-                                const selected = isSelected(product.id);
-                                return (
-                                    <div 
-                                        key={product.id} 
-                                        className={`bg-white shadow-md p-3 flex justify-between rounded-md border cursor-pointer transition-colors ${
-                                            selected
-                                                ? "border-indigo-500 ring-2 ring-indigo-200 bg-indigo-50"
-                                                : "border-gray-300"
-                                        }`}
-                                        onClick={() => toggleSelect(product)}
-                                    >
-                                        <div className="flex gap-x-5">
-
-                                            <div className="border border-gray-200 rounded-md flex-shrink-0 h-20 w-20 overflow-hidden">
-                                                {
-                                                    product.image ? (
-                                                        <img 
-                                                            src={`/storage/${product.image}`}
-                                                            alt={product.name} 
-                                                            className="h-full w-full object-cover object-center"
-                                                        />
-                                                    ) : (
-                                                        <div className="h-20 w-full flex justify-center items-center bg-black/20">
-                                                            <ShoppingBag size={30} color="gray"/>
-                                                        </div>
-                                                    )
-                                                }
-                                                
-                                            </div>
-
-                                            <div className="flex flex-col justify-between">
-                                                <div className="flex flex-col">
-                                                    <h1 className="text-lg font-semibold capitalize">{product.name}</h1>
-                                                    <span className="text-sm text-gray-400 font-semibold capitalize">{product.category}</span>
+                                                <div className="border border-gray-200 rounded-md flex-shrink-0 h-20 w-20 overflow-hidden">
+                                                    {
+                                                        product.image ? (
+                                                            <img 
+                                                                src={`/storage/${product.image}`}
+                                                                alt={product.name} 
+                                                                className="h-full w-full object-cover object-center"
+                                                            />
+                                                        ) : (
+                                                            <div className="h-20 w-full flex justify-center items-center bg-black/20">
+                                                                <ShoppingBag size={30} color="gray"/>
+                                                            </div>
+                                                        )
+                                                    }
+                                                    
                                                 </div>
 
-                                                <div>
-                                                    <h1>{formatCurrency(product.variants_min_price ?? 0)}</h1>
+                                                <div className="flex flex-col justify-between">
+                                                    <div className="flex flex-col">
+                                                        <h1 className="text-lg font-semibold capitalize">{product.name}</h1>
+                                                        <span className="text-sm text-gray-400 font-semibold capitalize">{product.category}</span>
+                                                    </div>
+
+                                                    <div>
+                                                        <h1>{formatCurrency(product.variants_min_price ?? 0)}</h1>
+                                                    </div>
+                                                    
                                                 </div>
+
                                                 
                                             </div>
-
                                             
+
                                         </div>
-                                        
+                                    )
+                                })
+                            ) :(
+                                <div className="w-full flex justify-center items-center col-span-2 my-10">
+                                    <h1 className="text-lg font-bold text-gray-400">No products found.</h1>
+                                </div>
+                            )
+                        }
+                    </div>
 
-                                    </div>
-                                )
-                            })
-                        ) :(
-                            <div className="w-full flex justify-center items-center col-span-2 my-10">
-                                <h1 className="text-lg font-bold text-gray-400">No products found.</h1>
-                            </div>
-                        )
-                    }
+                    {visibleCount < filteredProducts.length && (
+                        <div className="flex justify-center mt-6">
+                            <button
+                                type="button"
+                                onClick={() => setVisibleCount((prev) => prev + 10)}
+                                className="text-gray-400 font-semibold hover:text-gray-300 cursor-pointer"
+                            >
+                                Load More
+                            </button>
+                        </div>
+                    )}
                 </div>
-
-
+                
                 <div className="border-t-2 border-gray-300 pt-3 mt-5">
                     <div className="flex gap-x-5 items-center justify-end">
                         <button 

@@ -5,9 +5,13 @@ import { useEffect, useState } from "react";
 import ProductModal from "./Components/ProductModal";
 import Swal from "sweetalert2";
 import { formatCurrency } from "../../Utils/formatCurrency";
-import { CirclePlus, Eye, Flower, Handbag, Search, Shirt, ShoppingBag, SportShoe, Toolbox } from "lucide-react";
+import { CirclePlus, Eye, FilePlusCorner, Flower, Handbag, Search, Shirt, ShoppingBag, SportShoe, Toolbox, Wallet } from "lucide-react";
+import ImportForm from "./Components/ImportForm";
+import Pagination from "../../Components/Pagination";
 
 export default function Dashboard ({products, user}){
+
+    // console.log("Products rendered: ", products);
 
     const [productInfo, setProductInfo] = useState(null);
 
@@ -64,7 +68,7 @@ export default function Dashboard ({products, user}){
         
     }
 
-    const tabs = ['all', 'clothes', 'bag', 'footwear', 'perfume', 'skincare'];
+    const tabs = ['all', 'clothes', 'bag', 'footwear', 'wallet', 'other'];
 
     const [activeTab, setActiveTab] = useState(tabs[0]);
     const [currentSearch, setCurrentSearch] = useState("");
@@ -140,6 +144,9 @@ export default function Dashboard ({products, user}){
         };
     }, [productInfo]);
 
+
+    const [openImportForm, setOpenImportForm] = useState(false);
+
     return <>
         <Layout user={user}>
             
@@ -150,15 +157,42 @@ export default function Dashboard ({products, user}){
                     Product List
                 </h1>
 
-                <button 
-                    className="flex gap-x-2 items-center rounded-md text-md bg-blue-500 px-3 py-2 text-white cursor-pointer hover:bg-blue-400"
-                    onClick={() => router.visit(route("product.create"))}
-                >
-                    <CirclePlus size={15} />
-                    <span className="font-semibold">Add product</span>
-                </button>
+                <div className="flex gap-x-5 items-center">
+
+                    <button 
+                        className="flex gap-x-2 items-center rounded-md text-md px-3 py-2 border cursor-pointer hover:bg-gray-200"
+                        onClick={() => setOpenImportForm(true)}
+                    >
+                        <FilePlusCorner size={15}/>
+                        <span>Import product</span>
+                    </button>
+
+
+                    <button 
+                        className="flex gap-x-2 items-center rounded-md text-md bg-blue-500 px-3 py-2 text-white cursor-pointer hover:bg-blue-400"
+                        onClick={() => router.visit(route("product.create"))}
+                    >
+                        <CirclePlus size={15} />
+                        <span className="font-semibold">Add product</span>
+                    </button>
+
+
+                    
+                </div>
+                
 
             </div>
+
+
+            {
+                openImportForm && (
+                    <ImportForm 
+                        onClose={() => {
+                            setOpenImportForm(false);
+                        }}
+                    />
+                )
+            }
 
             
             {/* Navigation */}
@@ -241,8 +275,9 @@ export default function Dashboard ({products, user}){
                             : "text-gray-400"
                         }`}
                     >
-                        <Flower strokeWidth={2} size={20} />
-                        Perfumes
+                        
+                        <Wallet strokeWidth={2} size={20}/>
+                        Wallets
                     </span>
                 </button>
 
@@ -257,8 +292,7 @@ export default function Dashboard ({products, user}){
                             : "text-gray-400"
                         }`}
                     >
-                        <Toolbox strokeWidth={2} size={20} />
-                        Skincare
+                        Others
                     </span>
                 </button>
 
@@ -283,7 +317,7 @@ export default function Dashboard ({products, user}){
 
             </div>
             
-            <div className="relative mt-10">
+            <div className="mt-10">
                 <div className="grid grid-cols-4 gap-x-10 gap-y-5 mt-10">
 
                     {products.data.length > 0 ? (
@@ -371,34 +405,27 @@ export default function Dashboard ({products, user}){
                     
                 </div>
 
-                {isFetchingData && (
-                    <div className="absolute inset-0 bg-gray-100/70 backdrop-blur-[1px] flex flex-col items-center justify-center z-20">
+                <Pagination
+                    data={products}
+                    name="products"
+                />
+            </div>
+
+            {isFetchingData && (
+                <div className="w-full fixed inset-0 bg-[rgb(0,0,0,0.5)] z-99 flex items-center justify-center">
+
+                    <div className="flex gap-x-2 items-center bg-white rounded-md p-4">
+
                         <div className="animate-spin h-10 w-10 border-4 border-gray-300 border-t-blue-600 rounded-full" />
 
-                        <span className="text-sm text-gray-500 font-medium mt-3">
-                            Loading more...
+                        <span className="text-sm text-gray-500 font-medium">
+                            Loading products...
                         </span>
                     </div>
-                )}
-            </div>
+                    
+                </div>
+            )}
             
-
-            {/* {
-                isFetchingData && (
-                    <div className="w-full h-full flex flex-col items-center justify-center gap-3">
-                        <div className="animate-spin h-10 w-10 border-4 border-gray-300 border-t-blue-600 rounded-full" />
-                        <span className="text-sm text-gray-500 font-medium">Loading more...</span>
-                    </div>
-                )
-            } */}
-            
-            
-            
-            
-               
-
-            
-
             {previewImage && (
                 <div 
                     className="fixed inset-0 bg-[rgb(0,0,0,0.5)] z-99 flex items-center justify-center"

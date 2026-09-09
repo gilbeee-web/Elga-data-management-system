@@ -1,28 +1,36 @@
 import { useForm } from "@inertiajs/react";
 import TextInput from "../../../Components/TextInput";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { ChevronLeft } from "lucide-react";
 
 export default function UserCredentialForm({user, back, updateCredentialSuccess}){
 
 
-    const {data, setData, post, process, errors} = useForm({
-        new_email: "",
+    const {data, setData, put, process, errors} = useForm({
+        email: "",
         current_password: "",
         new_password: "",
         new_password_confirmation: ""
     });
 
 
-    const saveUserCredentials = () => {
-        post(route('user.updateCredentials'),{
+    const [isSaving, setIsSaving] = useState(false);
+
+    const saveUserCredentials = (e) => {
+
+        e.preventDefault();
+
+        setIsSaving(true);
+
+        put(route('user.updateCredentials', user.id    ),{
             onSuccess: () => {
                 updateCredentialSuccess();
                 console.log("Success");
             },
             onError: (errors) => {
                 console.log("Errors: ", errors);
-            }
+            },
+            onFinish: () => setIsSaving(false)
         });
     }
 
@@ -30,7 +38,7 @@ export default function UserCredentialForm({user, back, updateCredentialSuccess}
     useEffect(() => {
 
         if(user){
-            setData("new_email", user.email);
+            setData("email", user.email);
         }
 
     }, [user]);
@@ -48,7 +56,7 @@ export default function UserCredentialForm({user, back, updateCredentialSuccess}
 
         </div>
     
-        <form className="flex flex-col gap-y-5">
+        <form onSubmit={saveUserCredentials} className="flex flex-col gap-y-5">
 
             
             <TextInput 
@@ -56,8 +64,9 @@ export default function UserCredentialForm({user, back, updateCredentialSuccess}
                 type="text"
                 placeholder="Enter email"
                 className="w-[80%]"
-                value={data.new_email}
-                onChange={(e) => setData("new_email", e.target.value)}
+                value={data.email}
+                onChange={(e) => setData("email", e.target.value)}
+                error={errors.email}
             />
 
             <TextInput 
@@ -67,16 +76,18 @@ export default function UserCredentialForm({user, back, updateCredentialSuccess}
                 placeholder="Enter current password"
                 value={data.current_password}
                 onChange={(e) => setData("current_password", e.target.value)}
+                error={errors.current_password}
             />
            
 
-            <div className="flex gap-x-8 items-center">
+            <div className="flex gap-x-8 items-start">
                 <TextInput 
                     label={"New password:"}
                     type="password"
                     placeholder="Enter new password"
                     value={data.new_password}
                     onChange={(e) => setData("new_password", e.target.value)}
+                    error={errors.new_password}
                 />
 
                 <TextInput 
@@ -84,16 +95,21 @@ export default function UserCredentialForm({user, back, updateCredentialSuccess}
                     type="password"
                     placeholder="Enter again new password"
                     value={data.new_password_confirmation}
-                    onChange={(e) => setData("current_password", e.target.value)}
+                    onChange={(e) => setData("new_password_confirmation", e.target.value)}
+                    error={errors.new_password_confirmation}
                 />
             </div>
 
             <div className="mt-5 w-full flex justify-end">
                 <button
                     type="submit" 
-                    className="rounded-md text-md bg-green-500 px-3 py-2 text-white cursor-pointer hover:bg-green-400"
+                    className={`rounded-md text-md px-3 py-2 text-white cursor-pointer ${
+                        isSaving ? "bg-green-400" : "bg-green-500 hover:bg-green-400"
+                    }`}
                 >
-                    Submit
+                    {
+                        isSaving ? "Submitting..." : "Submit"
+                    }
                 </button>
             </div>
             

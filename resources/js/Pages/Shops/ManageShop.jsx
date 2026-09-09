@@ -2,6 +2,8 @@ import { ChevronLeft, Plus, Store } from "lucide-react";
 import { useEffect, useState } from "react";
 import ShopForm from "./Components/ShopForm";
 import ShopCard from "./Components/ShopCard";
+import { router } from "@inertiajs/react";
+import { route } from "ziggy-js";
 
 export default function ManageShop({onClose, shops, onShopsChange, isFetchingShopData, isAddShop}){
 
@@ -14,15 +16,35 @@ export default function ManageShop({onClose, shops, onShopsChange, isFetchingSho
 
     const handleCardAction = (action, shop) => {
 
-        if(action === 'edit' && shop){
+        if (action === "edit" && shop) {
             setSelectedShop(shop);
             setMode("edit");
             setOpenShopForm(true);
-        }else if(action === 'deactivate'){
-            console.log("Deactivate Shop");
+
+        } else if (action === "changeStatus" && shop) {
+
+            console.log("Change status");
+
+            router.put(
+                route("shop.handleStatus", shop.id),
+                {},
+                {
+                    preserveState: true,
+                    preserveScroll: true,
+
+                    onSuccess: () => {
+                        console.log("Status successfully changed!");
+
+                        onShopsChange();
+                    },
+
+                    onError: (errors) => {
+                        console.log("Error:", errors);
+                    }
+                }
+            );
         }
-        
-    }
+    };
 
     useEffect(() => {
 
@@ -36,25 +58,28 @@ export default function ManageShop({onClose, shops, onShopsChange, isFetchingSho
         
         <div className="fixed inset-0 bg-[rgb(0,0,0,0.5)] z-99 flex justify-center items-center">
         
-            <div className="w-full bg-white sm:max-w-md md:max-w-xl lg:max-w-lg rounded-md shadow p-3 pt-3 overflow-y-auto min-h-[50vh]">
+            <div className="w-full bg-white sm:max-w-md md:max-w-xl lg:max-w-xl rounded-md shadow pt-3 px-5 overflow-y-auto min-h-[50vh]">
 
                 {/* Header */}
-                <div className="w-full flex justify-between items-center border-b border-gray-300">
+                <div className="w-full sticky top-0 z-99 bg-white">
+                    <div className="w-full flex justify-between items-center border-b border-gray-300">
                     
-                    <div className="flex gap-x-2 items-center">
+                        <div className="flex gap-x-2 items-center">
+                            
+                            <Store size={20} />
+
+                            <h1 className="text-lg font-bold capitalize">
+                                Manage Stores
+                            </h1>
+                        </div>
                         
-                        <Store size={20} />
 
-                        <h1 className="text-lg font-bold capitalize">
-                            Manage Stores
-                        </h1>
+                        <button className="text-3xl cursor-pointer hover:text-gray-300" onClick={onClose}>
+                            &times;
+                        </button>
                     </div>
-                    
-
-                    <button className="text-3xl cursor-pointer hover:text-gray-300" onClick={onClose}>
-                        &times;
-                    </button>
                 </div>
+                
 
                 {
                     !openShopForm ? (
@@ -75,7 +100,7 @@ export default function ManageShop({onClose, shops, onShopsChange, isFetchingSho
                             </div>
 
 
-                            <div className="mt-5 flex flex-col gap-y-3">
+                            <div className="my-5 flex flex-col gap-y-3">
                                 {
                                     isFetchingShopData ? (
                                         <div className="w-full flex items-center justify-center">
@@ -115,13 +140,6 @@ export default function ManageShop({onClose, shops, onShopsChange, isFetchingSho
                     )
                 }
                 
-
-
-                
-
-
-
-
             </div>
         </div>
 

@@ -84,29 +84,26 @@ export default function Sidebar({user}){
         setIsFetchingShopData(true);
 
         try {
-            
-            const response = await fetch(route('shop.getShops'));
+            const response = await fetch(route("shop.getShops"));
 
-            if(!response){
-                alert("No response");
-                return;
+            if (!response.ok) {
+                throw new Error("Failed to fetch shops");
             }
 
             const result = await response.json();
 
-            if(result){
-                setIsFetchingShopData(false);
-                setShops(result);
-            }
+            setShops(result);
 
-            setOpenShopSettings(false); 
+            setOpenShopSettings(false);
             setOpenManageShop(true);
 
         } catch (error) {
-            console.log("Error: ", error);
-        }
+            console.log("Error:", error);
 
-    }
+        } finally {
+            setIsFetchingShopData(false);
+        }
+    };
 
     const [isAddShop, setIsAddShop] = useState(false);
 
@@ -204,6 +201,7 @@ export default function Sidebar({user}){
                                                     .filter((shop) => shop.id !== currentShop?.id)
                                                     .map((shop) => (
                                                         <button
+                                                            key={shop.id}
                                                             onClick={() => handleSwitchShop(shop)}
                                                             className="w-full flex items-center gap-x-3 px-4 py-2 text-sm font-medium capitalize text-gray-500 hover:bg-gray-50 hover:text-gray-900 transition-colors cursor-pointer rounded-md"
                                                         >

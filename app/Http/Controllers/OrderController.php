@@ -8,6 +8,7 @@ use App\Models\Order;
 use App\Models\OrderItem;
 use App\Models\OrderStatusHistory;
 use App\Models\Payment;
+use App\Models\Product;
 use App\Models\ProductVariant;
 use App\Models\Shipment;
 use App\Models\Shop;
@@ -63,12 +64,14 @@ class OrderController extends Controller
         }
 
         $orders = $query->latest()->paginate(5)->withQueryString();
+        $products = Product::where('shop_id', session('shop_id'))->get();
 
         return Inertia::render('Orders/Index', [
             'orders' => $orders,
             'filters' => $request->only(['filter_status', 'search']),
             'user' => Auth::user(),
-            'shops' => Shop::all()
+            'shops' => Shop::all(),
+            'products' => $products
         ]);
     }   
 
@@ -342,18 +345,12 @@ class OrderController extends Controller
 
         // dd($validated);
 
-
-        try {
-            $this->orderService->savePayment(
-                $order, 
-                $validated, 
-                $validated['payment_id'] ?? null
-            );
-        } catch (ValidationException $e) {
-            dd($e); // let Laravel/Inertia handle it as a validation error
-        } catch (Exception $e) {
-            return redirect()->back()->with('error', 'Error in adding payment.');
-        }
+        $this->orderService->savePayment(
+            $order, 
+            $validated, 
+            $validated['payment_id'] ?? null
+        );
+        
 
         return redirect()->back()->with('success', 'Payment added successfully!');
     }
@@ -375,10 +372,14 @@ class OrderController extends Controller
     //shipped the order for shipment order
     public function shippedOrder(Order $order, Request $request){
 
+        
+
         $validated = $request->validate([
-            'sf_payment_reference' => 'string|nullable',
-            'remarks' => 'string|nullable',
+            'sf_payment_reference' => 'nullable|string',
+            'remarks' => 'nullable|string',
         ]);
+
+        
 
         try{
             $this->orderService->saveShipment($order,$validated);

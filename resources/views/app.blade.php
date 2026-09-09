@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sample OMS</title>
+    <title>Elga OMS</title>
     <link rel="icon" type="image/png" href="/images/logo/logo.png" style="border-radius: 100%">
     @routes
     @viteReactRefresh

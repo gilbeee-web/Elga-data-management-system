@@ -122,8 +122,8 @@ class UserController extends Controller
     
         $validated = $request->validate([
             'email' => 'required|string',
-            'current_password'      => 'required|string',
-            'new_password'          => 'nullable|string|min:8|confirmed',
+            'current_password' => 'required|string',
+            'new_password' => 'nullable|string|min:8|confirmed',
         ]);
 
         // Verify current password if match sa user password store in database

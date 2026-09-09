@@ -460,18 +460,20 @@ class OrderService{
     {
         return DB::transaction(function () use ($data, $order) {
 
-            if ($order->order_type === 'shipment' && $order->status !== 'shipped') {
+            if ($order->status !== 'shipped') {
 
-                $shipment = Shipment::where('order_id', $order->id)
+                $isWalkin = $order->order_type === "walkin";
+
+                if(!$isWalkin){
+                    $shipment = Shipment::where('order_id', $order->id)
                     ->firstOrFail();
 
-                $shipment->update([
-                    'sf_payment_reference' => $data['sf_payment_reference'] ?? null,
-                    'shipped_at' => now(),
-                    'remarks' => $data['remarks'] ?? null
-                ]);
-
-
+                    $shipment->update([
+                        'sf_payment_reference' => $data['sf_payment_reference'] ?? null,
+                        'shipped_at' => now()
+                    ]);
+                }
+            
                 $orderItems = OrderItem::with("product_variant")->where("order_id", $order->id)->get();
 
                 // dd($orderItems);
@@ -486,6 +488,7 @@ class OrderService{
                 $order->update([
                     'completed_at' => now(),
                     'order_status' => 'shipped',
+                    'remarks' => $data['remarks'] ?? null
                 ]);
 
                 $this->storeStatusHistory(

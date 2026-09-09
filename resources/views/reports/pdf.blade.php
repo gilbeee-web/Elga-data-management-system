@@ -34,7 +34,7 @@
                 <tr>
                     <th>Transaction No.</th>
                     <th>Customer Name</th>
-                    <th>Payment Type</th>
+                    {{-- <th>Payment Type</th> --}}
                     <th>Amount Paid</th>
                     <th>Mode of Payment</th>
                     <th>Reference No.</th>
@@ -46,7 +46,7 @@
                     <tr>
                         <td>{{ $txn->order->transaction_number }}</td>
                         <td>{{ $txn->order->sender_name }}</td>
-                        <td>{{ $txn->payment_type === 'down_payment' ? 'DP' : ucfirst($txn->payment_type) }}</td>
+                        {{-- <td>{{ $txn->payment_type === 'down_payment' ? 'DP' : ucfirst($txn->payment_type) }}</td> --}}
                         <td class="text-left">₱{{ number_format($txn->payment_amount, 2) }}</td>
                         <td>{{ ucfirst($txn->payment_method) }} ({{ $txn->mop_name }})</td>
                         <td>{{ $txn->reference_number }}</td>

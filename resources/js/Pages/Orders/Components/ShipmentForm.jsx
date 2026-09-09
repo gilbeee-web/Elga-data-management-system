@@ -421,9 +421,11 @@ export default function ShipmentForm({order, order_type, customer, orderReferenc
                         </div>
                     </> 
                     : (
-                        <div className="w-full px-5 py-2 bg-white border border-gray-400 shadow-sm">
-                            <p>{orderSummary.remarks}</p>
-                        </div>
+                        orderSummary.remarks && (
+                            <div className="w-full mt-5 px-5 py-2 bg-white border border-gray-400 shadow-sm rounded-md">
+                                <p>{orderSummary.remarks}</p>
+                            </div>
+                        )
                     )
                 }
                 

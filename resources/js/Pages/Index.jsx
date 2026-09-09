@@ -55,7 +55,7 @@ export default function Index(){
         <div className="relative w-full min-h-screen">
             <div 
                 className="absolute inset-0 bg-cover bg-center bg-no-repeat brightness-50"
-                style={{ backgroundImage: "url('/images/sample-bg.jpg')" }}
+                style={{ backgroundImage: "url('/images/elga-bg.jpg')" }}
             />
 
             <div className="relative w-full min-h-screen flex justify-center items-center rounded-lg">
@@ -64,9 +64,12 @@ export default function Index(){
 
                     <div className="w-full h-full grid grid-cols-2 min-h-95">
 
-                        <div className="w-full h-full bg-[#DF9BAA] rounded-l-lg border-gray-400 p-5">
+                        <div className="w-full h-full rounded-l-lg border-gray-300 border-r rounded-r-lg shadow-sm p-5">
 
-                            <div className="w-full h-full flex flex-col justify-center items-center text-center text-white font-bold">
+                            <div className="w-full h-full flex flex-col justify-center items-center text-center font-bold">
+
+                                <img src="/images/logo/logo.png" alt="Logo" className="object-contain w-20 h-20"/>
+
                                 <h1 className="text-6xl">Index</h1>
                                 <p className="text-xl">Order Management System</p>
                             </div>
@@ -116,6 +119,13 @@ export default function Index(){
                                                     className="w-full border-none outline-none text-sm text-[#2C2C2A] placeholder:text-[#8A8880]"
                                                 />
                                             </div>
+                                            {
+                                                errors.email && (
+                                                    <p className="text-red-400 text-sm">{errors.email}</p>
+                                                )
+                                                
+                                            }
+
                                         </div>
 
                                         <div className="flex flex-col">
@@ -132,6 +142,13 @@ export default function Index(){
                                                     className="w-full border-none outline-none text-sm text-[#2C2C2A] placeholder:text-[#8A8880]"
                                                 />
                                             </div>
+
+                                            {
+                                                errors.password && (
+                                                    <p className="text-red-400 text-sm">{errors.password}</p>
+                                                )
+                                                
+                                            }
                                         </div>
                         
                                         <div className="flex gap-x-5 justify-between items-center">
@@ -160,7 +177,7 @@ export default function Index(){
                                             <button 
                                                 type="submit"
                                                 className={`w-full cursor-pointer text-white rounded-md p-2 font-bold ${
-                                                    loginLoading ? "bg-pink-300" : "bg-[#DF9BAA] hover:bg-pink-300"}
+                                                    loginLoading ? "bg-green-300" : "bg-green-500 hover:bg-green-300"}
                                                 `}
                                             >
                                                 {

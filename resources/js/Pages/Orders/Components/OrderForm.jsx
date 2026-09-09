@@ -27,6 +27,7 @@ export default function OrderForm({order, order_type, changeTab, orderReferences
 
     const [products, setProducts] = useState(null);
 
+    const [isFetchingProducts, setIsFetchingProducts] = useState(false);
     const handleOpenProductList = async (index) => {
 
         const order = data.orderReferences[index];
@@ -41,6 +42,8 @@ export default function OrderForm({order, order_type, changeTab, orderReferences
             return;
         }
 
+
+        setIsFetchingProducts(true);
 
         try{
 
@@ -61,6 +64,8 @@ export default function OrderForm({order, order_type, changeTab, orderReferences
 
         }catch(error){
             console.log("Error: ", error)
+        }finally{
+            setIsFetchingProducts(false);
         }
 
     }
@@ -698,6 +703,23 @@ export default function OrderForm({order, order_type, changeTab, orderReferences
             
             </div>
         </form>
+
+        {
+            isFetchingProducts && (
+                <div className="w-full fixed inset-0 bg-[rgb(0,0,0,0.5)] z-99 flex items-center justify-center">
+
+                    <div className="flex gap-x-2 items-center bg-white rounded-md p-4">
+
+                        <div className="animate-spin h-10 w-10 border-4 border-gray-300 border-t-blue-600 rounded-full" />
+
+                        <span className="text-sm text-gray-500 font-medium">
+                            Fetching products...
+                        </span>
+                    </div>
+                    
+                </div>
+            )
+        }
 
         {/* modal to search and add product to order number */}
 

@@ -2,12 +2,15 @@
 
 namespace App\Http\Controllers;
 
+use App\Exports\ProductTemplateExport;
+use App\Imports\ProductsImport;
 use App\Models\Product;
 use App\Models\Shop;
 use App\Services\ProductService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Inertia\Inertia;
+use Maatwebsite\Excel\Facades\Excel;
 
 class ProductController extends Controller
 {
@@ -42,7 +45,7 @@ class ProductController extends Controller
             ->withMin('variants', 'price')
             ->withMax('variants', 'price')
             ->withSum('variants', 'sold')
-            ->paginate(10);
+            ->paginate(8);
 
         return Inertia::render('Products/Index', [
             'products' => $products,
@@ -169,6 +172,28 @@ class ProductController extends Controller
         $this->productService->disableProduct($product);
 
         return redirect()->route('product.index')->with('success', $product->name . ' successfully disabled!');
+    }
+
+    public function import(Request $request)
+    {
+        $request->validate([
+            'file' => ['required', 'file', 'mimes:xlsx,xls,csv'],
+        ]);
+
+        Excel::import(
+            new ProductsImport,
+            $request->file('file')
+        );
+
+        return back()->with('success', 'Products imported successfully.');
+    }
+
+    public function downloadTemplate()
+    {
+        return Excel::download(
+            new ProductTemplateExport,
+            'product-import-template.xlsx'
+        );
     }
 
 

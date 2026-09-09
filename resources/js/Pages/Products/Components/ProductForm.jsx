@@ -443,14 +443,14 @@ export default function ProductForm({mode, product}){
 
                 <button 
                     type="button"
-                    className="border border-gray-300 bg-white px-3 py-2 rounded-md cursor-pointer"
+                    className="border border-gray-300 bg-gray-400 hover:bg-gray-300 text-white font-semibold px-3 py-2 rounded-md cursor-pointer"
                     onClick={() => router.visit(route('product.index'))}
                 >
                     Cancel
                 </button>
 
                 <button 
-                    className={` px-3 py-2 rounded-md text-white cursor-pointer ${
+                    className={` px-3 py-2 rounded-md text-white font-semibold cursor-pointer ${
                         isSaving ? "bg-green-400" : "bg-green-500 hover:bg-green-400"
                     }`}
                     type="submit"

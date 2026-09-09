@@ -104,7 +104,7 @@ export default function ShopForm({onClose, onSuccess, shop, mode}){
 
     return (
 
-        <div className="mt-3">
+        <div className="my-3">
                             
             <div className="flex gap-x-1 items-center">
                 <button 

@@ -21,7 +21,7 @@ export default function OrderStatusHistory({statusHistory, onClose}){
                 </div>
 
 
-                <div className="mt-5">
+                <div className="mt-5 overflow-y h-[70vh]">
                     <div className="space-y-0">
                         {statusHistory.length > 0 ? (
                             statusHistory

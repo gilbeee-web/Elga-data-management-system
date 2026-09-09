@@ -41,8 +41,8 @@ Route::middleware('auth')->group(function(){
             Route::post('/{order}/complete', 'completeOrder')->name('order.completeOrder');
             Route::delete('/{order}', 'destroyOrder')->name('order.destroy');
             Route::delete('/{order}/{payment_id}', 'destroyPayment')->name('order.destroyPayment');
-            Route::patch('/{order}', 'cancelOrder')->name('order.cancel');
-            Route::patch('/{order}', 'switchOrderType')->name('order.switchOrderType');
+            Route::patch('/{order}/cancel', 'cancelOrder')->name('order.cancel');
+            Route::patch('/{order}/switch', 'switchOrderType')->name('order.switchOrderType');
             Route::get('/{variant}', 'getVariantOrderHistory')->name('order.getVariantOrderHistory');
             Route::get('/{order}/history', 'getOrderStatusHistory')->name('order.getOrderStatusHistory');
         });
@@ -59,6 +59,8 @@ Route::middleware('auth')->group(function(){
             Route::get('/{id}/view', 'view')->name('product.view');
             Route::get('/{id}/edit', 'edit')->name('product.edit');
             Route::get('/get-products', 'getAllProducts')->name('product.getAllProducts');
+            Route::get('/download-template', 'downloadTemplate')->name('product.download.template');
+            Route::post('/import', 'import')->name('product.import');
             Route::post('/', 'store')->name('product.store');
             Route::put('/{product}', 'update')->name('product.update');
             Route::put('/{product}/disable', 'disableProduct')->name('product.disable');
@@ -107,6 +109,7 @@ Route::middleware('auth')->group(function(){
             Route::post('/', 'store')->name('shop.store');
             Route::post('/switch/{shop}', 'switchShop')->name('shop.switch');
             Route::put('/{shop}', 'update')->name('shop.update');
+            Route::put('/{shop}/status', 'handleShopStatus')->name('shop.handleStatus');
             Route::delete('/{shop}', 'destroy')->name('shop.destroy');
         });
     });

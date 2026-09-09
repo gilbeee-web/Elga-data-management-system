@@ -129,7 +129,7 @@ export default function Reports({filters, summaryCards, transactions, user}){
                         <tr className="">
                             <th className="p-3">TRANSACTION NO.</th>
                             <th className="p-3">CUSTOMER NAME</th>
-                            <th className="p-3">PAYMENT TYPE</th>
+                            {/* <th className="p-3">PAYMENT TYPE</th> */}
                             <th className="p-3">
                                 AMOUNT PAID
                             </th>
@@ -164,13 +164,13 @@ export default function Reports({filters, summaryCards, transactions, user}){
                                             <h1 className="font-semibold">{transaction.order.transaction_number}</h1>
                                         </td>
                                         <td className="p-3">{transaction.order.sender_name ?? "--"}</td>
-                                        <td className="p-3 capitalize">{
+                                        {/* <td className="p-3 capitalize">{
                                             transaction.payment_type === 'down_payment' ? 
                                             "Down Payment" : `${transaction.payment_type} Payment`
-                                        }</td>
+                                        }</td> */}
                                         <td className="p-3">{formatCurrency(transaction.payment_amount ?? 0)}</td>
                                         <td className="p-3">
-                                            <h1 className="capitalize font-semibold">{transaction.payment_method}</h1>
+                                            <h1 className="capitalize font-semibold">{transaction.payment_method === 'bank_transfer' ? "Bank Transfer" : transaction.payment_method}</h1>
                                             <span className="text-xs">{transaction.mop_name}</span>
                                         </td>
                                         <td className="p-3">{transaction.reference_number}</td>
@@ -182,7 +182,7 @@ export default function Reports({filters, summaryCards, transactions, user}){
                                 ))
                             ):
                             (
-                                <td className="p-3 text-center font-semibold" colSpan={7}>No transactions found.</td>
+                                <td className="p-3 text-center font-semibold" colSpan={6}>No transactions found.</td>
                             )
                         }
 

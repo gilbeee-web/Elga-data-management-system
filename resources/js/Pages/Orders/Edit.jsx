@@ -142,7 +142,7 @@ export default function Edit({order, order_type, status, customer, orderReferenc
         const unpaid_message = 
         `To ship your order please settle:
 
-Subtotal: ${formatCurrency(order.subtotal)}
+Item: ${formatCurrency(order.subtotal)}
 Shipping Fee: ${formatCurrency(order.shipping_fee)}
 Discount: ${formatCurrency(order.discount)}
 Total: ${formatCurrency(order.total_amount)}
@@ -157,7 +157,7 @@ Please settle the payment as soon as possible, thank you!
         if (order.remaining_balance > 0) {
             return `To ship your order please settle:
 
-Subtotal: ${formatCurrency(order.subtotal)}
+Item: ${formatCurrency(order.subtotal)}
 Shipping Fee: ${formatCurrency(order.shipping_fee)}
 Discount: ${formatCurrency(order.discount)}
 Total Payment: ${formatCurrency(order.total_amount)}

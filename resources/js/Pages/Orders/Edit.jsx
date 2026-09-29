@@ -11,7 +11,7 @@ import { formatCurrency } from "../../Utils/formatCurrency";
 import Swal from "sweetalert2";
 import Payment from "./Components/Payment";
 import ShipmentForm from "./Components/ShipmentForm";
-import { Ban, ChevronDown, ChevronLeft, CircleAlert, CircleCheck, CircleCheckBig, Clock, Copy, Trash2 } from "lucide-react";
+import { Ban, Check, ChevronDown, ChevronLeft, CircleAlert, CircleCheck, CircleCheckBig, Clock, Copy, ReceiptText, Trash2 } from "lucide-react";
 import OrderStatusDropdown from "../../Components/OrderStatusDropdown";
 import OrderTypeDropdown from "../../Components/OrderTypeDropdown";
 import SaveLoading from "../../Components/SaveLoading";
@@ -57,11 +57,6 @@ export default function Edit({order, order_type, status, customer, orderReferenc
             } else if (!hasOrderItems) {
                 message = "Please add at least one order item first.";
             } 
-            
-            // else if (!hasShipping && !isWalkinOrder) {
-            //     console.log("hey");
-            //     message = "Please set the shipping fee first.";
-            // }
         } else if (selectedTab === 'shipment') {
             if (!hasCustomer) {
                 message = "Please complete the Customer Info tab first.";
@@ -231,11 +226,62 @@ Thank you!`;
         }
     }
 
+    
+    const handleMarkPrintReceipt = async () => {
+
+        const result = await Swal.fire({
+            title: "Receipt already printed?",
+            text: "Please make sure the receipt has been printed in Page365 before continuing.",
+            icon: "question",
+            showCancelButton: true,
+            confirmButtonText: "Confirm",
+            cancelButtonText: "Cancel",
+            reverseButtons: true,
+            confirmButtonColor: "#16a34a",
+            cancelButtonColor: "#6b7280",
+        });
+
+        if (!result.isConfirmed) {
+            return;
+        }
+
+        router.patch(
+            route('order.receipt.printed', order.id),
+            {},
+            {
+                onSuccess: () => {
+                    Swal.fire({
+                        toast: true,
+                        position: "top-end",
+                        icon: "success",
+                        title: "Receipt marked as printed. Order is now processing.",
+                        showConfirmButton: false,
+                        timer: 2000,
+                        timerProgressBar: true,
+                    });
+                },
+
+                onError: (error) => {
+                    Swal.fire({
+                        title: "Something went wrong",
+                        text: "Unable to mark the receipt as printed. Please try again.",
+                        icon: "error"
+                    });
+
+                    console.log("Error marking receipt as printed:", error);
+                }
+            }
+        );
+    };
+
     const [isSaving, setIsSaving] = useState(false);
     
     const handleIsSaving = (status) => {
         setIsSaving(status);
     }
+
+
+    
 
     return <>
 
@@ -262,6 +308,14 @@ Thank you!`;
                     )}
                         
                     <OrderStatusDropdown order={order} />
+
+                    <button 
+                        className="flex gap-x-2 items-center px-3 py-2 hover:bg-gray-200 rounded-md border font-semibold cursor-pointer"
+                        onClick={handleShowOrderHistory}
+                    >
+                        <Clock size={20}/>
+                        View History
+                    </button>
 
                 </div>
 
@@ -395,16 +449,30 @@ Thank you!`;
                         </span>
                     </button>
                 </div>
+                
+                {
+                    order.payment_status === 'paid' && order.order_status === 'payment_confirmed' && !isWalkinOrder && (
+                        <div className="">
+                            <button 
+                                className="flex gap-x-2 items-center px-3 py-2 bg-green-500 hover:bg-green-400 rounded-md text-white font-semibold cursor-pointer"
+                                onClick={handleMarkPrintReceipt}
+                            >
+                                <ReceiptText size={20} />
+                                Mark Receipt as Printed
+                            </button>
+                        </div>
+                    )
+                }
 
-                <div className="">
-                    <button 
-                        className="flex gap-x-2 items-center px-3 py-2 bg-blue-500 hover:bg-blue-400 rounded-md text-white font-semibold cursor-pointer"
-                        onClick={handleShowOrderHistory}
-                    >
-                        <Clock size={20}/>
-                        View History
-                    </button>
-                </div>
+                {
+                    order.order_status === 'processing' && !isWalkinOrder && (
+                        <div className="flex gap-x-2 items-center">
+                            <Check size={15} color="green"/>
+                            <h1 className="text-green-500 font-semibold">Receipt Printed</h1>
+                        </div>
+                    )
+                }
+                
 
             </div>
             

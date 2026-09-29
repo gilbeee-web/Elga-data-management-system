@@ -28,16 +28,23 @@ class ReportController extends Controller
     public function index(Request $request){
 
         $validated = $request->validate([
+            'order_type' => 'nullable|in:all,walkin,shipment',
             'period' => 'nullable|in:daily,weekly,monthly,yearly,custom',
             'dateFrom' => 'nullable|date|required_if:period,custom',
             'dateTo' => 'nullable|date|required_if:period,custom|after_or_equal:dateFrom',
             'sort_by' => 'nullable|in:paid_at,payment_amount,payment_type,payment_method',
             'sort_direction' => 'nullable|in:asc,desc',
             'search' => 'nullable|string|max:255',
+            'mop_type' => 'nullable|array',
+            'mop_type.*' => 'in:cash,gcash,bank_transfer,card_payment',
         ]);
 
+        // dd($validated);
 
+        $orderType = $validated['order_type'] ?? 'all';
         $period = $validated['period'] ?? null;
+
+
         $sortBy = $validated['sort_by'] ?? 'paid_at';
         $sortDirection = $validated['sort_direction'] ?? 'desc'; 
         
@@ -76,6 +83,7 @@ class ReportController extends Controller
         }
 
         $transactionsQuery = Payment::with('order.customer')
+            ->select('payments.*')
             ->join('orders','orders.id','=','payments.order_id')
             ->where('orders.order_status', 'shipped')
             ->where('orders.shop_id', $this->shopId)
@@ -84,15 +92,63 @@ class ReportController extends Controller
                 $sortDirection === 'asc' ? 'asc' : 'desc'
             );
 
+        if ($orderType !== 'all') {
+            $salesQuery->where(
+                'orders.order_type',
+                $orderType
+            );
+
+            $transactionsQuery->where(
+                'orders.order_type',
+                $orderType
+            );
+
+            $shipmentQuery->where(
+                'orders.order_type',
+                $orderType
+            );
+        }
+
+        
+
+        if (!empty($validated['mop_type'])) {
+            $transactionsQuery->whereIn(
+                'payments.payment_method',
+                $validated['mop_type']
+            );
+
+            $salesQuery->whereIn(
+                'payments.payment_method',
+                $validated['mop_type']
+            );
+
+            $shipmentQuery->whereHas('order.payments', function ($query) use ($validated) {
+                $query->whereIn(
+                    'payments.payment_method',
+                    $validated['mop_type']
+                );
+            });
+        }
+
         if ($range) {
             $salesQuery->whereBetween('payments.paid_at', $range);
             $shipmentQuery->whereBetween('shipments.shipped_at', $range);
             $transactionsQuery->whereBetween('payments.paid_at', $range);
         }
 
-        $totalSales = $salesQuery->sum('payments.payment_amount');
-        $totalSfCollected = $shipmentQuery->sum('shipments.raw_shipping_fee');
 
+
+        $totalSales = $salesQuery->sum('payments.payment_amount');
+
+        $totalSfCollected = 0;
+        $totalSfPaid = 0;
+
+        if($orderType !== 'walkin'){
+            $totalSfCollected = $shipmentQuery->sum('shipments.total_shipping_fee');
+            $totalSfPaid = $shipmentQuery->sum('shipments.raw_shipping_fee');
+        }
+
+        
         if ($request->filled('search')) {
             $search = $request->search;
 
@@ -110,10 +166,13 @@ class ReportController extends Controller
         $summaryCards = [
             'totalSales' => $totalSales,
             'totalTransactions' => $totalTransactions,
-            'totalSfCollected' => $totalSfCollected
+            'totalSfCollected' => $totalSfCollected,
+            'totalSfPaid' => $totalSfPaid
         ];
 
         $transactions = $transactionsQuery->paginate(5)->withQueryString(); //keep filtering across the pagination
+
+        // dd($transactionsQuery);
 
 
         return Inertia::render('Reports', [
@@ -121,9 +180,11 @@ class ReportController extends Controller
             'transactions' => $transactions,
             'filters' => [
                 'search' => $request->search ?? null,
+                'order_type' => $request->order_type ?? "all",
                 'period' => $period,
                 'sort_by' => $sortBy,
                 'sort_direction' => $sortDirection,
+                'mop_type' => $request->mop_type ?? [],
                 'dateFrom' => $request->dateFrom,
                 'dateTo' => $request->dateTo,
             ],

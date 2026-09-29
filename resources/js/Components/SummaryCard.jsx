@@ -1,8 +1,24 @@
+import { router } from '@inertiajs/react';
 import { formatCurrency } from '../Utils/formatCurrency';
+import { route } from 'ziggy-js';
 
-export default function SummaryCard({ cardName, value, icon: Icon, isCurrency, color }) {
+export default function SummaryCard({ cardName, value, icon: Icon, isCurrency, color, link }) {
+
+
+    const handleCardNavigation = () => {
+
+        if(!link){
+            return;
+        }
+        
+        router.visit(route(link));
+    }
+
     return (
-        <div className={`rounded-lg shadow-sm p-5 relative bg-white ${color}`}>
+        <div 
+            className={`rounded-lg shadow-sm p-5 relative bg-white ${color} ${link ? "cursor-pointer hover:bg-gray-50" : ""}`}
+            onClick={handleCardNavigation}
+        >
             <div className='w-full h-full'>
                 <div className="flex gap-x-3 items-center">
 

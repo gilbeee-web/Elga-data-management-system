@@ -33,7 +33,7 @@ export default function OrderTypeDropdown({order, hasShipmentInfo}){
 
         
 
-        router.patch(route('order.switchOrderType', order.id), {
+        router.patch(route('order.switch.orderType', order.id), {
             order_type: orderType,
         }, {
             onSuccess: () => {

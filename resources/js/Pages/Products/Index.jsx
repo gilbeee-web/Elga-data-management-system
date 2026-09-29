@@ -330,7 +330,7 @@ export default function Dashboard ({products, user}){
                                 >
                                     
                                     <div 
-                                        className="absolute top-2 right-2 bg-[#E0DD94] text-[#949556] text-xs px-3 py-1 font-bold rounded-full"
+                                        className="absolute top-2 right-2 z-99 bg-[#E0DD94] text-[#949556] text-xs px-3 py-1 font-bold rounded-full"
                                     >
                                         Sold: {product.variants_sum_sold}
                                     </div>

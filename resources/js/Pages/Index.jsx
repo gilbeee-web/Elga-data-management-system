@@ -6,7 +6,7 @@ import FlashMessage from "../Components/FlashMessage";
 import { useState } from "react";
 import VerifyEmailForm from "../Components/VerifyEmailForm";
 import ResetPasswordForm from "../Components/ResetPasswordForm";
-import { ChevronLeft, KeyRound, Mail } from "lucide-react";
+import { ChevronLeft, KeyRound, Lock, Mail } from "lucide-react";
 
 
 export default function Index(){
@@ -70,7 +70,7 @@ export default function Index(){
 
                                 <img src="/images/logo/logo.png" alt="Logo" className="object-contain w-20 h-20"/>
 
-                                <h1 className="text-6xl">Index</h1>
+                                <h1 className="text-6xl">Elga</h1>
                                 <p className="text-xl">Order Management System</p>
                             </div>
 
@@ -132,7 +132,8 @@ export default function Index(){
                                             <label htmlFor="password" className="font-semibold">Password:</label>
                                             <div className="flex items-center gap-2 bg-white border border-gray-400 rounded-lg px-3 py-2">
                                                 
-                                                <KeyRound strokeWidth={1} size={20} color="gray"/>
+                                                <Lock size={20} strokeWidth={1} color="gray"/>
+                                                {/* <KeyRound strokeWidth={1} size={20} color="gray"/> */}
 
                                                 <input
                                                     type="password"

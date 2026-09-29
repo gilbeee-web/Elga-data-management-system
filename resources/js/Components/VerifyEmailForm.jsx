@@ -87,7 +87,7 @@ export default function VerifyEmailForm({onClose, verifySuccess}){
 
                 <button 
                     type="submit" 
-                    className={`px-5 py-2 text-white rounded-md border border-gray-400 ${isVerify ? "bg-pink-300" : "bg-[#DF9BAA] hover:bg-pink-300 cursor-pointer"}`}
+                    className={`px-5 py-2 text-white rounded-md border border-gray-400 ${isVerify ? "bg-green-300" : "bg-green-500 hover:bg-green-400 cursor-pointer"}`}
                 >
                     {isVerify ? "Verifying..." : "Verify"}
                 </button>

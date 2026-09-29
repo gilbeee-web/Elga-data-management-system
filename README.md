@@ -157,7 +157,7 @@ Walk-in orders use a simplified workflow that does not require shipping informat
 
 | Order Details | Product Management |
 | :---: | :---: |
-| ![Order Details](docs/screenshots/order-details.png) | ![Product Management](docs/screenshots/products.png) |
+| ![Order Details](docs/screenshots/edit-order.png) | ![Product Management](docs/screenshots/products.png) |
 
 | Reports |
 | :---: |

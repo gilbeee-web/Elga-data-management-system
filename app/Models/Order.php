@@ -21,6 +21,7 @@ class Order extends Model
         'payment_status',
         'order_status',
         'remaining_balance',
+        'is_receipt_printed',
         'remarks',
         'completed_at'
     ];

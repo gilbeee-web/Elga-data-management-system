@@ -122,22 +122,22 @@ export default function ProductModal({product, onClose, editProduct, deleteProdu
                                             product.variants.map((variant) => (
                                                 <tr
                                                     key={variant.id}
-                                                    className="border-b border-gray-300 hover:bg-gray-200 cursor-pointer"
+                                                    className="border-b border-gray-300 hover:bg-gray-50 cursor-pointer"
                                                     onClick={() => fetchOrderHistory(variant.id)}
                                                 >
-                                                    <td className="p-3 font-semibold">
+                                                    <td className="p-3">
                                                         {variant.variant_name}
                                                     </td>
 
-                                                    <td className="p-3 font-semibold">
+                                                    <td className="p-3">
                                                         {variant.product_code}
                                                     </td>
 
-                                                    <td className="p-3 font-semibold">
+                                                    <td className="p-3">
                                                         {formatCurrency(variant.price)}
                                                     </td>
 
-                                                    <td className="p-3 font-semibold">
+                                                    <td className="p-3">
                                                         {variant.sold}
                                                     </td>
                                                 </tr>

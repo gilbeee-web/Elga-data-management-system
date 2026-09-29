@@ -83,37 +83,38 @@ class UserController extends Controller
 
         // dd($request->all());
 
-        try{
+        $validated = $request->validate([
+            'name' => 'string|required',
+            'role' => 'string|required',
+            'profile_pic' => 'nullable|image|mimes:jpg,jpeg,png|max:2048'
+        ]);
 
-            $validated = $request->validate([
-                'name' => 'string|required',
-                'role' => 'string|required',
-                'profile_pic' => 'nullable|image|mimes:jpg,jpeg,png|max:2048'
-            ]);
+        if ($request->hasFile('profile_pic')) {
 
-            if ($request->hasFile('profile_pic')) {
-
-                // delete the old file before storing the new one
-                if ($user->profile_pic && Storage::disk('public')->exists($user->profile_pic)) {
-                    Storage::disk('public')->delete($user->profile_pic);
-                }
-
-                $validated['profile_pic'] = $request->file('profile_pic')->store('profile_pics', 'public');
+            // delete the old file before storing the new one
+            if ($user->profile_pic && Storage::disk('public')->exists($user->profile_pic)) {
+                Storage::disk('public')->delete($user->profile_pic);
             }
 
-            // dd($validated);
+            $validated['profile_pic'] = $request->file('profile_pic')->store('profile_pics', 'public');
+        }
 
-            $user->update($validated);
+        // dd($validated);
 
+        $user->update($validated);
+
+        if($user->role === 'admin'){
+            return redirect()->back()->with([
+                'message' => 'User updated successfully!',
+                'user' => $user
+            ]);
+        }else{
             return redirect()->route('user.index')->with([
                 'message' => 'User updated successfully!',
                 'user' => $user
             ]);
-
-        }catch(Exception $e){
-            dd("update function: " . $e);
-            return redirect()->back()->with('error', 'Something went wrong: ' . $e);
-        }
+        }   
+        
     }
 
     //super admin side

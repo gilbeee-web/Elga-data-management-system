@@ -6,24 +6,32 @@ import { formatCurrency } from "../Utils/formatCurrency";
 import { formatDateTime } from "../Utils/formatDateTime";
 import { router } from "@inertiajs/react";
 import { route } from "ziggy-js";
-import { ChartNoAxesCombined, ClipboardClock, ShoppingCart, Truck } from "lucide-react";
+import { ChartNoAxesCombined, ClipboardClock, HandCoins, ShoppingCart, Truck } from "lucide-react";
 
 export default function Dashboard ({
-        totalSales, totalOrders, pendingOrders, totalSfCollected, recentOrders, salesTrend, orderStatusDistribution, view, user
+    summaryCards,
+    recentOrders, 
+    salesTrend, 
+    orderStatusDistribution, 
+    view, 
+    user
 }){
+
+    console.log("Summary Cards: ", summaryCards);
 
     const statusClasses = {
         draft: "bg-gray-500",
-        awaiting_shipping_fee: "bg-blue-500",
+        awaiting_shipping_fee: "bg-orange-500",
         awaiting_payment: "bg-red-500",
-        payment_confirmed: "bg-blue-500",
-        processing: "bg-yellow-500",
+        payment_confirmed: "bg-yellow-500",
+        processing: "bg-blue-500",
         shipped: "bg-green-500",
+        cancelled: "bg-gray-800"
     };
 
     const orderStatusDisplay = {
         awaiting_payment: "Unpaid",
-        payment_confirmed: "Partial Payment",
+        payment_confirmed: "Fully Paid",
         awaiting_shipping_fee: "Awaiting Shipping Fee"
     };
 
@@ -33,7 +41,7 @@ export default function Dashboard ({
         router.get(route('dashboard.index'), { period }, {
             preserveState: true,
             preserveScroll: true,
-            only: ['totalSales', 'totalOrders', 'pendingOrders', 'totalSfCollected', 'period'],
+            only: ['summaryCards', 'period'],
         });
     };
 
@@ -51,8 +59,8 @@ export default function Dashboard ({
                         onChange={handleOverviewFilter}
                     >
                         <option value="today">Today</option>
-                        <option value="weekly">Weekly</option>
-                        <option value="monthly">Monthly</option>
+                        <option value="weekly">This Week</option>
+                        <option value="monthly">This Month</option>
                     </select>
                 </div>
 
@@ -60,33 +68,31 @@ export default function Dashboard ({
                     <SummaryCard 
                         cardName={"Sales"}
                         isCurrency={true}
-                        value={totalSales}
+                        value={summaryCards.totalSales}
                         icon={ChartNoAxesCombined}
-                        
                     />
 
                     <SummaryCard 
                         cardName={"Orders"}
                         isCurrency={false}
-                        value={totalOrders}
+                        value={summaryCards.totalOrders}
                         icon={ShoppingCart}
-                       
+                        link={"order.index"}
                     />
 
                     <SummaryCard 
-                        cardName={"Pending orders"}
-                        isCurrency={false}
-                        value={totalOrders}
-                        icon={ClipboardClock}
-                       
+                        cardName={"Payments Collected"}
+                        isCurrency={true}
+                        value={summaryCards.totalPaymentsCollected}
+                        icon={HandCoins}
+                        link={"order.index"}
                     />
 
                     <SummaryCard 
                         cardName={"Shipping fee collected"}
                         isCurrency={true}
-                        value={totalSfCollected}
+                        value={summaryCards.totalSfCollected}
                         icon={Truck}
-                       
                     />
                 </div>
 

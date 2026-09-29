@@ -4,6 +4,7 @@ import TextInput from "../../../Components/TextInput";
 import { route } from "ziggy-js";
 import UserCredentialForm from "./UserCredentialsForm";
 import { Camera } from "lucide-react";
+import Swal from "sweetalert2";
 
 export default function UserForm({user, onClose, mode}){
 
@@ -49,6 +50,17 @@ export default function UserForm({user, onClose, mode}){
             post(route('user.update', user_id), {
                 forceFormData: true,
                 onSuccess: () => {
+                    
+                    Swal.fire({
+                        toast: true,
+                        position: "top-end",
+                        icon: "success",
+                        title: "Acount is successfully updated!",
+                        showConfirmButton: false,
+                        timer: 2000,
+                        timerProgressBar: true,
+                    });
+
                     onClose();
                 },
                 onError: (errors) => {
@@ -59,6 +71,17 @@ export default function UserForm({user, onClose, mode}){
         } else {
             post(route('user.store'), {
                 onSuccess: () => {
+
+                    Swal.fire({
+                        toast: true,
+                        position: "top-end",
+                        icon: "success",
+                        title: "Account is successfully created!",
+                        showConfirmButton: false,
+                        timer: 2000,
+                        timerProgressBar: true,
+                    });
+
                     onClose();
                 },
                 onError: (errors) => {
@@ -181,26 +204,55 @@ export default function UserForm({user, onClose, mode}){
                                         error={errors.name}
                                     />
 
-                                    <div className="flex flex-col">
-                                        <label htmlFor="role">Role: <span className="text-red-500">*</span></label>
-                                        <select 
-                                            name="role"
-                                            value={data.role} 
-                                            onChange={(e) => setData("role", e.target.value)}
-                                            className="border border-gray-400 bg-white px-5 py-2 rounded-md"
-                                        >
-                                            <option value="super_admin">Super admin</option>
-                                            <option value="admin">Admin</option>
-                                            
-                                        </select>
+                                    {
+                                        !isEdit && <>
 
-                                        {errors.role && (
-                                            <p className="text-red-500 text-sm mt-1">
-                                                {errors.role}
-                                            </p>
-                                        )}
-                                    </div>
+                                            <div className="flex flex-col">
+                                                <label htmlFor="role">Role: <span className="text-red-500">*</span></label>
+                                                <select 
+                                                    name="role"
+                                                    value={data.role} 
+                                                    onChange={(e) => setData("role", e.target.value)}
+                                                    className="border border-gray-400 bg-white px-5 py-2 rounded-md"
+                                                >
+                                                    <option value="super_admin">Super admin</option>
+                                                    <option value="admin">Admin</option>
+                                                    
+                                                </select>
 
+                                                {errors.role && (
+                                                    <p className="text-red-500 text-sm mt-1">
+                                                        {errors.role}
+                                                    </p>
+                                                )}
+                                            </div>
+
+                                            <div className="flex flex-col gap-y-5">
+                                                <TextInput 
+                                                    label={"Email:"}
+                                                    placeholder="eg. company@gmail.com"
+                                                    value={data.email}
+                                                    onChange={(e) => setData("email", e.target.value)}
+                                                    error={errors.email}
+                                                    required={true}
+                                                />
+
+                                                <TextInput 
+                                                    label={"Password:"}
+                                                    type="password"
+                                                    placeholder="Enter password"
+                                                    value={data.password}
+                                                    onChange={(e) => setData("password", e.target.value)}
+                                                    error={errors.password}
+                                                    required={true}
+                                                />
+                                            </div>
+                                        
+                                        </>
+                                    }
+
+                                    
+{/* 
                                     {
                                         !isEdit && (
                                             <div className="flex flex-col gap-y-5">
@@ -225,7 +277,7 @@ export default function UserForm({user, onClose, mode}){
                                             </div>
                                             
                                         )
-                                    }
+                                    } */}
                                     
                                         
                                     

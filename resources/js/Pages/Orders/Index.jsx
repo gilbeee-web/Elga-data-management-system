@@ -64,17 +64,17 @@ export default function Index ({orders, user, products}){
 
     const statusClasses = {
         draft: "bg-gray-500",
-        awaiting_shipping_fee: "bg-blue-500",
+        awaiting_shipping_fee: "bg-orange-500",
         awaiting_payment: "bg-red-500",
-        payment_confirmed: "bg-blue-500",
-        processing: "bg-yellow-500",
+        payment_confirmed: "bg-yellow-500",
+        processing: "bg-blue-500",
         shipped: "bg-green-500",
-        cancelled: "bg-gray-800", 
+        cancelled: "bg-gray-800"
     };
 
     const orderStatusDisplay = {
         awaiting_payment: "Unpaid",
-        payment_confirmed: "Partial Payment",
+        payment_confirmed: "Fully Paid",
         awaiting_shipping_fee: "Awaiting Shipping Fee"
     };
 
@@ -292,7 +292,12 @@ export default function Index ({orders, user, products}){
                             <th className="p-3">
                                 {activeTab === "shipped" ? "DATE SHIPPED" : "DATE CREATED"}
                             </th>
-                            <th className="p-3">REMARKS</th>
+                            {
+                                (activeTab === "shipped" || activeTab === "all") && (
+                                    <th className="p-3">REMARKS</th>
+                                )
+                            }
+                            
                         </tr>
                     </thead>
                     <tbody>
@@ -339,15 +344,34 @@ export default function Index ({orders, user, products}){
 
                                         <td className="p-3">
                                             
-                                            <span className={`py-1 px-3 rounded-full text-white font-semibold capitalize ${
-                                                statusClasses[order.order_status] || "bg-gray-500"
+                                            <span className={`py-1 px-3 rounded-full text-white font-semibold capitalize  ${
+                                                order.payment_status === 'partial' ? 
+                                                "bg-yellow-500" 
+                                                : statusClasses[order.order_status] || "bg-gray-500"
                                             }`}>
-                                                {orderStatusDisplay[order.order_status] ?? order.order_status}
+
+                                                {
+                                                    order.payment_status !== 'partial' ? 
+                                                    orderStatusDisplay[order.order_status] ?? order.order_status
+                                                    : "Partial Payment" 
+                                                }
+                                                {/* {
+                                                    
+                                                    orderStatusDisplay[order.order_status] ?? order.order_status
+                                                } */}
                                             </span>
                                         </td>
 
-                                        <td className="p-3">{formatDateTime(order.created_at)}</td>
-                                        <td className="p-3">{order.remarks ?? "--"}</td>
+                                        <td className="p-3">
+                                            {activeTab === "shipped" ? formatDateTime(order.completed_at) : formatDateTime(order.created_at)}
+                                            {}
+                                        </td>
+                                        {
+                                            (activeTab === "shipped" || activeTab === "all") && (
+                                                <td className="p-3">{order.remarks ?? "--"}</td>
+                                            )
+                                        }
+                                        {/* <td className="p-3">{order.remarks ?? "--"}</td> */}
                                     </tr>
                                 ))
                             ) :

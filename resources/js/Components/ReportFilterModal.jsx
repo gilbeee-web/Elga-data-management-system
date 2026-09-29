@@ -4,13 +4,36 @@ import { route } from "ziggy-js";
 
 export default function ReportFilterModal({onClose, initialFilters}){
 
+    const modeOfPayments = [
+        "cash",
+        "gcash",
+        "bank_transfer",
+        "card_payment"
+    ];
+
     const {data, setData, processing, errors, get} = useForm({
+        order_type: "",
         period: "",
         sort_by: "",
+        mop_type: modeOfPayments,
         sort_direction: "",
         dateFrom: "",
         dateTo: "",
     });
+
+    const handleCheckboxChange = (mop) => {
+        if (data.mop_type.includes(mop)) {
+            setData(
+                "mop_type",
+                data.mop_type.filter((item) => item !== mop)
+            );
+        } else {
+            setData(
+                "mop_type",
+                [...data.mop_type, mop]
+            );
+        }
+    };
 
     const customPeriod = data.period === 'custom';
     
@@ -42,8 +65,10 @@ export default function ReportFilterModal({onClose, initialFilters}){
 
         if(initialFilters){
             setData({
+                order_type: initialFilters.order_type,
                 period: initialFilters.period,
                 sort_by: initialFilters.sort_by,
+                mop_type: initialFilters.mop_type,
                 sort_direction: initialFilters.sort_direction,
                 dateFrom: initialFilters.dateFrom,
                 dateTo: initialFilters.dateTo
@@ -72,8 +97,61 @@ export default function ReportFilterModal({onClose, initialFilters}){
                     </button>
                 </div>
 
-                <form className="mt-5" onSubmit={handleGenerateReport}>
+                <form className="mt-3" onSubmit={handleGenerateReport}>
+
                     <div className="flex flex-col">
+                        <h1 className="mb-2 font-semibold">Order Type</h1>
+
+                        <div className="flex gap-x-5 items-center">
+                            <div className="flex gap-x-5 items-center">
+                                <div className="flex gap-x-2 items-center">
+                                    <input 
+                                        type="radio" 
+                                        name="order_type"
+                                        value="all"
+                                        id="all"
+                                        checked={data.order_type === 'all'}
+                                        onChange={(e) => setData('order_type', e.target.value)}
+                                        className="w-4 h-4"
+                                    />
+                                    <label htmlFor="all" className="text-sm">All</label>
+                                </div>
+                            </div>
+
+                            <div className="flex gap-x-5 items-center">
+                                <div className="flex gap-x-2 items-center">
+                                    <input 
+                                        type="radio" 
+                                        name="order_type"
+                                        value="shipment"
+                                        id="shipment"
+                                        checked={data.order_type === 'shipment'}
+                                        onChange={(e) => setData('order_type', e.target.value)}
+                                        className="w-4 h-4"
+                                    />
+                                    <label htmlFor="shipment" className="text-sm">Shipment</label>
+                                </div>
+                            </div>
+
+                            <div className="flex gap-x-5 items-center">
+                                <div className="flex gap-x-2 items-center">
+                                    <input 
+                                        type="radio" 
+                                        name="order_type"
+                                        value="walkin"
+                                        id="walkin"
+                                        checked={data.order_type === 'walkin'}
+                                        onChange={(e) => setData('order_type', e.target.value)}
+                                        className="w-4 h-4"
+                                    />
+                                    <label htmlFor="walkin" className="text-sm">Walk-in</label>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+
+                    <div className="mt-3 flex flex-col">
                         <h1 className="mb-2 font-semibold">Period</h1>
 
                         <div className="flex flex-col gap-y-3">
@@ -175,7 +253,7 @@ export default function ReportFilterModal({onClose, initialFilters}){
                         </div>
                     </div>
 
-                    <div className="mt-5 flex flex-col">
+                    <div className="mt-3 flex flex-col">
                         <h1 className="mb-2 font-semibold">Sort By</h1>
 
                         <div className="flex flex-col gap-y-3">
@@ -233,7 +311,37 @@ export default function ReportFilterModal({onClose, initialFilters}){
                         </div>
                     </div>
 
-                    <div className="mt-5 flex flex-col">
+
+                    {
+                        data.sort_by === "payment_method" && (
+
+                            <div className="mt-3 flex flex-col">
+                                <h1 className="mb-2 font-semibold">Available MOP:</h1>
+
+                                <div className="flex flex-col gap-y-3">    
+
+                                    {modeOfPayments.map((mop) => (
+                                        <label key={mop} className="block">
+                                            <input
+                                                type="checkbox"
+                                                checked={data.mop_type.includes(mop)}
+                                                onChange={() => handleCheckboxChange(mop)}
+                                            />
+
+                                            <span className="ml-2 capitalize">
+                                                {mop.replace("_", " ")}
+                                            </span>
+                                        </label>
+                                    ))}
+
+                                </div>
+
+                            </div>
+
+                        )
+                    }
+
+                    <div className="mt-3 flex flex-col">
                         <h1 className="mb-2 font-semibold">Order</h1>
 
                         <div className="flex gap-x-5 items-center">

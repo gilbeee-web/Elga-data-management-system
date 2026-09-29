@@ -368,6 +368,16 @@ class OrderController extends Controller
         return redirect()->back()->with('success', "Successfully removed the payment.");
     }
 
+    public function markReceiptPrinted(Order $order)
+    {
+        $order = $this->orderService->markReceiptPrinted($order);
+
+        return back()->with(
+            'success',
+            'Receipt marked as printed. Order is now processing.'
+        );
+    }
+
 
     //shipped the order for shipment order
     public function shippedOrder(Order $order, Request $request){
@@ -447,6 +457,7 @@ class OrderController extends Controller
                 'orders.sender_name',
                 'orders.completed_at'
             )
+            ->where('orders.order_status',"shipped")
             ->orderByDesc('order_items.created_at')
             ->get();
 

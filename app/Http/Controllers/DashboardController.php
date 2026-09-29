@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Order;
+use App\Models\OrderItem;
 use App\Models\Payment;
 use App\Models\Shipment;
 use App\Models\Shop;
@@ -26,24 +27,28 @@ class DashboardController extends Controller
             default => [now()->startOfDay(), now()->endOfDay()],
         };
 
-        $totalSales = Payment::join('orders', 'orders.id', '=', 'payments.order_id')
+        $totalPaymentsCollected = Payment::join('orders', 'orders.id', '=', 'payments.order_id')
             ->where('orders.shop_id', session('shop_id'))
             ->whereBetween('paid_at', $range)->sum('payment_amount');
 
-
+        $totalSales = OrderItem::join('orders', 'orders.id', '=', 'order_items.order_id')
+            ->where('orders.shop_id', session('shop_id'))
+            ->where('orders.order_status', 'shipped')
+            ->whereBetween('orders.completed_at', $range)
+            ->sum('order_items.subtotal');
+        
         $totalOrders = Order::where('shop_id', session('shop_id'))->whereBetween('created_at', $range)->count();
 
-
-        $pendingOrders = Order::where('shop_id', session('shop_id'))->whereIn('order_status', [
-            'processing', 'awaiting_payment', 'payment_confirmed'
-        ])->count();
+        // $pendingOrders = Order::where('shop_id', session('shop_id'))->whereIn('order_status', [
+        //     'processing', 'awaiting_payment', 'payment_confirmed'
+        // ])->count();
 
         $totalSfCollected = Shipment::join('orders', 'shipments.order_id', '=', 'orders.id')
             ->where('orders.shop_id', session('shop_id'))
             ->whereBetween('shipments.shipped_at', $range)
-            ->sum('shipments.raw_shipping_fee');
+            ->sum('shipments.total_shipping_fee');
 
-
+        
         $recentOrders = Order::with('references')
             ->where('orders.shop_id', session('shop_id'))
             ->latest()->take(5)->get();
@@ -78,10 +83,13 @@ class DashboardController extends Controller
 
 
         return Inertia::render('Dashboard', [
-            'totalSales' => $totalSales,
-            'totalOrders' => $totalOrders,
-            'pendingOrders' => $pendingOrders,
-            'totalSfCollected' => $totalSfCollected,
+            'summaryCards' => [
+                'totalSales' => $totalSales, //item or product sales
+                'totalOrders' => $totalOrders,
+                'totalPaymentsCollected' => $totalPaymentsCollected,
+                'totalSfCollected' => $totalSfCollected,
+            ],
+            // 'pendingOrders' => $pendingOrders,
             'recentOrders' => $recentOrders,
             'salesTrend' => $salesTrend,
             'orderStatusDistribution' => $orderStatusBreakdown,

@@ -120,7 +120,8 @@ class OrderService{
             'discount' => 0,
             'total_amount' => 0,
             'payment_status' => "unpaid",
-            'order_status' => "draft"
+            'order_status' => "draft",
+            'is_receipt_printed' => false
         ]);
 
         $this->storeStatusHistory(
@@ -400,12 +401,30 @@ class OrderService{
 
             $updatedOrder = $this->recalculateOrderTotals($order);
 
-            $newStatus = $updatedOrder->remaining_balance == 0 ? 'processing' : 'payment_confirmed';
- 
-            if ($newStatus !== $oldStatus) {
-                $order->update(['order_status' => $newStatus]);
-                $this->storeStatusHistory($order, $oldStatus, $newStatus, 'Order fully paid.');
+            if ($updatedOrder->payment_status === 'paid') {
+
+                $newStatus = 'payment_confirmed';
+
+                if ($newStatus !== $oldStatus) {
+                    $order->update([
+                        'order_status' => $newStatus
+                    ]);
+
+                    $this->storeStatusHistory(
+                        $order,
+                        $oldStatus,
+                        $newStatus,
+                        'Order fully paid.'
+                    );
+                }
             }
+
+            // $newStatus = $updatedOrder->remaining_balance == 0 ? 'processing' : 'payment_confirmed';
+ 
+            // if ($newStatus !== $oldStatus) {
+            //     $order->update(['order_status' => $newStatus]);
+            //     $this->storeStatusHistory($order, $oldStatus, $newStatus, 'Order fully paid.');
+            // }
 
             return $payment;
         });
@@ -432,15 +451,18 @@ class OrderService{
 
                 if($updatedOrder->remaining_balance === $updatedOrder->total_amount){
                     $newStatus = "awaiting_payment";
-                }else if($updatedOrder->remaining_balance === 0){
-                    $newStatus = "processing";
+                }else if($updatedOrder->payment_status === 'paid'){
+                    $newStatus = 'payment_confirmed';
                 }else{
                     $newStatus = "payment_confirmed";
                 }
+            }
 
-                // $newStatus = $updatedOrder->remaining_balance == 0
-                //     ? 'processing'
-                //     : 'payment_confirmed';
+            // If payment is no longer fully settled, receipt should no longer be considered printed.
+            if ($updatedOrder->payment_status !== 'paid') {
+                $order->update([
+                    'is_receipt_printed' => false,
+                ]);
             }
 
             //only update the order status if it actually changes
@@ -453,6 +475,40 @@ class OrderService{
         });
     }
 
+    public function markReceiptPrinted(Order $order)
+    {
+        if ($order->payment_status !== 'paid') {
+            throw ValidationException::withMessages([
+                'receipt' => 'The order must be fully paid before the receipt can be printed.'
+            ]);
+        }
+
+        if ($order->is_receipt_printed) {
+            throw ValidationException::withMessages([
+                'receipt' => 'The receipt has already been marked as printed.'
+            ]);
+        }
+
+        return DB::transaction(function () use ($order) {
+
+            $oldStatus = $order->order_status;
+
+            $order->update([
+                'is_receipt_printed' => true,
+                'order_status' => 'processing',
+            ]);
+
+            $this->storeStatusHistory(
+                $order,
+                $oldStatus,
+                'processing',
+                'Receipt printed. Order moved to processing.'
+            );
+
+            return $order->fresh();
+        });
+    }
+
 
     
 
@@ -461,6 +517,12 @@ class OrderService{
         return DB::transaction(function () use ($data, $order) {
 
             if ($order->status !== 'shipped') {
+
+                if (!$order->is_receipt_printed) {
+                    throw ValidationException::withMessages([
+                        'receipt' => 'The receipt must be marked as printed before shipping the order.'
+                    ]);
+                }
 
                 $isWalkin = $order->order_type === "walkin";
 
@@ -476,7 +538,6 @@ class OrderService{
             
                 $orderItems = OrderItem::with("product_variant")->where("order_id", $order->id)->get();
 
-                // dd($orderItems);
                 //increment the sold of the order item
                 foreach($orderItems as $item){
                     $item->product_variant->increment('sold', $item->qty);

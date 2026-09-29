@@ -40,9 +40,10 @@ Route::middleware('auth')->group(function(){
             Route::post('/{order}/shipped', 'shippedOrder')->name('order.shippedOrder');
             Route::post('/{order}/complete', 'completeOrder')->name('order.completeOrder');
             Route::delete('/{order}', 'destroyOrder')->name('order.destroy');
-            Route::delete('/{order}/{payment_id}', 'destroyPayment')->name('order.destroyPayment');
+            Route::delete('/{order}/{payment_id}', 'destroyPayment')->name('order.destroy.payment');
             Route::patch('/{order}/cancel', 'cancelOrder')->name('order.cancel');
-            Route::patch('/{order}/switch', 'switchOrderType')->name('order.switchOrderType');
+            Route::patch('/{order}/switch', 'switchOrderType')->name('order.switch.orderType');
+            Route::patch('/{order}/receipt/printed', 'markReceiptPrinted')->name('order.receipt.printed');
             Route::get('/{variant}', 'getVariantOrderHistory')->name('order.getVariantOrderHistory');
             Route::get('/{order}/history', 'getOrderStatusHistory')->name('order.getOrderStatusHistory');
         });

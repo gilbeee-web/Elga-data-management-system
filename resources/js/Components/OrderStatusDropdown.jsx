@@ -8,16 +8,16 @@ export default function OrderStatusDropdown({order}){
 
     const orderStatusDisplay = {
         awaiting_payment: "Unpaid",
-        payment_confirmed: "Partial Payment",
+        payment_confirmed: "Fully Paid",
         awaiting_shipping_fee: "Awaiting Shipping Fee"
     };
 
     const statusClasses = {
         draft: "bg-gray-500",
-        awaiting_shipping_fee: "bg-blue-500",
+        awaiting_shipping_fee: "bg-orange-500",
         awaiting_payment: "bg-red-500",
-        payment_confirmed: "bg-blue-500",
-        processing: "bg-yellow-500",
+        payment_confirmed: "bg-yellow-500",
+        processing: "bg-blue-500",
         shipped: "bg-green-500",
         cancelled: "bg-gray-800"
     };
@@ -84,11 +84,19 @@ export default function OrderStatusDropdown({order}){
             <div className="relative">
                 <button 
                     className={`flex gap-x-3 items-center px-5 py-2 rounded-md text-white capitalize font-semibold cursor-pointer
-                        ${statusClasses[order.order_status] || "bg-gray-500"}`
+                        ${
+                            order.payment_status === 'partial' ? 
+                            "bg-yellow-500" 
+                            : statusClasses[order.order_status] || "bg-gray-500"
+                        }`
                     }
                     onClick={() => setOpenStatusSettings(!openStatusSettings)}
                 >
-                    {orderStatusDisplay[order.order_status] ?? order.order_status}
+                    {
+                        order.payment_status !== 'partial' ? 
+                        orderStatusDisplay[order.order_status] ?? order.order_status
+                        : "Partial Payment" 
+                    }
                     <span>
                         <ChevronDown strokeWidth={2} size={20} />
                     </span>

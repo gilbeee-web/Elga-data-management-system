@@ -99,11 +99,10 @@ export default function OrderForm({order, order_type, changeTab, orderReferences
         const targetOrder = updated[activerOrderIndex]; 
 
         // collect the ids that exists in the target order
-        const existingIds = new Set(targetOrder.items.map((item) => item.id)); 
+        // const existingIds = new Set(targetOrder.items.map((item) => item.id)); 
 
         // make a default value to the new added products and also filter the products by existing ids
         const newItems = addedProducts
-            .filter((p) => !existingIds.has(p.id))
             .map((p) => ({
                 ...p,
                 selected_variant_id: p.variants?.[0]?.id ?? null, // default to first variant

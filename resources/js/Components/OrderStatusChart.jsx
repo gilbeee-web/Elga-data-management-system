@@ -11,14 +11,18 @@ const STATUS_LABELS = {
 };
 
 const COLORS = {
-    draft: '#9ca3af',
-    awaiting_shipping_fee: '#fbbf24',
-    awaiting_payment: '#f59e0b',
-    payment_confirmed: '#3b82f6',
-    processing: '#8b5cf6',
-    shipped: '#10b981',
-    cancelled: '#ef4444',
+    draft: '#6b7280',                 // bg-gray-500
+    awaiting_shipping_fee: '#f97316', // bg-orange-500
+    awaiting_payment: '#ef4444',      // bg-red-500
+    payment_confirmed: '#eab308',     // bg-yellow-500
+    processing: '#3b82f6',            // bg-blue-500
+    shipped: '#22c55e',               // bg-green-500
+    cancelled: '#1f2937',             // bg-gray-800
 };
+
+
+
+    
 
 export default function OrderStatusChart({ orderStatusBreakdown }) {
     const chartData = orderStatusBreakdown.map((item) => ({

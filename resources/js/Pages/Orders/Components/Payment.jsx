@@ -43,7 +43,7 @@ export default function Payment({order, order_type, orderSummary, payments, chan
 
         if(result.isConfirmed){
             router.delete(
-                route('order.destroyPayment', {
+                route('order.destroy.payment', {
                     order: order.id,
                     payment_id: payment_id,
                 }),

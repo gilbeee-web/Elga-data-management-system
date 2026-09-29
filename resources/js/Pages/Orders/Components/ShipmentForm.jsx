@@ -33,6 +33,18 @@ export default function ShipmentForm({order, order_type, customer, orderReferenc
     const saveShipment = async (e) => {
 
         e.preventDefault();
+
+
+        if(!order.is_receipt_printed && !isWalkin){
+            Swal.fire({
+                title: "Ship failed",
+                text: "The receipt must be marked as printed before shipping the order.",
+                icon: "error"
+            });
+
+            return;
+        }
+
         
         const result = await Swal.fire({
             title: "Shipped Order?",
@@ -295,7 +307,8 @@ export default function ShipmentForm({order, order_type, customer, orderReferenc
                             <div className="mt-2">
                                 <ul className="flex gap-x-3 items-center">
                                     <li className="font-semibold text-gray-500 capitalize">{shippingInfo?.container_size ?? "--"} {shippingInfo?.container_type ?? "--"}</li>
-                                    <li className="font-semibold text-gray-500"><span className="text-black">|</span> Fee {formatCurrency(shippingInfo?.total_shipping_fee ?? 0)}</li>
+                                    <li className="font-semibold text-gray-500"><span className="text-black">|</span> Courier Fee: {formatCurrency(shippingInfo?.raw_shipping_fee ?? 0)}</li>
+                                    <li className="font-semibold text-gray-500"><span className="text-black">|</span> SF Collected: {formatCurrency(shippingInfo?.total_shipping_fee ?? 0)}</li>
                                     <li className="font-semibold text-gray-500"><span className="text-black">|</span> {shippingInfo?.tracking_number ?? "--"}</li>
                                 </ul>
                             </div>
@@ -349,7 +362,9 @@ export default function ShipmentForm({order, order_type, customer, orderReferenc
                         <tbody>
                             {payments.length > 0 && payments.map((payment, paymentIndex) => (
                                 <tr key={paymentIndex} className="border-b border-gray-100">
-                                    <td className="py-2 text-gray-900 capitalize">{payment.payment_method} {payment.mop_name}</td>
+                                    <td className="py-2 text-gray-900 capitalize">
+                                        <span className="text-gray-500">{payment.payment_method === "bank_transfer" ? "Bank Transfer" : payment.payment_method }</span> {payment.mop_name}
+                                    </td>
                                     <td className="py-2 text-gray-600">{payment.reference_number || '—'}</td>
                                     <td className="py-2 text-right text-gray-900">{formatCurrency(payment.payment_amount)}</td>
                                 </tr>

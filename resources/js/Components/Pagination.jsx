@@ -1,7 +1,7 @@
 import { router } from "@inertiajs/react";
+import { ArrowLeft, ArrowRight, ChevronsLeft, ChevronsRight } from "lucide-react";
 
 export default function Pagination({ data, name }) {
-
     if (!data || data.data.length === 0) {
         return null;
     }
@@ -16,23 +16,29 @@ export default function Pagination({ data, name }) {
             <div className="flex gap-1">
 
                 {/* Previous */}
-                {data.prev_page_url && (
-                    <button
-                        onClick={() =>
-                            router.get(
-                                data.prev_page_url,
-                                {},
-                                {
-                                    preserveState: true,
-                                    preserveScroll: true,
-                                }
-                            )
-                        }
-                        className="px-3 py-1 rounded bg-gray-100 hover:bg-gray-200 cursor-pointer"
-                    >
-                        Previous
-                    </button>
-                )}
+                <button
+                    disabled={!data.prev_page_url}
+                    onClick={() =>
+                        data.prev_page_url &&
+                        router.get(
+                            data.prev_page_url,
+                            {},
+                            {
+                                preserveState: true,
+                                preserveScroll: true,
+                            }
+                        )
+                    }
+                    className={`px-3 py-1 rounded flex gap-x-1 ${
+                        data.prev_page_url
+                            ? "bg-gray-100 hover:bg-gray-200 cursor-pointer"
+                            : "bg-gray-100 text-gray-400 cursor-not-allowed"
+                    }`}
+                >
+                    
+                    <ChevronsLeft size={20}/>
+                    <span>Previous</span>
+                </button>
 
                 {/* Page Numbers */}
                 {Array.from(
@@ -91,23 +97,29 @@ export default function Pagination({ data, name }) {
                 )}
 
                 {/* Next */}
-                {data.next_page_url && (
-                    <button
-                        onClick={() =>
-                            router.get(
-                                data.next_page_url,
-                                {},
-                                {
-                                    preserveState: true,
-                                    preserveScroll: true,
-                                }
-                            )
-                        }
-                        className="px-3 py-1 rounded bg-gray-300 hover:bg-gray-200 cursor-pointer"
-                    >
-                        Next
-                    </button>
-                )}
+                <button
+                    disabled={!data.next_page_url}
+                    onClick={() =>
+                        data.next_page_url &&
+                        router.get(
+                            data.next_page_url,
+                            {},
+                            {
+                                preserveState: true,
+                                preserveScroll: true,
+                            }
+                        )
+                    }
+                    className={`px-3 py-1 rounded flex gap-x-1 ${
+                        data.next_page_url
+                            ? "bg-gray-300 hover:bg-gray-200 cursor-pointer"
+                            : "bg-gray-100 text-gray-400 cursor-not-allowed"
+                    }`}
+                >
+                    <span>Next</span>
+                    <ChevronsRight size={20}/>
+                    
+                </button>
 
             </div>
         </div>

@@ -6,7 +6,9 @@ import { formatDateTime } from "../Utils/formatDateTime";
 import { formatCurrency } from "../Utils/formatCurrency";
 import ReportFilterModal from "../Components/ReportFilterModal";
 import ExportButton from "../Components/ExportButton";
-import { ArrowLeftRight, ChartNoAxesCombined, Funnel, Search, Truck } from "lucide-react";
+import { ArrowLeftRight, BanknoteArrowUp, ChartNoAxesCombined, Funnel, Search, Truck } from "lucide-react";
+import Pagination from "../Components/Pagination";
+import { route } from "ziggy-js";
 
 export default function Reports({filters, summaryCards, transactions, user}){
 
@@ -92,7 +94,7 @@ export default function Reports({filters, summaryCards, transactions, user}){
             }
 
 
-            <div className="mt-5 grid grid-cols-3 gap-10">
+            <div className="mt-5 grid grid-cols-4 gap-10">
 
                 <SummaryCard 
                     cardName={"Transactions"}
@@ -110,10 +112,17 @@ export default function Reports({filters, summaryCards, transactions, user}){
                     
                 />
 
+                <SummaryCard 
+                    cardName={"Courier Fee Paid"}
+                    isCurrency={true}
+                    value={summaryCards.totalSfPaid}
+                    icon={BanknoteArrowUp}
+                />
+
                 
 
                 <SummaryCard 
-                    cardName={"Shipping fee collected"}
+                    cardName={"Shipping Fee Collected"}
                     isCurrency={true}
                     value={summaryCards.totalSfCollected}
                     icon={Truck}
@@ -127,7 +136,7 @@ export default function Reports({filters, summaryCards, transactions, user}){
                 <table className="mt-3 w-full text-sm text-left border-collapse bg-white shadow-md rounded-lg">
                     <thead className="text-gray-500 uppercase text-xs border-b border-gray-300">
                         <tr className="">
-                            <th className="p-3">TRANSACTION NO.</th>
+                            <th className="p-3">TRANSACTION NO. / ORDER TYPE</th>
                             <th className="p-3">CUSTOMER NAME</th>
                             {/* <th className="p-3">PAYMENT TYPE</th> */}
                             <th className="p-3">
@@ -162,6 +171,9 @@ export default function Reports({filters, summaryCards, transactions, user}){
                                     >
                                         <td className="p-3">
                                             <h1 className="font-semibold">{transaction.order.transaction_number}</h1>
+                                            <span className="capitalize text-xs">
+                                                {transaction.order.order_type === "walkin" ? "Walk-in" : transaction.order.order_type}
+                                            </span>
                                         </td>
                                         <td className="p-3">{transaction.order.sender_name ?? "--"}</td>
                                         {/* <td className="p-3 capitalize">{
@@ -188,38 +200,10 @@ export default function Reports({filters, summaryCards, transactions, user}){
 
                     </tbody>
                 </table>
+
+
+                <Pagination name={"transactions"} data={transactions}/>
                 
-                {transactions.data.length > 0 && (
-                    <div className="flex justify-between items-center mt-4 text-sm text-gray-600">
-                        <span>
-                            Showing {transactions.from ?? 0}–{transactions.to ?? 0} of {transactions.total} transactions
-                        </span>
-                        <div className="flex gap-1">
-                            {transactions.links.map((link, i) => (
-                                <button
-                                    key={i}
-                                    disabled={!link.url}
-                                    onClick={() =>
-                                        link.url &&
-                                        router.get(
-                                            link.url,
-                                            {},
-                                            { preserveState: true, preserveScroll: true}
-                                        )
-                                    }
-                                    className={`px-3 py-1 rounded ${
-                                        link.active
-                                            ? 'bg-blue-500 text-white'
-                                            : 'bg-gray-100 hover:bg-gray-200'
-                                    } ${!link.url ? 'opacity-40 cursor-not-allowed' : 'cursor-pointer'}`}
-                                    dangerouslySetInnerHTML={{ __html: link.label }}
-                                />
-                            ))}
-                        </div>
-                    </div>
-                )}
-
-
             </div>
 
 

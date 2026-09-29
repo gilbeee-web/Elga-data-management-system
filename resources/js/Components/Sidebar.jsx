@@ -147,7 +147,7 @@ export default function Sidebar({user}){
                     className="object-contain w-8 h-8" 
                 />
                 <h1 className="text-lg font-semibold text-gray-800 tracking-tight">
-                    Index <span className="text-xs font-medium text-gray-400 align-middle">OMS</span>
+                    Elga <span className="text-xs font-medium text-gray-400 align-middle">OMS</span>
                 </h1>
             </div>
 

@@ -6,6 +6,16 @@ export default function Pagination({ data, name }) {
         return null;
     }
 
+    const goToPage = (page) => {
+        const url = new URL(window.location.href);
+        url.searchParams.set("page", page);
+
+        router.get(url.pathname + url.search, {}, {
+            preserveState: true,
+            preserveScroll: true,
+        });
+    };
+
     return (
         <div className="flex justify-between items-center my-8 text-sm text-gray-600">
 
@@ -47,16 +57,7 @@ export default function Pagination({ data, name }) {
                 ).map((page) => (
                     <button
                         key={page}
-                        onClick={() =>
-                            router.get(
-                                data.path,
-                                { page },
-                                {
-                                    preserveState: true,
-                                    preserveScroll: true,
-                                }
-                            )
-                        }
+                        onClick={() => goToPage(page)}
                         className={`px-3 py-1 rounded cursor-pointer ${
                             page === data.current_page
                                 ? "bg-blue-500 text-white"
@@ -75,16 +76,7 @@ export default function Pagination({ data, name }) {
                         </span>
 
                         <button
-                            onClick={() =>
-                                router.get(
-                                    data.path,
-                                    { page: data.last_page },
-                                    {
-                                        preserveState: true,
-                                        preserveScroll: true,
-                                    }
-                                )
-                            }
+                            onClick={() => goToPage(data.last_page)}
                             className={`px-3 py-1 rounded cursor-pointer ${
                                 data.current_page === data.last_page
                                     ? "bg-blue-500 text-white"

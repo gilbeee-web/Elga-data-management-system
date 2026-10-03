@@ -141,7 +141,7 @@ export default function CustomerForm({order, order_type, changeTab, customer, ge
 
                     <TextInput 
                         name={"sender_name"}
-                        placeholder="Enter customer name..."
+                        placeholder="Enter customer name"
                         type="text"
                         value={data.sender_name}
                         error={errors.sender_name}
@@ -162,7 +162,7 @@ export default function CustomerForm({order, order_type, changeTab, customer, ge
 
                     <TextInput 
                         name={"receiver_name"}
-                        placeholder="Enter receiver's name..."
+                        placeholder="Enter receiver name"
                         type="text"
                         value={data.receiver_name}
                         error={errors.receiver_name}
@@ -181,7 +181,7 @@ export default function CustomerForm({order, order_type, changeTab, customer, ge
 
                     <TextInput 
                         name={"contact_number"}
-                        placeholder="Enter contact number (11 digits)..."
+                        placeholder="09XXXXXXXXX"
                         type="text"
                         value={data.contact_number}
                         error={errors.contact_number}
@@ -202,7 +202,7 @@ export default function CustomerForm({order, order_type, changeTab, customer, ge
                     <div className="flex flex-col">
                         <input
                             type="text"
-                            placeholder="Enter address..."
+                            placeholder="Enter receiver address"
                             name="address"
                             value={data.address}
                             disabled={readOnly}

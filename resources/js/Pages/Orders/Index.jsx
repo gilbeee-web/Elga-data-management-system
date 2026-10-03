@@ -96,6 +96,59 @@ export default function Index ({orders, user, products}){
 
     }
 
+    const [currentPaymentStatus, setcurrentPaymentStatus] = useState("");
+
+    const handleFilterPaymentStatus = (selectedStatus) => {
+
+        console.log("fetching payment status");
+        setIsFetchingData(true);
+
+        setcurrentPaymentStatus(selectedStatus);
+
+        // alert(selectedStatus);
+
+        router.get(route('order.index'), { 
+            filter_status: currentFilter, 
+            search: currentSearch, 
+            payment_status: selectedStatus
+        }, {
+            preserveState: true,
+            preserveScroll: true,
+            only: ['orders'],
+            onFinish: () => {
+                setIsFetchingData(false);
+            }
+        });
+
+    }
+
+    const [selectedOrderId, setSelectedOrderId] = useState([]);
+
+    const handleSelectOrder = (orderId) => {
+
+        setSelectedOrderId((prev) => {
+
+            if (prev.includes(orderId)) {
+                // Remove ID if already selected
+                return prev.filter((id) => id !== orderId);
+            }
+
+            // Add ID if not selected
+            return [...prev, orderId];
+        });
+    };
+
+    const handleSelectAll = (e) => {
+        if (e.target.checked) {
+            // Select all orders currently displayed
+            const allOrderIds = orders.data.map((order) => order.id);
+
+            setSelectedOrderId(allOrderIds);
+        } else {
+            // Unselect all
+            setSelectedOrderId([]);
+        }
+    };
 
 
 
@@ -259,34 +312,81 @@ export default function Index ({orders, user, products}){
 
 
 
-            <div className="mt-5">
-                <div className="w-full flex justify-end relative">
-                    <input 
-                        type="text" 
-                        className="min-w-xs rounded-md border border-gray-400 bg-white px-2 py-1 focus:outline-none focus:ring-1 focus:ring-gray-400"
-                        placeholder="Search order..."
-                        value={currentSearch}
-                        onChange={(e) => setCurrentSearch(e.target.value)}
-                        onKeyDown={(e) => {
-                            if(e.key === "Enter"){
-                                handleSearch(currentSearch);
-                            }
-                        }}
-                    />
+            <div className="mt-8">
+                <div className="w-full flex justify-between items-center">
 
-                    <button className="absolute top-0 right-0 h-full border-l border-gray-400 px-4 rounded-r-md flex items-center justify-center">
-                        <Search size={20} strokeWidth={2} />
-                    </button>
+                    <div className="">
+                        {
+                            activeTab === tabs[3] && (
+                                <div className="flex gap-x-2 items-center">
+                                    <label htmlFor="payment_status" className="font-medium">Payment Status:</label>
+                                    <select 
+                                        name="payment_status"
+                                        value={currentPaymentStatus}
+                                        className="border border-gray-400 bg-white px-2 py-1 rounded-md max-w-55"
+                                        onChange={(e) => handleFilterPaymentStatus(e.target.value)}
+                                    >
+                                        <option value="">All</option>
+                                        <option value="unpaid">Unpaid</option>
+                                        <option value="paid">Full Payment</option>
+                                        <option value="partial">Partial Payment</option>
+                                    </select>
+                                </div>
+                            )
+                        }
+                        
+                    </div>
+
+                    <div className="relative">
+                        <input 
+                            type="text" 
+                            className="min-w-xs rounded-md border border-gray-400 bg-white px-2 py-1 focus:outline-none focus:ring-1 focus:ring-gray-400"
+                            placeholder="Search order..."
+                            value={currentSearch}
+                            onChange={(e) => setCurrentSearch(e.target.value)}
+                            onKeyDown={(e) => {
+                                if(e.key === "Enter"){
+                                    handleSearch(currentSearch);
+                                }
+                            }}
+                        />
+
+                        <button className="absolute top-0 right-0 h-full border-l border-gray-400 px-4 rounded-r-md flex items-center justify-center">
+                            <Search size={20} strokeWidth={2} />
+                        </button>
+                    </div>
+
+                    
+                    
                 </div>
                 
                 <table className="mt-5 w-full text-sm text-left border-collapse bg-white shadow-sm rounded-lg">
                     <thead className="text-gray-600 uppercase text-xs border-b border-gray-300">
                         <tr>
+                            {
+                                (activeTab !== "all" && activeTab !== "shipped") && (
+                                    <th className="p-3">
+                                        <input 
+                                            type="checkbox" 
+                                            className="h-4 w-4" 
+                                            checked={
+                                                orders.data.length > 0 &&
+                                                orders.data.every((order) => selectedOrderId.includes(order.id)) //check if the all id is selected
+                                            }
+                                            onChange={handleSelectAll}
+                                        />
+                                    </th>
+                                )
+                            }
+                            
                             <th className="p-3">TRANSACTION NO. / ORDER NO.</th>
                             <th className="p-3">ORDER TYPE</th>
-                            <th className="p-3">CUSTOMER NAME</th>
+                            <th className="p-3">CUSTOMER / RECEIVER NAME</th>
                             <th className="p-3">
                                 {activeTab === "payment" ? "REMAINING BALANCE" : "TOTAL AMOUNT"}
+                            </th>
+                            <th className="p-3">
+                                {activeTab === "processing" && "J&T Tracking No."}
                             </th>
                             <th className="p-3">STATUS</th>
                             <th className="p-3">
@@ -297,6 +397,8 @@ export default function Index ({orders, user, products}){
                                     <th className="p-3">REMARKS</th>
                                 )
                             }
+
+                            
                             
                         </tr>
                     </thead>
@@ -304,7 +406,7 @@ export default function Index ({orders, user, products}){
                         {
                             isFetchingData ? 
                             <tr>
-                                <td colSpan={6} className="py-12">
+                                <td colSpan={7} className="py-12">
                                     <div className="flex flex-col items-center justify-center gap-3">
                                         <div className="animate-spin h-10 w-10 border-4 border-gray-300 border-t-blue-600 rounded-full" />
                                         <span className="text-sm text-gray-500 font-medium">Loading orders...</span>
@@ -320,6 +422,20 @@ export default function Index ({orders, user, products}){
                                         onClick={() => router.visit(route('order.edit', order.id))}
                                         key={order.id}
                                     >
+                                        {
+                                            (activeTab !== "all" && activeTab !== "shipped") && (
+                                                <td className="p-3">
+                                                    <input 
+                                                        type="checkbox" 
+                                                        checked={selectedOrderId.includes(order.id)}
+                                                        onChange={() => handleSelectOrder(order.id)}
+                                                        onClick={(e) => e.stopPropagation()}
+                                                        className="h-4 w-4"
+                                                    />
+                                                </td>
+                                            )
+                                        }
+                                        
                                         <td className="p-3">
                                             <h1 className="font-semibold">{order.transaction_number}</h1>
                                             
@@ -332,14 +448,21 @@ export default function Index ({orders, user, products}){
                                             ))}
                                             
                                         </td>
-                                        <td className="p-3 capitalize">{order.order_type ?? "--"}</td>
-                                        <td className="p-3">{order.sender_name ?? "--"}</td>
+                                        <td className="p-3">{order.order_type === "walkin" ? "Walk-in" : "Shipment"}</td>
+                                        <td className="p-3">
+                                            <h1 className="font-semibold">{order.sender_name ?? "--"}</h1>
+                                            <span className="text-xs">{order.receiver_name !== order.sender_name ? order.receiver_name : ""}</span>
+                                        </td>
                                         <td className="p-3">
                                             {
                                                 activeTab === "payment" 
                                                 ? formatCurrency(order.remaining_balance ?? "0.00")  
                                                 : formatCurrency(order.total_amount ?? "0.00")
                                             }
+                                        </td>
+
+                                        <td className="p-3 capitalize">
+                                            {activeTab === "processing" && order.shipment.tracking_number}
                                         </td>
 
                                         <td className="p-3">
@@ -355,23 +478,18 @@ export default function Index ({orders, user, products}){
                                                     orderStatusDisplay[order.order_status] ?? order.order_status
                                                     : "Partial Payment" 
                                                 }
-                                                {/* {
-                                                    
-                                                    orderStatusDisplay[order.order_status] ?? order.order_status
-                                                } */}
                                             </span>
                                         </td>
 
                                         <td className="p-3">
                                             {activeTab === "shipped" ? formatDateTime(order.completed_at) : formatDateTime(order.created_at)}
-                                            {}
                                         </td>
                                         {
                                             (activeTab === "shipped" || activeTab === "all") && (
                                                 <td className="p-3">{order.remarks ?? "--"}</td>
                                             )
                                         }
-                                        {/* <td className="p-3">{order.remarks ?? "--"}</td> */}
+
                                     </tr>
                                 ))
                             ) :

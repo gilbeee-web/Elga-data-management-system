@@ -302,7 +302,7 @@ export default function Dashboard ({products, user}){
                         placeholder="Search product..."
                         value={currentSearch}
                         onChange={(e) => setCurrentSearch(e.target.value)}
-                        className="w-full rounded-md py-2 pl-3 bg-white focus:outline-none focus:ring-1 focus:ring-[#DF9BAA]"
+                        className="min-w-xs rounded-md border border-gray-400 bg-white px-2 py-1 focus:outline-none focus:ring-1 focus:ring-gray-400"
                         onKeyDown={(e) => {
                             if(e.key === "Enter"){
                                 handleSearch(currentSearch);

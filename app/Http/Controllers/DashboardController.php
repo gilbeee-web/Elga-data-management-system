@@ -29,7 +29,7 @@ class DashboardController extends Controller
 
         $totalPaymentsCollected = Payment::join('orders', 'orders.id', '=', 'payments.order_id')
             ->where('orders.shop_id', session('shop_id'))
-            ->whereBetween('paid_at', $range)->sum('payment_amount');
+            ->whereBetween('orders.completed_at', $range)->sum('payment_amount');
 
         $totalSales = OrderItem::join('orders', 'orders.id', '=', 'order_items.order_id')
             ->where('orders.shop_id', session('shop_id'))

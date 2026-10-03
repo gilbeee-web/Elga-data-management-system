@@ -149,7 +149,7 @@ export default function PaymentFormModal({order, order_type, onClose, payment, o
 
         <div className="fixed inset-0 bg-[rgb(0,0,0,0.5)] z-99 flex justify-center items-center">
             
-            <div className="w-full bg-white sm:max-w-xs md:max-w-sm lg:max-w-md rounded-md shadow p-3 pt-3 overflow-y-auto min-h-[50vh]">
+            <div className="w-full bg-white sm:max-w-xs md:max-w-sm lg:max-w-md rounded-md shadow p-3 overflow-y-auto min-h-[90vh]">
 
                 {/* Header */}
 
@@ -170,7 +170,7 @@ export default function PaymentFormModal({order, order_type, onClose, payment, o
                     className="mt-3 flex flex-col gap-y-5"
                 >
 
-                    <div className="flex gap-x-5 items-center">
+                    <div className="flex gap-x-5 items-start">
 
                         <div className="flex flex-col gap-y-1">
                             <label htmlFor="" className="font-semibold">Payment Amount: <span className="text-red-500">*</span></label>

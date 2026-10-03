@@ -36,7 +36,7 @@ class OrderController extends Controller
     public function index(Request $request)
     {  
         $shopId = session('shop_id');
-        $query = Order::with('references')->where('shop_id', $shopId);
+        $query = Order::with(['references', 'shipment'])->where('shop_id', $shopId);
 
         if ($request->filled('filter_status') && $request->filter_status !== 'all') {
 
@@ -61,6 +61,11 @@ class OrderController extends Controller
                         $q2->where('order_number', 'like', '%' . $search . '%');
                     });
             });
+        }
+
+        if($request->filled('payment_status')){
+            // dd($request->payment_status);
+            $query->where('payment_status', $request->payment_status);
         }
 
         $orders = $query->latest()->paginate(5)->withQueryString();

@@ -58,6 +58,9 @@ export default function Edit({order, order_type, status, customer, orderReferenc
                 message = "Please add at least one order item first.";
             } 
         } else if (selectedTab === 'shipment') {
+
+            // alert(orderSummary.remaining_balance);
+
             if (!hasCustomer) {
                 message = "Please complete the Customer Info tab first.";
             } else if (!hasOrderItems) {
@@ -65,7 +68,7 @@ export default function Edit({order, order_type, status, customer, orderReferenc
             } else if (!hasShipping && !isWalkinOrder) {
                 console.log("hey2");
                 message = "Please set the shipping fee first.";
-            } else if (!hasPayments && order.remaining_balance > 0) {
+            } else if (!hasPayments || orderSummary.remaining_balance > 0) {
                 message = "Please settle the payment first.";
             }
         }
@@ -451,7 +454,11 @@ Thank you!`;
                 </div>
                 
                 {
-                    order.payment_status === 'paid' && order.order_status === 'payment_confirmed' && !isWalkinOrder && (
+                    order.payment_status === 'paid' && 
+                    order.order_status === 'payment_confirmed' && 
+                    orderSummary.shipping_fee > 0 && 
+                    !isWalkinOrder && 
+                    (
                         <div className="">
                             <button 
                                 className="flex gap-x-2 items-center px-3 py-2 bg-green-500 hover:bg-green-400 rounded-md text-white font-semibold cursor-pointer"

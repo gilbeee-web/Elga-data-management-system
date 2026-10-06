@@ -44,6 +44,8 @@ Route::middleware('auth')->group(function(){
             Route::patch('/{order}/cancel', 'cancelOrder')->name('order.cancel');
             Route::patch('/{order}/switch', 'switchOrderType')->name('order.switch.orderType');
             Route::patch('/{order}/receipt/printed', 'markReceiptPrinted')->name('order.receipt.printed');
+            Route::put('/bulk/receipt/printed', 'bulkMarkReceiptPrinted')->name('order.bulk.receipt.printed');
+            Route::put('/bulk/cancel', 'bulkCancelOrder')->name('order.bulk.cancel');
             Route::get('/{variant}', 'getVariantOrderHistory')->name('order.getVariantOrderHistory');
             Route::get('/{order}/history', 'getOrderStatusHistory')->name('order.getOrderStatusHistory');
         });

@@ -496,6 +496,43 @@ class OrderController extends Controller
     }
 
 
+    public function bulkCancelOrder(Request $request)
+    {
+        $validated = $request->validate([
+            'orderIds' => ['required', 'array', 'min:1'],
+            'orderIds.*' => ['integer', 'exists:orders,id'],
+        ]);
+
+        try {
+
+            $this->orderService->bulkCancelOrder(
+                $validated['orderIds']
+            );
+
+
+            return redirect()->back()->with('success', 'Successfully cancelled all selected orders.');
+
+        } catch (Exception $e) {
+            return redirect()->back()->with('error', 'Error cancelling orders');
+        }
+    }
+
+    public function bulkMarkReceiptPrinted(Request $request)
+    {
+        $validated = $request->validate([
+            'orderIds' => ['required', 'array', 'min:1'],
+            'orderIds.*' => ['integer', 'exists:orders,id'],
+        ]);
+
+        $this->orderService->bulkMarkReceiptPrinted(
+            $validated['orderIds']
+        );
+
+        return redirect()->back()->with('success', 'Selected orders were marked as receipt printed successfully.');
+         
+    }
+
+
 
 
 

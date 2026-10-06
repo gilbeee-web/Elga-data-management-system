@@ -5,7 +5,7 @@ import { useState } from "react";
 import { formatDateTime } from "../../Utils/formatDateTime";
 import { formatCurrency } from "../../Utils/formatCurrency";
 import TextInput from "../../Components/TextInput";
-import { CircleOff, HandCoins, PackageCheck, RotateCwFadingClock, Search, SquarePen, Truck } from "lucide-react";
+import { Ban, CircleOff, HandCoins, PackageCheck, ReceiptText, RotateCwFadingClock, Search, SquarePen, Truck } from "lucide-react";
 import Swal from "sweetalert2";
 import Pagination from "../../Components/Pagination";
 
@@ -150,6 +150,100 @@ export default function Index ({orders, user, products}){
         }
     };
 
+
+    const [isCancelling, setIsCancelling] = useState(false);
+
+    const handleBulkCancelOrder = async () => {
+
+        const result = await Swal.fire({
+            title: "Cancel all selected orders?",
+            text: "These action will cancel all the selected orders.",
+            icon: "warning",
+            showCancelButton: true,
+            confirmButtonColor: "#dc2626",
+            cancelButtonColor: "#6b7280",
+            confirmButtonText: "Confirm",
+            cancelButtonText: "Cancel",
+            reverseButtons: true
+        });
+    
+        if(!result.isConfirmed){
+            return;
+        }
+    
+        if (result.isConfirmed) {
+
+            setIsCancelling(true);
+
+            router.put(route('order.bulk.cancel'), {
+                orderIds: selectedOrderId
+            },{
+                preserveState: true,
+                preserveScroll: true,
+                onSuccess: () => {
+                    setSelectedOrderId([]);
+                },
+
+                onError: (errors) => {
+                    Swal.fire({
+                        title: "Unable to cancel orders",
+                        text: errors.cancel ?? "Something went wrong.",
+                        icon: "error",
+                    });
+                },
+
+                onFinish: () => {
+                    setIsCancelling(false);
+                },
+            });
+        }
+
+       
+
+    }
+
+    const [isPrinting, setIsPrinting] = useState(false);
+    const handleBulkMarkPrintedReceipt = async () => {
+
+        const result = await Swal.fire({
+            title: "Selected order receipts already printed?",
+            text: "Please make sure the receipt has been printed in Page365 before continuing.",
+            icon: "question",
+            showCancelButton: true,
+            confirmButtonText: "Confirm",
+            cancelButtonText: "Cancel",
+            reverseButtons: true,
+            confirmButtonColor: "#16a34a",
+            cancelButtonColor: "#6b7280",
+        });
+    
+        if(!result.isConfirmed){
+            return;
+        }else{
+            setIsPrinting(true);
+            router.put(route('order.bulk.receipt.printed'), {
+                orderIds: selectedOrderId
+            },{
+                preserveState: true,
+                preserveScroll: true,
+                onSuccess: () => {
+                    setSelectedOrderId([]);
+                },
+
+                onError: (errors) => {
+                    Swal.fire({
+                        title: "Unable to mark receipts",
+                        text: errors.receipt ?? "Something went wrong.",
+                        icon: "error",
+                    });
+                },
+
+                onFinish: () => {
+                    setIsPrinting(false);
+                },
+            });
+        }
+    }
 
 
     return <>
@@ -315,7 +409,8 @@ export default function Index ({orders, user, products}){
             <div className="mt-8">
                 <div className="w-full flex justify-between items-center">
 
-                    <div className="">
+                    <div className="flex gap-x-8 items-center">
+                        
                         {
                             activeTab === tabs[3] && (
                                 <div className="flex gap-x-2 items-center">
@@ -334,7 +429,53 @@ export default function Index ({orders, user, products}){
                                 </div>
                             )
                         }
-                        
+
+                        {
+                            selectedOrderId.length > 0 && (
+                                <button
+                                type="button"
+                                onClick={handleBulkCancelOrder}
+                                disabled={isCancelling}
+                                className="p-2 rounded-xl flex gap-x-2 items-center bg-red-500 hover:bg-red-400 text-white cursor-pointer"
+                            >
+                                {isCancelling ? (
+                                    <>
+                                        <div className="animate-spin h-5 w-5 border-4 border-gray-300 border-t-blue-600 rounded-full" />
+                                        <span>Cancelling orders...</span>
+                                    </>
+                                ) : (
+                                    <>
+                                        <Ban size={15} />
+                                        <span>Cancel order ({selectedOrderId.length})</span>
+                                    </>
+                                )}
+                            </button>
+                            )
+                        }
+
+                        {
+                            (selectedOrderId.length > 0 && activeTab === tabs[3]) && (
+                                <button
+                                    type="button"
+                                    onClick={handleBulkMarkPrintedReceipt}
+                                    disabled={isPrinting}
+                                    className="p-2 rounded-xl flex gap-x-2 items-center bg-green-500 hover:bg-green-400 text-white cursor-pointer"
+                                >
+                                    {isPrinting ? (
+                                        <>
+                                            <div className="animate-spin h-5 w-5 border-4 border-gray-300 border-t-blue-600 rounded-full" />
+                                            <span>Marking receipt printed...</span>
+                                        </>
+                                    ) : (
+                                        <>
+                                            <ReceiptText size={15}/>
+                                            <span>Mark as receipt printed ({selectedOrderId.length})</span>
+                                        </>
+                                    )}
+                                </button>
+                            )
+                        }
+
                     </div>
 
                     <div className="relative">
@@ -364,7 +505,7 @@ export default function Index ({orders, user, products}){
                     <thead className="text-gray-600 uppercase text-xs border-b border-gray-300">
                         <tr>
                             {
-                                (activeTab !== "all" && activeTab !== "shipped") && (
+                                (activeTab !== "all" && activeTab !== "shipped" && activeTab !== "cancelled") && (
                                     <th className="p-3">
                                         <input 
                                             type="checkbox" 
@@ -406,7 +547,7 @@ export default function Index ({orders, user, products}){
                         {
                             isFetchingData ? 
                             <tr>
-                                <td colSpan={7} className="py-12">
+                                <td colSpan={8} className="py-12">
                                     <div className="flex flex-col items-center justify-center gap-3">
                                         <div className="animate-spin h-10 w-10 border-4 border-gray-300 border-t-blue-600 rounded-full" />
                                         <span className="text-sm text-gray-500 font-medium">Loading orders...</span>
@@ -423,13 +564,15 @@ export default function Index ({orders, user, products}){
                                         key={order.id}
                                     >
                                         {
-                                            (activeTab !== "all" && activeTab !== "shipped") && (
-                                                <td className="p-3">
+                                            (activeTab !== "all" && activeTab !== "shipped" && activeTab !== "cancelled") && (
+                                                <td 
+                                                    className="p-3"
+                                                    onClick={(e) => e.stopPropagation()}
+                                                >
                                                     <input 
                                                         type="checkbox" 
                                                         checked={selectedOrderId.includes(order.id)}
                                                         onChange={() => handleSelectOrder(order.id)}
-                                                        onClick={(e) => e.stopPropagation()}
                                                         className="h-4 w-4"
                                                     />
                                                 </td>
@@ -469,7 +612,7 @@ export default function Index ({orders, user, products}){
                                             
                                             <span className={`py-1 px-3 rounded-full text-white font-semibold capitalize  ${
                                                 order.payment_status === 'partial' ? 
-                                                "bg-yellow-500" 
+                                                "bg-orange-500" 
                                                 : statusClasses[order.order_status] || "bg-gray-500"
                                             }`}>
 
@@ -495,7 +638,7 @@ export default function Index ({orders, user, products}){
                             ) :
                             (
                                 <tr className="text-center">
-                                    <td colSpan={7} className="font-semibold p-4">No orders found.</td>
+                                    <td colSpan={8} className="font-semibold p-4">No orders found.</td>
                                 </tr>
                             )
                         }

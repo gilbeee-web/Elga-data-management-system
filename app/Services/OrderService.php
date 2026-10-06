@@ -595,8 +595,8 @@ class OrderService{
     }
 
 
-    public function cancelOrder(Order $order)
-    {
+    public function cancelOrder(Order $order){
+    
         if ($order->order_status === 'cancelled') {
             throw ValidationException::withMessages([
                 'error' => 'This order is already cancelled.'
@@ -615,6 +615,88 @@ class OrderService{
 
         return $order;
     }
+
+
+    public function bulkCancelOrder(array $orderIds){
+
+        return DB::transaction(function () use ($orderIds) {
+
+            foreach($orderIds as $orderId){
+
+                $current_order = Order::findOrFail($orderId);
+
+                if ($current_order->order_status === 'cancelled') {
+                    throw ValidationException::withMessages([
+                        'cancel' => 'This order is already cancelled.'
+                    ]);
+                }
+
+                if ($current_order->order_status === 'shipped') {
+                    throw ValidationException::withMessages([
+                        'cancel' => 'Shipped orders cannot be cancelled directly.'
+                    ]);
+                }
+
+                $current_order->update([
+                    'order_status' => 'cancelled'
+                ]);
+            }
+
+            return null;
+
+        });
+        
+    }
+
+    
+
+    public function bulkMarkReceiptPrinted(array $orderIds){
+
+
+        return DB::transaction(function () use ($orderIds) {
+            
+            foreach($orderIds as $orderId){
+
+                $current_order = Order::findOrFail($orderId);
+
+                if ($current_order->payment_status !== 'paid') {
+                    throw ValidationException::withMessages([
+                        'receipt' => 'The selected orders must be fully paid before the receipt can be printed.'
+                    ]);
+                }
+
+                if ($current_order->is_receipt_printed) {
+                    throw ValidationException::withMessages([
+                        'receipt' => 'The receipt has already been marked as printed.'
+                    ]);
+                }
+
+
+                $oldStatus = $current_order->order_status;
+
+                $current_order->update([
+                    'is_receipt_printed' => true,
+                    'order_status' => 'processing',
+                ]);
+
+                $this->storeStatusHistory(
+                    $current_order,
+                    $oldStatus,
+                    'processing',
+                    'Receipt printed. Order moved to processing.'
+                );
+
+            }
+
+            return null;
+
+        });
+
+        
+
+    }
+
+
 
     
 

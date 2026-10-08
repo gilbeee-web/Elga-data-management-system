@@ -5,7 +5,7 @@ import { useState } from "react";
 import { formatDateTime } from "../../Utils/formatDateTime";
 import { formatCurrency } from "../../Utils/formatCurrency";
 import TextInput from "../../Components/TextInput";
-import { Ban, CircleOff, HandCoins, PackageCheck, ReceiptText, RotateCwFadingClock, Search, SquarePen, Truck } from "lucide-react";
+import { Ban, Check, CircleOff, Clipboard, HandCoins, PackageCheck, ReceiptText, RotateCwFadingClock, Search, SquarePen, Truck } from "lucide-react";
 import Swal from "sweetalert2";
 import Pagination from "../../Components/Pagination";
 
@@ -246,6 +246,80 @@ export default function Index ({orders, user, products}){
     }
 
 
+    const [isCopied, setIsCopied] = useState(false);
+    const copyTrackingNumber = async () => {
+
+        const trackingNumbers = orders.data
+            .filter(order => selectedOrderId.includes(order.id))
+            .map(order => order.shipment.tracking_number);
+
+        console.log(trackingNumbers);
+    
+        const message = trackingNumbers;
+
+        await navigator.clipboard.writeText(message);
+
+        setIsCopied(true);
+
+        setTimeout(() => {
+            setIsCopied(false);
+        }, 2000);
+
+        Swal.fire({
+            toast: true,
+            position: "top-end",
+            icon: "success",
+            title: "Copied to clipboard!",
+            showConfirmButton: false,
+            timer: 2000,
+            timerProgressBar: true,
+        });
+    };
+
+    const [isShipOrder, setIsShipOrder] = useState(false);
+    const handleBulkShipOrder = async () => {
+
+        const result = await Swal.fire({
+            title: "Shipped selected orders?",
+            text: "This can't be undone from here.",
+            icon: "question",
+            showCancelButton: true,
+            confirmButtonText: "Confirm",
+            cancelButtonText: "Cancel",
+            reverseButtons: true,
+            confirmButtonColor: "#16a34a",
+            cancelButtonColor: "#6b7280",
+        });
+    
+        if(!result.isConfirmed){
+            return;
+        }else{
+            setIsShipOrder(true);
+            router.put(route('order.bulk.ship'), {
+                orderIds: selectedOrderId
+            },{
+                preserveState: true,
+                preserveScroll: true,
+                onSuccess: () => {
+                    setSelectedOrderId([]);
+                },
+
+                onError: (errors) => {
+                    Swal.fire({
+                        title: "Ship failed",
+                        text: "Unable to ship the order.",
+                        icon: "error",
+                    });
+                },
+
+                onFinish: () => {
+                    setIsShipOrder(false);
+                },
+            });
+        }
+    }
+
+
     return <>
         <Layout user={user}>
             
@@ -433,23 +507,23 @@ export default function Index ({orders, user, products}){
                         {
                             selectedOrderId.length > 0 && (
                                 <button
-                                type="button"
-                                onClick={handleBulkCancelOrder}
-                                disabled={isCancelling}
-                                className="p-2 rounded-xl flex gap-x-2 items-center bg-red-500 hover:bg-red-400 text-white cursor-pointer"
-                            >
-                                {isCancelling ? (
-                                    <>
-                                        <div className="animate-spin h-5 w-5 border-4 border-gray-300 border-t-blue-600 rounded-full" />
-                                        <span>Cancelling orders...</span>
-                                    </>
-                                ) : (
-                                    <>
-                                        <Ban size={15} />
-                                        <span>Cancel order ({selectedOrderId.length})</span>
-                                    </>
-                                )}
-                            </button>
+                                    type="button"
+                                    onClick={handleBulkCancelOrder}
+                                    disabled={isCancelling}
+                                    className="p-2 rounded-xl flex gap-x-2 items-center bg-red-500 hover:bg-red-400 text-white cursor-pointer"
+                                >
+                                    {isCancelling ? (
+                                        <>
+                                            <div className="animate-spin h-5 w-5 border-4 border-gray-300 border-t-blue-600 rounded-full" />
+                                            <span>Cancelling orders...</span>
+                                        </>
+                                    ) : (
+                                        <>
+                                            <Ban size={15} />
+                                            <span>Cancel order ({selectedOrderId.length})</span>
+                                        </>
+                                    )}
+                                </button>
                             )
                         }
 
@@ -474,6 +548,31 @@ export default function Index ({orders, user, products}){
                                     )}
                                 </button>
                             )
+                        }
+
+                        {
+                            (selectedOrderId.length > 0 && activeTab === tabs[4]) && 
+                            <>
+                                <button
+                                    type="button"
+                                    onClick={copyTrackingNumber}
+                                    className="p-2 rounded-xl flex gap-x-2 items-center bg-white hover:bg-gray-100 border border-gray-400 cursor-pointer"
+                                >
+                                    {
+                                        isCopied ? <Check size={15}/> : <Clipboard size={15}/>
+                                    }
+                                    <span>Copy tracking number</span> 
+                                </button>
+
+                                <button
+                                    type="button"
+                                    onClick={handleBulkShipOrder}
+                                    className="p-2 rounded-xl flex gap-x-2 items-center bg-green-500 hover:bg-green-400 text-white cursor-pointer"
+                                >
+                                    <Truck  size={15}/>
+                                    <span>{isShipOrder ? "Shipping orders..." : "Shipped Order"}</span> 
+                                </button>
+                            </>
                         }
 
                     </div>

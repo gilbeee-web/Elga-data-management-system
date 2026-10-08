@@ -691,9 +691,57 @@ class OrderService{
             return null;
 
         });
+    }
 
+    public function bulkShippedOrder(array $orderIds){
         
+    
+        return DB::transaction(function () use ($orderIds) {
 
+            foreach($orderIds as $orderId){
+
+                $current_order = Order::findOrFail($orderId);
+
+                if ($current_order->status !== 'shipped') {
+
+                    $isWalkin = $current_order->order_type === "walkin";
+
+                    if(!$isWalkin){
+
+                        $shipment = Shipment::where('order_id', $current_order->id)->firstOrFail();
+                        
+                        $shipment->update([
+                            'shipped_at' => now()
+                        ]);
+                    }
+                
+                    $orderItems = OrderItem::with("product_variant")->where("order_id", $current_order->id)->get();
+
+                    //increment the sold of the order item
+                    foreach($orderItems as $item){
+                        $item->product_variant->increment('sold', $item->qty);
+                    }
+
+
+                    $oldStatus = $current_order->order_status;
+
+                    $current_order->update([
+                        'completed_at' => now(),
+                        'order_status' => 'shipped',
+                    ]);
+
+                    $this->storeStatusHistory(
+                        $current_order,
+                        $oldStatus,
+                        'shipped'
+                    );
+
+                    return $shipment;
+                }
+
+                return null;
+            }
+        });
     }
 
 

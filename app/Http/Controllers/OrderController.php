@@ -532,6 +532,20 @@ class OrderController extends Controller
          
     }
 
+    public function bulkShippedOrder(Request $request)
+    {
+        $validated = $request->validate([
+            'orderIds' => ['required', 'array', 'min:1'],
+            'orderIds.*' => ['integer', 'exists:orders,id'],
+        ]);
+
+        $this->orderService->bulkShippedOrder(
+            $validated['orderIds']
+        );
+
+        return redirect()->back()->with('success', 'Selected orders were shipped susccessfully.');
+         
+    }
 
 
 
